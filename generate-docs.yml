@@ -1,0 +1,8 @@
+---
+
+  - hosts: localhost
+    vars_files:
+      - vars/common
+      - vars/container-plex
+    roles:
+        - { role: roles/generate-docs }

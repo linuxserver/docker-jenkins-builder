@@ -1,0 +1,12 @@
+---
+
+- name: create destination dir for generated readme
+  file:
+    path: "readme/{{ project_name }}"
+    state: directory
+
+- name: write readme file
+  template:
+    src: ../templates/README.md.j2
+    dest: "readme/{{ project_name }}/README.md"
+  delegate_to: localhost

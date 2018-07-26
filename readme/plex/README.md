@@ -1,0 +1,21 @@
+## Versions
+
+* **09.12.17:** - Fix continuation lines.
+* **12.07.17:** -  Add inspect commands to README, move to jenkins build and push.
+* **28.05.17:** -  Add unrar package as per requests, for subzero plugin.
+* **11.01.17:** -  Use Plex environemt variables from pms docker, change abc home folder to /app to alleviate usermod chowning library folder by default (thanks gbooker, plexinc).
+* **03.01.17:** -  Use case insensitive version variable matching rather than export and make lowercase.
+* **17.10.16:** -  Allow use of uppercase version variable
+* **01.10.16:** -  Add TZ info to README.
+* **09.09.16:** -  Add layer badges to README.
+* **27.08.16:** -  Add badges to README.
+* **22.08.16:** -  Rebased to xenial and s6 overlay
+* **07.04.16:** -  removed `/transcode` volume support (upstream Plex change) and modified PlexPass download method to prevent unauthorised usage of paid PMS
+* **24.09.15:** -  added optional support for volume transcoding (/transcode), and various typo fixes.
+* **17.09.15:** -  Changed to run chmod only once
+* **19.09.15:** -  Plex updated their download servers from http to https
+* **28.08.15:** -  Removed plexpass from routine, and now uses VERSION as a combination fix.
+* **18.07.15:** -  Moved autoupdate to be hosted by linuxserver.io and implemented bugfix thanks to ljm42.
+* **09.07.15:** -  Now with ability to pick static version number.
+* **08.07.15:** -  Now with autoupdates. (Hosted by fanart.tv)
+* **03.07.15:** -  Fixed a mistake that allowed plex to run as user plex rather than abc (99:100). Thanks to double16 for spotting this.

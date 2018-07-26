@@ -1,0 +1,26 @@
+---
+######
+# URLs
+######
+
+# site urls
+lsio_url: "linuxserver.io"
+lsio_blog_url: "blog.{{ lsio_url }}"
+lsio_irc_url: "irc.{{ lsio_url }}"
+lsio_podcast_url: "podcast.{{ lsio_url }}"
+
+# asset urls
+lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png
+lsio_favicon_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png
+
+######
+# Common Params
+######
+
+# param strings
+common_container_param_config_description: ""
+
+# default param values
+container_param_env_PUID: "1000"
+container_param_env_PGID: "1000"
+
