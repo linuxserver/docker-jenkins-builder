@@ -100,6 +100,11 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
+## Application Setup
+
+- Access WebUI at `<your-ip>:4040`.
+- Default user/pass is admin/admin.
+
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it booksonic /bin/bash`

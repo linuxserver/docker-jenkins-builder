@@ -27,8 +27,10 @@ param_ports:
   - { external_port: "4040", internal_port: "4040", port_desc: "Application WebUI" } 
 
 # application setup block
-app_setup_block_enabled: false
-app_setup_block: ""
+app_setup_block_enabled: true
+app_setup_block: |
+  - Access WebUI at `<your-ip>:4040`.
+  - Default user/pass is admin/admin.
 
 # changelog
 changelogs:
