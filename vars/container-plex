@@ -8,6 +8,7 @@ project_blurb: "[Plex]({{ project_url }}) organizes video, music and photos from
 
 # container parameters
 param_container_name: "{{ project_name }}"
+param_usage_include_net: true
 param_net: "host"
 param_usage_include_env: true
 param_env_vars:
