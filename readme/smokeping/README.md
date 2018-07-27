@@ -77,10 +77,6 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-v /config` | Configure the `Targets` file here |
 | `-v /data` | Storage location for db and application data (graphs etc) |
 
-
-
-
-
 ## User / Group Identifiers
 
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.

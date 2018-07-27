@@ -14,15 +14,15 @@ Find us at:
 * [Blog](https://blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
 * [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
-# [linuxserver/beets](https://github.com/linuxserver/docker-beets)
-[![](https://images.microbadger.com/badges/version/linuxserver/beets.svg)](https://microbadger.com/images/linuxserverbeets "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/image/linuxserver/beets.svg)](https://microbadger.com/images/linuxserver/beets "Get your own version badge on microbadger.com")
-![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/beets.svg)
-![Docker Stars](https://img.shields.io/docker/stars/linuxserver/beets.svg)
+# [linuxserver/booksonic](https://github.com/linuxserver/docker-booksonic)
+[![](https://images.microbadger.com/badges/version/linuxserver/booksonic.svg)](https://microbadger.com/images/linuxserverbooksonic "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/linuxserver/booksonic.svg)](https://microbadger.com/images/linuxserver/booksonic "Get your own version badge on microbadger.com")
+![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/booksonic.svg)
+![Docker Stars](https://img.shields.io/docker/stars/linuxserver/booksonic.svg)
 
-[Beets](http://beets.io/) is a music library manager and not, for the most part, a music player. It does include a simple player plugin and an experimental Web-based player, but it generally leaves actual sound-reproduction to specialized tools.
+[Booksonic](http://booksonic.org) is a server and an app for streaming your audiobooks to any pc or android phone. Most of the functionality is also availiable on other platforms that have apps for subsonic.
 
-<a href="http://beets.io/" rel="beets">![beets](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/beets-icon.png)</a>
+<a href="http://booksonic.org" rel="booksonic">![booksonic](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/booksonic.png)</a>
 
 ## Usage
 
@@ -32,14 +32,16 @@ Here are some example snippets to help you get started creating a container.
 
 ```
 docker create \
-  --name=beets \
+  --name=booksonic \
   -e PUID=1001 \
   -e PGID=1001 \
-  -p 8337:8337 \
+  -e CONTEXT_PATH=<url-base> \
+  -p 4040:4040 \
   -v </path/to/appdata/config>:/config \
-  -v </path/to/music>:/music \
-  -v </path/to/downloads>:/downloads \
-  linuxserver/beets
+  -v </path/to/media/books>:/books \
+  -v </path/to/media/podcasts>:/podcasts \
+  -v </path/to/media/>:/media \
+  linuxserver/booksonic
 ```
 
 
@@ -51,18 +53,20 @@ Compatible with docker-compose v2 schemas.
 ---
 version: "2"
 services:
-  beets:
-    image: linuxserver/beets
-    container_name: beets
+  booksonic:
+    image: linuxserver/booksonic
+    container_name: booksonic
     environment:
       - PUID=1001
       - PGID=1001
+      - CONTEXT_PATH=<url-base>
     volumes:
       - </path/to/appdata/config>:/config
-      - </path/to/music>:/music
-      - </path/to/downloads>:/downloads
+      - </path/to/media/books>:/books
+      - </path/to/media/podcasts>:/podcasts
+      - </path/to/media/>:/media
     ports:
-      - 8337:8337
+      - 4040:4040
     mem_limit: 4096m
     restart: unless-stopped
 ```
@@ -73,12 +77,14 @@ Container images are configured using parameters passed at runtime (such as thos
 
 | Parameter | Function |
 | :----: | --- |
-| `-p 8337` | Application WebUI |
+| `-p 4040` | Application WebUI |
 | `-e PUID=1001` | for UserID - see below for explanation |
 | `-e PGID=1001` | for GroupID - see below for explanation |
-| `-v /config` | Configuration files |
-| `-v /music` | Music library location |
-| `-v /downloads` | Non-processed music |
+| `-e CONTEXT_PATH=<url-base>` | for setting url-base in reverse proxy setups - *optional* |
+| `-v /config` | Configuration files. |
+| `-v /books` | Location of audiobooks. |
+| `-v /podcasts` | Location of podcasts. |
+| `-v /media` | Location of other media - *optional* |
 
 ## User / Group Identifiers
 
@@ -97,20 +103,7 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 ## Versions
 
-* **04.03.18"** - Upgrade mp3gain to 1.6.1.
-* **02.01.18** - Deprecate cpu_core routine lack of scaling.
-* **27.12.17** - Add beautifulsoup4 pip package.
-* **06.12.17** - Rebase to alpine linux 3.7.
-* **25.05.17** - Rebase to alpine linux 3.6.
-* **06.02.17** - Rebase to alpine linux 3.5.
-* **16.01.17** - Add packages required for replaygain.
-* **24.12.16** - Add [beets-copyartifacts](https://github.com/sbarakat/beets-copyartifacts) plugin.
-* **07.12.16** - Edit cmake options for chromaprint, should now build and install fpcalc, add gstreamer lib
-* **14.10.16** - Add version layer information.
-* **01.10.16** - Add nano and editor variable to allow editing of the config from the container command line.
-* **30.09.16** - Fix umask.
-* **24.09.16** - Rebase to alpine linux.
-* **10.09.16** - Add layer badges to README.
-* **05.01.16** - Change ffpmeg repository, other version crashes container
-* **06.11.15** - Initial Release
-* **29.11.15** - Take out term setting, causing issues with key entry for some users
+* **06.12.17** - Rebase to alpine 3.7.
+* **11.07.17** - Rebase to alpine 3.6.
+* **07.02.17** - Rebase to alpine 3.5.
+* **13.12.16** - Initial Release.

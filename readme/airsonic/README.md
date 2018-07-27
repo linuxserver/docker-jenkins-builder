@@ -86,10 +86,6 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-v /podcasts` | Location of podcasts. |
 | `-v /media` | Location of other media - optional |
 
-
-
-
-
 ## User / Group Identifiers
 
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.
