@@ -21,6 +21,7 @@ Find us at:
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/codiad.svg)
 
 [Codiad](http://codiad.com/) is a web-based IDE framework with a small footprint and minimal requirements. We have added a few plugins, more can be added in the marketplace in the WebUI.
+* ### Plugins pre-installed
 * [Collaboration](https://github.com/Codiad/Codiad-Collaborative)
 * [Terminal](https://github.com/Fluidbyte/Codiad-Terminal)
 * [CodeGit](https://github.com/Andr3as/Codiad-CodeGit)

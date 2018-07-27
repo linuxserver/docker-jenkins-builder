@@ -21,6 +21,7 @@ Find us at:
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/smokeping.svg)
 
 [Smokeping](https://oss.oetiker.ch/smokeping/) keeps track of your network latency. For a full example of what this application is capable of visit [UCDavis](http://smokeping.ucdavis.edu/cgi-bin/smokeping.fcgi).
+* ### Plugins pre-installed
 * [Collaboration](https://github.com/Codiad/Codiad-Collaborative)
 * [Terminal](https://github.com/Fluidbyte/Codiad-Terminal)
 * [CodeGit](https://github.com/Andr3as/Codiad-CodeGit)

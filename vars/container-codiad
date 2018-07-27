@@ -9,6 +9,7 @@ project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_
 
 project_blurb_optional_extras_enabled: true
 project_blurb_optional_extras:
+  - "### Plugins pre-installed"
   - "[Collaboration](https://github.com/Codiad/Codiad-Collaborative)"
   - "[Terminal](https://github.com/Fluidbyte/Codiad-Terminal)"
   - "[CodeGit](https://github.com/Andr3as/Codiad-CodeGit)"
