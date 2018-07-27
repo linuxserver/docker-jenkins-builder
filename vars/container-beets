@@ -34,6 +34,9 @@ app_setup_block: |
   - See Beets website for more info.
   - Contains [beets-copyartifacts](https://github.com/sbarakat/beets-copyartifacts) plugin, [configuration details](https://github.com/sbarakat/beets-copyartifacts#configuration){% endraw %}
 
+app_setup_nginx_reverse_proxy_snippet: false
+app_setup_nginx_reverse_proxy_block: ""
+
 # changelog
 changelogs:
   - { date: 04.03.18", desc: "Upgrade mp3gain to 1.6.1."}

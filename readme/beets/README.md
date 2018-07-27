@@ -102,6 +102,8 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 - See Beets website for more info.
 - Contains [beets-copyartifacts](https://github.com/sbarakat/beets-copyartifacts) plugin, [configuration details](https://github.com/sbarakat/beets-copyartifacts#configuration)
 
+
+
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it beets /bin/bash`

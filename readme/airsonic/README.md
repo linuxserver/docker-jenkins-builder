@@ -106,6 +106,8 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 - Default user/pass is admin/admin.
 - Extra java options can be passed with the JAVA_OPTS environment variable, eg `-e JAVA_OPTS="-Xmx256m -Xms256m"`
 
+
+
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it airsonic /bin/bash`

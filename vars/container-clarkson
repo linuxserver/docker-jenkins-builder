@@ -41,6 +41,9 @@ app_setup_block: |
   <br/>
   Once running, the container will run an initial MySQL migration, which populates the schema with all tables and procedures. The application will start immediately afterwards. You will need to register an initial user, of which will be the admin of the application. All subsequent users will be standard users. You can disable registrations after the fact by recreating the container with the `ENABLE_REGISTRATIONS` flag set to `false`. This will not hide the register link, but will disable the functionality.{% endraw %}
 
+app_setup_nginx_reverse_proxy_snippet: false
+app_setup_nginx_reverse_proxy_block: ""
+
 # changelog
 changelogs:
   - { date: "19.02.18", desc: "Initial release." }

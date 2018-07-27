@@ -40,6 +40,9 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
+app_setup_nginx_reverse_proxy_snippet: false
+app_setup_nginx_reverse_proxy_block: ""
+
 # changelog
 
 changelogs:

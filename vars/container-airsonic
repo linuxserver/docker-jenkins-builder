@@ -41,6 +41,9 @@ app_setup_block: |
   - Default user/pass is admin/admin.
   - Extra java options can be passed with the JAVA_OPTS environment variable, eg `-e JAVA_OPTS="-Xmx256m -Xms256m"`{% endraw %}
 
+app_setup_nginx_reverse_proxy_snippet: false
+app_setup_nginx_reverse_proxy_block: ""
+
 # changelog
 
 changelogs:

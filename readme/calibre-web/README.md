@@ -91,6 +91,26 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
+## Application Setup
+
+- Webui can be found at `http://<your-ip>:8083`
+- On the initial setup screen, enter `/books` as your calibre library location.
+- Default user/pass is admin/admin123.
+
+
+## Reverse Proxy Snippet
+
+```	
+      location /calibre-web {
+              proxy_pass              http://<your-ip>:8083;
+              proxy_set_header        Host            $http_host;
+              proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header        X-Scheme        $scheme;
+              proxy_set_header        X-Script-Name   /calibre-web;
+      }
+```
+
+
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it calibre-web /bin/bash`
