@@ -7,6 +7,7 @@
 lsio_url: "linuxserver.io"
 lsio_full_url: "https://{{ lsio_url }}"
 lsio_blog_url: "blog.{{ lsio_url }}"
+lsio_discord_url: "https://discord.gg/YWrKVTn"
 lsio_irc_url: "irc.{{ lsio_url }}"
 lsio_podcast_url: "podcast.{{ lsio_url }}"
 
