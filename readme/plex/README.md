@@ -7,8 +7,8 @@ The [LinuxServer.io](https://linuxserver.io) team brings you another container r
 * [Podcast](https://podcast.linuxserver.io) - covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!
 
 # linuxserver/plex
-![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)(https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")
-![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)(https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)](https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")
 ![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/plex.svg)
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/plex.svg)
 
