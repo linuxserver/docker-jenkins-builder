@@ -102,13 +102,13 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 This snippet has been tested with Linuxserver.io's [Let's Encrypt reverse proxy](https://github.com/linuxserver/docker-letsencrypt) container.
 ```	
-      location /calibre-web {
-              proxy_pass              http://<your-ip>:8083;
-              proxy_set_header        Host            $http_host;
-              proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
-              proxy_set_header        X-Scheme        $scheme;
-              proxy_set_header        X-Script-Name   /calibre-web;
-      }
+location /calibre-web {
+        proxy_pass              http://<your-ip>:8083;
+        proxy_set_header        Host            $http_host;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Scheme        $scheme;
+        proxy_set_header        X-Script-Name   /calibre-web;
+}
 ```
 
 
