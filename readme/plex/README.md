@@ -24,6 +24,8 @@ Find us at:
 
 <a href="https://plex.tv/" rel="plex">![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)</a>
 
+Find the linuxserver Github  repo [here](https://github.com/linuxserver/reponame) for this container.
+
 ## Usage
 
 Here are some example snippets to help you get started creating a container.

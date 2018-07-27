@@ -24,6 +24,8 @@ Find us at:
 
 <a href="https://oss.oetiker.ch/smokeping/" rel="smokeping">![smokeping](https://camo.githubusercontent.com/e0694ef783e3fd1d74e6776b28822ced01c7cc17/687474703a2f2f6f73732e6f6574696b65722e63682f736d6f6b6570696e672f696e632f736d6f6b6570696e672d6c6f676f2e706e67)</a>
 
+Find the linuxserver Github  repo [here](https://github.com/linuxserver/docker-smokeping) for this container.
+
 ## Usage
 
 Here are some example snippets to help you get started creating a container.
@@ -36,7 +38,7 @@ docker create \
   -e PUID=1001 \
   -e PGID=1001 \
   -p 80:80 \
-  -v <path/to/smokeping/config>:/config \
+  -v </path/to/smokeping/config>:/config \
   -v </path/to/smokeping/data>:/data \
   linuxserver/smokeping
 ```
@@ -57,7 +59,7 @@ services:
       - PUID=1001
       - PGID=1001
     volumes:
-      - <path/to/smokeping/config>:/config
+      - </path/to/smokeping/config>:/config
       - </path/to/smokeping/data>:/data
     ports:
       - 80:80
