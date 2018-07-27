@@ -16,8 +16,8 @@ lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
 # descriptions
 lsio_discord_desc: "realtime chat with the community and the team."
 lsio_blog_desc: "all the things you can do with our containers including How-To guides, opinions and much more!"
-lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`"
-lsio_podcast_desc: "covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!"
+lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`. Our primary chat is Discord."
+lsio_podcast_desc: "on hiatus. Coming back soon (late 2018)."
 
 # asset urls
 lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png

@@ -3,8 +3,8 @@
 The [LinuxServer.io](https://linuxserver.io) team brings you another container release featuring easy user mapping and community support. Find us at:
 * [Discord](https://discord.gg/YWrKVTn) - realtime chat with the community and the team.
 * [Blog](https://blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
-* [IRC](https://irc.linuxserver.io) - on freenode at `#linuxserver.io`
-* [Podcast](https://podcast.linuxserver.io) - covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!
+* [IRC](https://irc.linuxserver.io) - on freenode at `#linuxserver.io`. Our primary chat is Discord.
+* [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
 # linuxserver/plex
 [![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")
