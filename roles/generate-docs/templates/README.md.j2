@@ -21,6 +21,11 @@ Find us at:
 ![Docker Stars]({{ lsio_shieldsio_stars_count_url }}/{{ project_name }}.svg)
 
 {{ project_blurb }}
+{% if project_blurb_optional_extras_enabled %}
+{% for item in project_blurb_optional_extras %}
+* {{ item }}
+{% endfor %}
+{% endif %}
 
 <a href="{{ project_url }}" rel="{{ project_name }}">![{{ project_name }}]({{ project_logo }})</a>
 

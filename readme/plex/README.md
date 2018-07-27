@@ -21,6 +21,10 @@ Find us at:
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/plex.svg)
 
 [Plex](https://plex.tv/) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server.
+* [Collaboration](https://github.com/Codiad/Codiad-Collaborative)
+* [Terminal](https://github.com/Fluidbyte/Codiad-Terminal)
+* [CodeGit](https://github.com/Andr3as/Codiad-CodeGit)
+* [Drag and Drop](https://github.com/Andr3as/Codiad-DragDrop)
 
 <a href="https://plex.tv/" rel="plex">![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)</a>
 
