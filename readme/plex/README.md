@@ -106,20 +106,20 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
+## Application Setup
 
-## Reverse Proxy Snippet
-
-This snippet has been tested with Linuxserver.io's [Let's Encrypt reverse proxy](https://github.com/linuxserver/docker-letsencrypt) container.
 - Webui can be found at `<your-ip>:32400/web`
 - Note about updates, if there is no value set for the VERSION variable, then no updates will take place.
 - For new users, no updates will take place on the first run of the container as there is no preferences file to read your token from, to update restart the Docker container after logging in through the webui.
-<br/>
+
 IMPORTANT NOTE:- YOU CANNOT UPDATE TO A PLEXPASS ONLY VERSION IF YOU DO NOT HAVE PLEXPASS
-<br/>
+
 - Valid settings for VERSION are:-
+
   - **`latest`**: will update plex to the latest version available that you are entitled to.
   - **`public`**: will update plexpass users to the latest public version, useful for plexpass users that don't want to be on the bleeding edge but still want the latest public updates.
   - **`<specific-version>`**: will select a specific version (eg 0.9.12.4.1192-9a47d21) of plex to install, note you cannot use this to access plexpass versions if you do not have plexpass.
+
 
 
 ## Support Info
