@@ -87,7 +87,7 @@ http://192.168.x.x:8080 would show you what's running inside the container on po
 | `-e PGID=1001` | for GroupID - see below for explanation |
 | `-e VERSION=latest` | Supported values are LATEST, PLEXPASS or a specific version number. |
 | `-e TZ=Europe/London` | *Optional* Timezone. |
-| `-v /config` | Plex metadata location. Budget at least 50gb+ of disk space for large libraries. An SSD is perferred. |
+| `-v /config` | Plex metadata location. Budget at least 50gb+ of disk space for large libraries. An SSD is probably preferrable for performance reasons. |
 | `-v /data/tv` | Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc. |
 | `-v /data/movies` | Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc. |
 | `-v /transcode` | Path for transcoding folder, *optional*. |
