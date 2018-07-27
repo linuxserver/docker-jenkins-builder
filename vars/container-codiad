@@ -40,8 +40,11 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
-app_setup_nginx_reverse_proxy_snippet: false
-app_setup_nginx_reverse_proxy_block: ""
+app_setup_nginx_reverse_proxy_snippet: true
+app_setup_nginx_reverse_proxy_block: |
+  - use `/config/projects` to save your projects, for data persistence
+  - change `/config/www/plugins/Codiad-CodeGit-master/shell.sh` to add Git User/Pass
+  - change `/config/www/plugins/Codiad-Terminal-master/emulator/term.php` to change terminal password
 
 # changelog
 

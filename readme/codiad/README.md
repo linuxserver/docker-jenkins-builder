@@ -93,6 +93,13 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 &nbsp;
 
+## Reverse Proxy Snippet
+
+This snippet has been tested with Linuxserver.io's [Let's Encrypt reverse proxy](https://github.com/linuxserver/docker-letsencrypt) container.
+- use `/config/projects` to save your projects, for data persistence
+- change `/config/www/plugins/Codiad-CodeGit-master/shell.sh` to add Git User/Pass
+- change `/config/www/plugins/Codiad-Terminal-master/emulator/term.php` to change terminal password
+
 
 ## Support Info
 
