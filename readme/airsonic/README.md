@@ -101,6 +101,19 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 &nbsp;
 
+## Support Info
+
+* Shell access whilst the container is running: `docker exec -it airsonic /bin/bash`
+* To monitor the logs of the container in realtime: `docker logs -f airsonic`
+
+* container version number 
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' <container_name>`
+
+* image version number
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/airsonic`
+
 ## Versions
 
 * **22.04.18:** - Add the forgotten JAVA_OPTS to the run command.

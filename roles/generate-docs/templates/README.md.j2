@@ -155,6 +155,19 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 &nbsp;
 
+## Support Info
+
+* Shell access whilst the container is running: `docker exec -it {{ project_name }} /bin/bash`
+* To monitor the logs of the container in realtime: `docker logs -f {{ project_name }}`
+
+* container version number 
+
+`docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} <container_name>`
+
+* image version number
+
+`docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ lsio_project_name_short }}/{{ project_name }}`
+
 ## Versions
 
 {% for item in changelogs %}

@@ -95,6 +95,19 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 &nbsp;
 
+## Support Info
+
+* Shell access whilst the container is running: `docker exec -it beets /bin/bash`
+* To monitor the logs of the container in realtime: `docker logs -f beets`
+
+* container version number 
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' <container_name>`
+
+* image version number
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/beets`
+
 ## Versions
 
 * **04.03.18"** - Upgrade mp3gain to 1.6.1.

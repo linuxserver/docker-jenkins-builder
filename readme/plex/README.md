@@ -103,6 +103,19 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 &nbsp;
 
+## Support Info
+
+* Shell access whilst the container is running: `docker exec -it plex /bin/bash`
+* To monitor the logs of the container in realtime: `docker logs -f plex`
+
+* container version number 
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' <container_name>`
+
+* image version number
+
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/plex`
+
 ## Versions
 
 * **09.12.17:** - Fix continuation lines.
