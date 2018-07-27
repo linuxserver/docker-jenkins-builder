@@ -27,8 +27,11 @@ param_ports:
 app_setup_block_enabled: false
 app_setup_block: ""
 
-app_setup_nginx_reverse_proxy_snippet: false
-app_setup_nginx_reverse_proxy_block: ""
+app_setup_nginx_reverse_proxy_snippet: true
+app_setup_nginx_reverse_proxy_block: |
+  - Configure via the webui at `<your-ip>:5060`
+  - By adding a variable to the run command, `SOCKS_PROXY` or `HTTP_PROXY` cardigann can be used with a proxy, *eg* `-e SOCKS_PROXY=localhost:1080`
+  - The folder /config/definitions can be used to add additional tracker definitions (for more info see [Additional definitions](https://github.com/cardigann/cardigann#definitions)
 
 # changelog
 changelogs:
