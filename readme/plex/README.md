@@ -14,7 +14,7 @@ Find us at:
 * [Blog](https://blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
 * [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
-# linuxserver/plex
+# [linuxserver/plex](https://github.com/linuxserver/reponame)
 [![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")
 [![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)](https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")
 ![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/plex.svg)
@@ -23,8 +23,6 @@ Find us at:
 [Plex](https://plex.tv/) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server.
 
 <a href="https://plex.tv/" rel="plex">![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)</a>
-
-Find the Linuxserver Github <i class="fab fa-github"></i> repo [here](https://github.com/linuxserver/reponame) for this container.
 
 ## Usage
 
