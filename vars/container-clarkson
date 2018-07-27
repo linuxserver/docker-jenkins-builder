@@ -5,7 +5,7 @@ project_name: clarkson
 project_url: "https://github.com/linuxserver/Clarkson"
 project_logo: "https://raw.githubusercontent.com/linuxserver/Clarkson/master/docs/dashboard.png"
 project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) is a web-based dashboard application that gives you a neat and clean interface for logging your fuel fill-ups for all of your vehicles. The application has full multi-user support, as well as multiple vehicles per user. Whenever you fill-up your car or motorcycle, keep the receipt and record the data in Clarkson."
-project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project-name }}"
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_name }}"
 
 # container parameters
 common_param_env_vars_enabled: true #PGID, PUID, etc

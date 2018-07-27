@@ -14,15 +14,15 @@ Find us at:
 * [Blog](https://blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
 * [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
-# [linuxserver/cardigann](https://github.com/linuxserver/docker-cardigann)
-[![](https://images.microbadger.com/badges/version/linuxserver/cardigann.svg)](https://microbadger.com/images/linuxservercardigann "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/image/linuxserver/cardigann.svg)](https://microbadger.com/images/linuxserver/cardigann "Get your own version badge on microbadger.com")
-![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/cardigann.svg)
-![Docker Stars](https://img.shields.io/docker/stars/linuxserver/cardigann.svg)
+# [linuxserver/clarkson](https://github.com/linuxserver/docker-clarkson)
+[![](https://images.microbadger.com/badges/version/linuxserver/clarkson.svg)](https://microbadger.com/images/linuxserverclarkson "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/linuxserver/clarkson.svg)](https://microbadger.com/images/linuxserver/clarkson "Get your own version badge on microbadger.com")
+![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/clarkson.svg)
+![Docker Stars](https://img.shields.io/docker/stars/linuxserver/clarkson.svg)
 
-[Cardigann](https://github.com/cardigann/cardigann) is a server for adding extra indexers to Sonarr, SickRage and CouchPotato via Torznab and TorrentPotato proxies. Behind the scenes Cardigann logs in and runs searches and then transforms the results into a compatible format. 
+[Clarkson](https://github.com/linuxserver/Clarkson) is a web-based dashboard application that gives you a neat and clean interface for logging your fuel fill-ups for all of your vehicles. The application has full multi-user support, as well as multiple vehicles per user. Whenever you fill-up your car or motorcycle, keep the receipt and record the data in Clarkson.
 
-<a href="https://github.com/cardigann/cardigann" rel="cardigann">![cardigann](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/cardigann.png)</a>
+<a href="https://github.com/linuxserver/Clarkson" rel="clarkson">![clarkson](https://raw.githubusercontent.com/linuxserver/Clarkson/master/docs/dashboard.png)</a>
 
 ## Usage
 
@@ -32,12 +32,15 @@ Here are some example snippets to help you get started creating a container.
 
 ```
 docker create \
-  --name=cardigann \
+  --name=clarkson \
   -e PUID=1001 \
   -e PGID=1001 \
-  -p 5060:5060 \
-  -v </path/to/appdata/config>:/config \
-  linuxserver/cardigann
+  -e MYSQL_HOST=db-host \
+  -e MYSQL_USERNAME=db-user \
+  -e MYSQL_PASSWORD=db-pass \
+  -e ENABLE_REGISTRATIONS=_true_ \
+  -p 3000:3000 \
+  linuxserver/clarkson
 ```
 
 
@@ -49,16 +52,18 @@ Compatible with docker-compose v2 schemas.
 ---
 version: "2"
 services:
-  cardigann:
-    image: linuxserver/cardigann
-    container_name: cardigann
+  clarkson:
+    image: linuxserver/clarkson
+    container_name: clarkson
     environment:
       - PUID=1001
       - PGID=1001
-    volumes:
-      - </path/to/appdata/config>:/config
+      - MYSQL_HOST=db-host
+      - MYSQL_USERNAME=db-user
+      - MYSQL_PASSWORD=db-pass
+      - ENABLE_REGISTRATIONS=_true_
     ports:
-      - 5060:5060
+      - 3000:3000
     mem_limit: 4096m
     restart: unless-stopped
 ```
@@ -69,10 +74,13 @@ Container images are configured using parameters passed at runtime (such as thos
 
 | Parameter | Function |
 | :----: | --- |
-| `-p 5060` | Application WebUI |
+| `-p 3000` | Application WebUI |
 | `-e PUID=1001` | for UserID - see below for explanation |
 | `-e PGID=1001` | for GroupID - see below for explanation |
-| `-v /config` | Configuration files. |
+| `-e MYSQL_HOST=db-host` | Points the backend to the MySQL database. This can be either a docker hostname or an IP |
+| `-e MYSQL_USERNAME=db-user` | The user with access to the _clarkson_ schema |
+| `-e MYSQL_PASSWORD=db-pass` | The password for the DB user |
+| `-e ENABLE_REGISTRATIONS=_true_` | If set to _true_, allows new users to register |
 
 ## User / Group Identifiers
 
@@ -91,19 +99,13 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 ## Support Info
 
-* Shell access whilst the container is running: `docker exec -it cardigann /bin/bash`
-* To monitor the logs of the container in realtime: `docker logs -f cardigann`
+* Shell access whilst the container is running: `docker exec -it clarkson /bin/bash`
+* To monitor the logs of the container in realtime: `docker logs -f clarkson`
 * container version number 
-  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' cardigann`
+  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' clarkson`
 * image version number
-  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/cardigann`
+  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/clarkson`
 
 ## Versions
 
-* **06.05.18:** - Use buildstage in Dockerfile.
-* **06.12.17:** - Rebase to alpine 3.7.
-* **12.08.17:** - Add npm install to build stage.
-* **25.05.17:** - Rebase to alpine 3.6.
-* **07.02.17:** - Rebase to alpine 3.5.
-* **03.11.16:** - Compiled using [sstamoulis'](https://github.com/sstamoulis) method
-* **01.11.16:** - Initial Release.
+* **19.02.18** - Initial release.

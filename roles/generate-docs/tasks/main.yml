@@ -1,4 +1,8 @@
 ---
+- name: friendly debug
+  debug:
+    msg: "{{ container_name }}"
+
 - name: include vars file for this project
   include_vars:
     file: "{{ playbook_dir }}/vars/container-{{ container_name }}"
