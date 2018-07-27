@@ -26,7 +26,13 @@ docker create \
 -e PUID=1001 \
 -e PGID=1001 \
 -e TZ=Europe/London \
--v </path/to/plex/library>:/config \
+  -p 32400:32400 \
+  -p 32400:32400/udp \
+  -p 32469:32400 \
+  -p 32469:32469/udp \
+  -p 5353:5353/udp \
+  -p 1900:1900/udp \
+  -v </path/to/plex/library>:/config \
 -v </path/to/tvseries>:/data/tv \
 -v </path/to/movies>:/data/movies \
 -v </path/for/transcoding>:/transcode \
