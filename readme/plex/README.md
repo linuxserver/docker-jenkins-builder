@@ -1,3 +1,17 @@
+[![linuxserver.io](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png][https://linuxserver.io]
+
+The [LinuxServer.io](https://linuxserver.io) team brings you another container release featuring easy user mapping and community support. Find us for support at:
+* [discord](https://discord.gg/YWrKVTn)
+* [IRC][ircurl] on freenode at `#linuxserver.io`
+* [Podcast][podcasturl] covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!
+
+# linuxserver/plex
+[![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")[![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)](https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")[![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/plex.svg)][hub][![Docker Stars](https://img.shields.io/docker/stars/linuxserver/plex.svg)][hub][![Build Status](https://ci.linuxserver.io/buildStatus/icon?job=Docker-Builders/x86-64/x86-64-plex)](https://ci.linuxserver.io/job/Docker-Builders/job/x86-64/job/x86-64-plex/)
+
+[Plex](https://plex.tv/) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server.
+
+[![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)][https://plex.tv/]
+
 ## Versions
 
 * **09.12.17:** - Fix continuation lines.

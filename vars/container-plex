@@ -4,7 +4,7 @@
 project_name: plex
 project_url: "https://plex.tv/"
 project_logo: "http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png"
-project_blurb: "[Plex]({{ plex_project_url }}) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server."
+project_blurb: "[Plex]({{ project_url }}) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server."
 
 # container parameters
 param_container_name: "{{ plex_project_name }}"

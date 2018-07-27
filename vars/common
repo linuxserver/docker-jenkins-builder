@@ -15,6 +15,14 @@ lsio_podcast_url: "podcast.{{ lsio_url }}"
 lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png
 lsio_favicon_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png
 
+# badges
+lsio_microbadger_badge_version_url: https://images.microbadger.com/badges/version/linuxserver
+lsio_microbadger_badge_image_url: https://images.microbadger.com/badges/image/linuxserver
+lsio_microbadger_image_url: https://microbadger.com/images/linuxserver
+lsio_microbadger_link_desc: "Get your own version badge on microbadger.com"
+lsio_shieldsio_pull_count_url: https://img.shields.io/docker/pulls/linuxserver
+lsio_shieldsio_stars_count_url: https://img.shields.io/docker/stars/linuxserver
+
 ######
 # Common Params
 ######
