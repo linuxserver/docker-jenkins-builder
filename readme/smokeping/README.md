@@ -99,7 +99,7 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 * container version number 
 
-`docker inspect -f '{{ index .Config.Labels "build_version" }}' <container_name>`
+`docker inspect -f '{{ index .Config.Labels "build_version" }}' smokeping`
 
 * image version number
 

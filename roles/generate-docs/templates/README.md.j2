@@ -162,7 +162,7 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 * container version number 
 
-`docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} <container_name>`
+`docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 
 * image version number
 
