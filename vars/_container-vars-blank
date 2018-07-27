@@ -5,7 +5,7 @@ project_name: name
 project_url: "https://url.com/"
 project_logo: "http://www.logo.com/logo.png"
 project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) short description goes here."
-project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project-name }}"
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project_name }}"
 
 project_blurb_optional_extras_enabled: false
 project_blurb_optional_extras: []
