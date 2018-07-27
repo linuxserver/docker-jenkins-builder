@@ -39,6 +39,7 @@ lsio_shieldsio_stars_count_url: https://img.shields.io/docker/stars/linuxserver
 common_container_param_config_description: ""
 
 # default param values
-container_param_env_PUID: "1000"
-container_param_env_PGID: "1000"
+common_param_env_vars:
+  - { env_var: "PUID", env_value: "1001", desc: "for UserID - see below for explanation" }
+  - { env_var: "PGID", env_value: "1001", desc: "for GroupID - see below for explanation" }
 

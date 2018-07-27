@@ -3,6 +3,6 @@
   - hosts: localhost
     vars_files:
       - vars/common
-      - vars/container-plex
     roles:
-        - { role: roles/generate-docs }
+        - { role: roles/generate-docs, container_name: "plex" }
+        - { role: roles/generate-docs, container_name: "smokeping" }

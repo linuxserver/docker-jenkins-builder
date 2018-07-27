@@ -6,41 +6,29 @@ The [LinuxServer.io](https://linuxserver.io) team brings you another container r
 * [IRC](https://irc.linuxserver.io) - on freenode at `#linuxserver.io`. Our primary support channel is Discord.
 * [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
-# linuxserver/plex
-[![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")
-[![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)](https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")
-![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/plex.svg)
-![Docker Stars](https://img.shields.io/docker/stars/linuxserver/plex.svg)
+# linuxserver/smokeping
+[![](https://images.microbadger.com/badges/version/linuxserver/smokeping.svg)](https://microbadger.com/images/linuxserversmokeping "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/linuxserver/smokeping.svg)](https://microbadger.com/images/linuxserver/smokeping "Get your own version badge on microbadger.com")
+![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/smokeping.svg)
+![Docker Stars](https://img.shields.io/docker/stars/linuxserver/smokeping.svg)
 
-[Plex](https://plex.tv/) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server.
+[Smokeping](https://oss.oetiker.ch/smokeping/) keeps track of your network latency. For a full example of what this application is capable of visit [UCDavis](http://smokeping.ucdavis.edu/cgi-bin/smokeping.fcgi).
 
-<a href="https://plex.tv/" rel="plex">![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)</a>
+<a href="https://oss.oetiker.ch/smokeping/" rel="smokeping">![smokeping](https://camo.githubusercontent.com/e0694ef783e3fd1d74e6776b28822ced01c7cc17/687474703a2f2f6f73732e6f6574696b65722e63682f736d6f6b6570696e672f696e632f736d6f6b6570696e672d6c6f676f2e706e67)</a>
 
 ## Usage
 
 ```
 docker create \
---name=plex \
---net=host \
--e PUID=1001 \
--e PGID=1001 \
--e VERSION=latest \
--e TZ=Europe/London \
--v </path/to/plex/library>:/config \
--v </path/to/tvseries>:/data/tv \
--v </path/to/movies>:/data/movies \
--v </path/for/transcoding>:/transcode \
-linuxserver/plex
+--name=smokeping \
+-v <path/to/smokeping/config>:/config \
+-v </path/to/smokeping/data>:/data \
+linuxserver/smokeping
 ```
 
 *Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:
 
--p 32400:32400 \
--p 32400:32400/udp \
--p 32469:32400 \
--p 32469:32469/udp \
--p 5353:5353/udp \
--p 1900:1900/udp \
+-p 80:80 \
 
 ## Versions
 

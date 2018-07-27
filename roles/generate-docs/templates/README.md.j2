@@ -25,6 +25,11 @@ docker create \
 --net={{ param_net }} \
 {% endif %}
 {% if param_usage_include_env %}
+{% if common_param_env_vars %}
+{% for item in common_param_env_vars %}
+-e {{ item.env_var }}={{ item.env_value }} \
+{% endfor %}
+{% endif %}
 {% for item in param_env_vars %}
 -e {{ item.env_var }}={{ item.env_value }} \
 {% endfor %}
@@ -41,6 +46,14 @@ docker create \
 {% endif %}
 {{ lsio_project_name_short }}/{{ project_name }}
 ```
+
+{% if optional_block_1 %}
+{{ optional_block_1_item_1 }}
+
+{% for item in param_ports %}
+-p {{ item.external_port }}:{{ item.internal_port }} \
+{% endfor %}
+{% endif %}
 
 ## Versions
 
