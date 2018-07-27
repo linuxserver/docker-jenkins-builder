@@ -100,6 +100,11 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
+## Application Setup
+
+- Access WebUI at `<your-ip>:4040`.
+- Default user/pass is admin/admin.
+- Extra java options can be passed with the JAVA_OPTS environment variable, eg `-e JAVA_OPTS="-Xmx256m -Xms256m"`
 
 ## Support Info
 

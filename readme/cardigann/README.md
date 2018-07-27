@@ -88,7 +88,6 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
-
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it cardigann /bin/bash`

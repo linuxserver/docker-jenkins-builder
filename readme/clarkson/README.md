@@ -110,7 +110,6 @@ GRANT ALL ON `clarkson`.* TO 'clarkson_user';
 <br/>
 Once running, the container will run an initial MySQL migration, which populates the schema with all tables and procedures. The application will start immediately afterwards. You will need to register an initial user, of which will be the admin of the application. All subsequent users will be standard users. You can disable registrations after the fact by recreating the container with the `ENABLE_REGISTRATIONS` flag set to `false`. This will not hide the register link, but will disable the functionality.
 
-
 ## Support Info
 
 * Shell access whilst the container is running: `docker exec -it clarkson /bin/bash`

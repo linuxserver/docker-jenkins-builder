@@ -35,8 +35,11 @@ optional_block_1_items:
   - "```"
 
 # application setup block
-app_setup_block_enabled: false
-app_setup_block: ""
+app_setup_block_enabled: true
+app_setup_block: |
+  {% raw %}- Access WebUI at `<your-ip>:4040`.
+  - Default user/pass is admin/admin.
+  - Extra java options can be passed with the JAVA_OPTS environment variable, eg `-e JAVA_OPTS="-Xmx256m -Xms256m"`{% endraw %}
 
 # changelog
 
