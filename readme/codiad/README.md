@@ -20,8 +20,7 @@ Find us at:
 ![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/codiad.svg)
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/codiad.svg)
 
-[Codiad](http://codiad.com/) is a web-based IDE framework with a small footprint and minimal requirements. We have added a few plugins, more can be added in the marketplace in the WebUI.
-* ### Plugins pre-installed
+[Codiad](http://codiad.com/) is a web-based IDE framework with a small footprint and minimal requirements. We have added a few plugins, more can be added in the marketplace in the WebUI. Pre-installed plugins are:
 * [Collaboration](https://github.com/Codiad/Codiad-Collaborative)
 * [Terminal](https://github.com/Fluidbyte/Codiad-Terminal)
 * [CodeGit](https://github.com/Andr3as/Codiad-CodeGit)
@@ -93,6 +92,20 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
+
+## Application Setup
+
+**Please ensure MySQL is running before starting this container**.<br/>
+It is preferred if you create the `clarkson` schema before initially running the container, then creating a user with granted permissions for the schema. Creating the schema before running the app is important as the `clarkson` user will not have permission to create the schema on your behalf. You can, of course, use the `root` user, which has the ability to create schemas automatically, but this is not recommended.
+<br/>
+```sql
+CREATE SCHEMA `clarkson`;"
+CREATE USER 'clarkson_user' IDENTIFIED BY 'supersecretpassword';
+GRANT ALL ON `clarkson`.* TO 'clarkson_user';
+```
+<br/>
+Once running, the container will run an initial MySQL migration, which populates the schema with all tables and procedures. The application will start immediately afterwards. You will need to register an initial user, of which will be the admin of the application. All subsequent users will be standard users. You can disable registrations after the fact by recreating the container with the `ENABLE_REGISTRATIONS` flag set to `false`. This will not hide the register link, but will disable the functionality.
+
 
 ## Support Info
 

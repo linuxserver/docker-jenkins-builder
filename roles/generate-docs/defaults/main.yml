@@ -2,3 +2,6 @@
 
 project_blurb_optional_extras_enabled: false
 project_blurb_optional_extras: []
+
+app_setup_block_enabled: false
+app_setup_block: ""
