@@ -33,14 +33,6 @@ docker create \
 linuxserver/plex
 ```
 
-*Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:
-
--p 32400:32400 \
--p 32400:32400/udp \
--p 32469:32400 \
--p 32469:32469/udp \
--p 5353:5353/udp \
--p 1900:1900/udp \
 
 ## Versions
 

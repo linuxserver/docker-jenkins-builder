@@ -26,9 +26,6 @@ docker create \
 linuxserver/smokeping
 ```
 
-*Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:
-
--p 80:80 \
 
 ## Versions
 

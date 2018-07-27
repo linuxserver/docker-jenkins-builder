@@ -30,8 +30,11 @@ param_ports:
   - { external_port: "5353", internal_port: "5353/udp" }
   - { external_port: "1900", internal_port: "1900/udp" }
 
-optional_block_1: true
-optional_block_1_item_1: "*Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:"
+optional_block_1: false
+optional_block_1_items:
+  - "```"
+  - "*Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:"
+  - "```"
 
 # changelog
 
