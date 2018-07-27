@@ -82,7 +82,7 @@ http://192.168.x.x:8080 would show you what's running inside the container on po
 
 | Parameter | Function |
 | :---: | --- |
-| `--net=host | Shares host networking with container. |
+| `--net=host` | Shares host networking with container. |
 | `-e PUID=1001` | for UserID - see below for explanation |
 | `-e PGID=1001` | for GroupID - see below for explanation |
 | `-e VERSION=latest` | Supported values are LATEST, PLEXPASS or a specific version number. |
