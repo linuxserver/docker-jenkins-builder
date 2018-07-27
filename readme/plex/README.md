@@ -1,9 +1,10 @@
-<a href="https://linuxserver.io" rel="linuxserver.io">![linuxserver.io](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png)[https://linuxserver.io]</a>
+<a href="https://linuxserver.io" rel="linuxserver.io">![linuxserver.io](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png)</a>
 
 The [LinuxServer.io](https://linuxserver.io) team brings you another container release featuring easy user mapping and community support. Find us for support at:
-* [discord](https://discord.gg/YWrKVTn)
-* [IRC][ircurl] on freenode at `#linuxserver.io`
-* [Podcast][podcasturl] covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!
+* [Discord](https://discord.gg/YWrKVTn) - realtime chat with the community and the team.
+* [Blog](blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
+* [IRC](irc.linuxserver.io) - on freenode at `#linuxserver.io`
+* [Podcast](podcast.linuxserver.io) - covers everything to do with getting the most from your Linux Server plus a focus on all things Docker and containerisation!
 
 # linuxserver/plex
 [![](https://images.microbadger.com/badges/version/linuxserver/plex.svg)](https://microbadger.com/images/linuxserverplex "Get your own version badge on microbadger.com")[![](https://images.microbadger.com/badges/image/linuxserver/plex.svg)](https://microbadger.com/images/linuxserver/plex "Get your own version badge on microbadger.com")[![Docker Pulls](https://img.shields.io/docker/pulls/linuxserver/plex.svg)][hub][![Docker Stars](https://img.shields.io/docker/stars/linuxserver/plex.svg)][hub][![Build Status](https://ci.linuxserver.io/buildStatus/icon?job=Docker-Builders/x86-64/x86-64-plex)](https://ci.linuxserver.io/job/Docker-Builders/job/x86-64/job/x86-64-plex/)
