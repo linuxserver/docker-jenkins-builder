@@ -1,17 +1,35 @@
 <a href="{{ lsio_full_url }}" rel="{{ lsio_project_name }}">![{{ lsio_project_name }}]({{ lsio_primary_logo_url }})</a>
 
-The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring easy user mapping and community support. Find us for support at:
+The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring easy user mapping and community support. Find us at:
 * [Discord]({{ lsio_discord_url }}) - {{ lsio_discord_desc }}
 * [Blog]({{ lsio_blog_url }}) - {{ lsio_blog_desc }}
 * [IRC]({{ lsio_irc_url }}) - {{ lsio_irc_desc }}
 * [Podcast]({{ lsio_podcast_url }}) - {{ lsio_podcast_desc }}
 
 # linuxserver/{{ project_name }}
-[![]({{ lsio_microbadger_badge_version_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}{{ project_name }} "{{ lsio_microbadger_link_desc }}")[![]({{ lsio_microbadger_badge_image_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}/{{ project_name }} "{{ lsio_microbadger_link_desc }}")[![Docker Pulls]({{ lsio_shieldsio_pull_count_url }}/{{ project_name }}.svg)][hub][![Docker Stars]({{ lsio_shieldsio_stars_count_url }}/{{ project_name }}.svg)][hub][![Build Status](https://ci.linuxserver.io/buildStatus/icon?job=Docker-Builders/x86-64/x86-64-plex)](https://ci.linuxserver.io/job/Docker-Builders/job/x86-64/job/x86-64-plex/)
+[![]({{ lsio_microbadger_badge_version_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}{{ project_name }} "{{ lsio_microbadger_link_desc }}")
+[![]({{ lsio_microbadger_badge_image_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}/{{ project_name }} "{{ lsio_microbadger_link_desc }}")
+![Docker Pulls]({{ lsio_shieldsio_pull_count_url }}/{{ project_name }}.svg)
+![Docker Stars]({{ lsio_shieldsio_stars_count_url }}/{{ project_name }}.svg)
 
 {{ project_blurb }}
 
-[![{{ project_name }}]({{ project_logo }})][{{ project_url }}]
+<a href="{{ project_url }}" rel="{{ project_name }}">![{{ project_name }}]({{ project_logo }})</a>
+
+## Usage
+
+```
+docker create \
+--name={{ param_container_name }} \
+--net={{ param_net }} \
+{% for item in param_env_vars %}
+-e {{ item.env_var }}={{ item.env_value }} \
+{% endfor %}
+{% for item in param_volumes %}
+-v {{ item.vol_host_path }}:{{ item.vol_path }} \
+{% endfor %}
+{{ lsio_project_name_short }}/{{ project_name }}
+```
 
 ## Versions
 

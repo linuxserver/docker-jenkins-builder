@@ -7,17 +7,18 @@ project_logo: "http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e14
 project_blurb: "[Plex]({{ project_url }}) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server."
 
 # container parameters
-param_container_name: "{{ plex_project_name }}"
+param_container_name: "{{ project_name }}"
 param_net: "host"
 param_env_vars:
   - { env_var: "VERSION", env_value: "latest" }
-  - { env_var: "PUID", env_value: "PUID" }
-  - { env_var: "PGID", env_value: "PGID" }
+  - { env_var: "PUID", env_value: "1001" }
+  - { env_var: "PGID", env_value: "1001" }
   - { env_var: "TZ", env_value: "Europe/London"}
 param_volumes:
-  - { vol_path: "/config", desc: "{{ plex_desc_config }}" }
-  - { vol_path: "/data/xyz", desc: "{{ plex_desc_data }}" }
-  - { vol_path: "/transcode", desc: "{{ plex_desc_transcode" }
+  - { vol_path: "/config", vol_host_path: "</path/to/plex/library>", desc: "{{ desc_config }}" }
+  - { vol_path: "/data/tv", vol_host_path: "</path/to/tvseries>", desc: "{{ desc_data }}" }
+  - { vol_path: "/data/movies", vol_host_path: "</path/to/movies>", desc: "{{ desc_data }}" }
+  - { vol_path: "/transcode", vol_host_path: "</path/for/transcoding>", desc: "{{ desc_transcode }}" }
 param_ports:
   - { internal_port: "32400", external_port: "32400" }
   - { internal_port: "32400", external_port: "32400/udp" }

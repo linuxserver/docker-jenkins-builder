@@ -16,6 +16,23 @@ The [LinuxServer.io](https://linuxserver.io) team brings you another container r
 
 <a href="https://plex.tv/" rel="plex">![plex](http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png)</a>
 
+## Usage
+
+```
+docker create \
+--name=plex \
+--net=host \
+-e VERSION=latest \
+-e PUID=1001 \
+-e PGID=1001 \
+-e TZ=Europe/London \
+-v </path/to/plex/library>:/config \
+-v </path/to/tvseries>:/data/tv \
+-v </path/to/movies>:/data/movies \
+-v </path/for/transcoding>:/transcode \
+linuxserver/plex
+```
+
 ## Versions
 
 * **09.12.17:** - Fix continuation lines.
