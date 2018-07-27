@@ -4,8 +4,8 @@
 project_name: cardigann
 project_url: "https://github.com/cardigann/cardigann"
 project_logo: "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/cardigann.png"
-project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) a server for adding extra indexers to Sonarr, SickRage and CouchPotato via Torznab and TorrentPotato proxies. Behind the scenes Cardigann logs in and runs searches and then transforms the results into a compatible format. "
-project_lsio_github_repo_url: "https://github.com/linuxserver/docker-cardigann"
+project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) is a server for adding extra indexers to Sonarr, SickRage and CouchPotato via Torznab and TorrentPotato proxies. Behind the scenes Cardigann logs in and runs searches and then transforms the results into a compatible format. "
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project-name }}"
 
 # container parameters
 common_param_env_vars_enabled: true #PGID, PUID, etc

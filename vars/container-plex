@@ -5,7 +5,7 @@ project_name: plex
 project_url: "https://plex.tv/"
 project_logo: "http://the-gadgeteer.com/wp-content/uploads/2015/10/plex-logo-e1446990678679.png"
 project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices. This container is packaged as a standalone Plex Media Server."
-project_lsio_github_repo_url: "https://github.com/linuxserver/docker-plex"
+project_lsio_github_repo_url: "https://github.com/linuxserver/docker-{{ project-name }}"
 
 # container parameters
 common_param_env_vars_enabled: true #PGID, PUID, etc
