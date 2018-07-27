@@ -16,9 +16,9 @@ param_usage_include_vols: true
 param_volumes:
   - { vol_path: "/config", vol_host_path: "<path/to/smokeping/config>", desc: "Configure the `Targets` file here" }
   - { vol_path: "/data", vol_host_path: "</path/to/{{ project_name }}/data>", desc: "Storage location for db and application data (graphs etc)" }
-param_usage_include_ports: false
+param_usage_include_ports: true
 param_ports:
-  - { external_port: "80", internal_port: "80" }
+  - { external_port: "80", internal_port: "80", port_desc: "Allows HTTP access to the internal webserver." }
 
 
 # changelog

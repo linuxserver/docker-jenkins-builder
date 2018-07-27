@@ -35,6 +35,7 @@ docker create \
   --name=smokeping \
   -e PUID=1001 \
   -e PGID=1001 \
+  -p 80:80 \
   -v <path/to/smokeping/config>:/config \
   -v </path/to/smokeping/data>:/data \
   linuxserver/smokeping
@@ -58,6 +59,8 @@ services:
     volumes:
       - <path/to/smokeping/config>:/config
       - </path/to/smokeping/data>:/data
+    ports:
+      - 80:80
     mem_limit: 4096m
     restart: unless-stopped
 ```
@@ -72,6 +75,7 @@ http://192.168.x.x:8080 would show you what's running inside the container on po
 
 | Parameter | Function |
 | :----: | --- |
+| `-p 80` | Allows HTTP access to the internal webserver. |
 | `-e PUID=1001` | for UserID - see below for explanation |
 | `-e PGID=1001` | for GroupID - see below for explanation |
 | `-v /config` | Configure the `Targets` file here |
