@@ -105,14 +105,10 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 * Shell access whilst the container is running: `docker exec -it airsonic /bin/bash`
 * To monitor the logs of the container in realtime: `docker logs -f airsonic`
-
 * container version number 
-
-`docker inspect -f '{{ index .Config.Labels "build_version" }}' airsonic`
-
+  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' airsonic`
 * image version number
-
-`docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/airsonic`
+  * `docker inspect -f '{{ index .Config.Labels "build_version" }}' linuxserver/airsonic`
 
 ## Versions
 
