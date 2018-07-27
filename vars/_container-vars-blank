@@ -18,10 +18,10 @@ param_env_vars:
   - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
 param_usage_include_vols: true
 param_volumes:
-  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "short volume description here please" }
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
 param_usage_include_ports: true
 param_ports:
-  - { external_port: "80", internal_port: "80", port_desc: "short description of ports purpose (HTTP, etc)" } 
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" } 
 
 optional_block_1: false
 optional_block_1_items:
