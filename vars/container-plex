@@ -38,6 +38,10 @@ optional_block_1_items:
   - "*Special note* - If you'd like to run Plex without requiring `--net=host` (`NOT recommended`) then you will need the following ports in your `docker create` command:"
   - "```"
 
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
+
 # changelog
 
 changelogs:

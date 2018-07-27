@@ -21,6 +21,9 @@ param_usage_include_ports: true
 param_ports:
   - { external_port: "80", internal_port: "80", port_desc: "Allows HTTP access to the internal webserver." }
 
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
 
 # changelog
 changelog:

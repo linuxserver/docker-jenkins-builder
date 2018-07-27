@@ -36,6 +36,10 @@ optional_block_1_items:
   - "include optional stuff"
   - "```"
 
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
+
 # changelog
 
 changelogs:

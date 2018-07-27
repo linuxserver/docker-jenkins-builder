@@ -159,10 +159,9 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 ```
 
 &nbsp;
-
+{% if app_setup_block_enabled %}
 ## Application Setup
 
-{% if app_setup_block_enabled %}
 {{ app_setup_block }}
 {% endif %}
 

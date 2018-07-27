@@ -23,6 +23,10 @@ param_usage_include_ports: true
 param_ports:
   - { external_port: "5060", internal_port: "5060", port_desc: "Application WebUI" } 
 
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
+
 # changelog
 changelogs:
   - { date: "06.05.18:", desc: "Use buildstage in Dockerfile." }

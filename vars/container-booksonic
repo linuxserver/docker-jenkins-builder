@@ -26,6 +26,10 @@ param_usage_include_ports: true
 param_ports:
   - { external_port: "4040", internal_port: "4040", port_desc: "Application WebUI" } 
 
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
+
 # changelog
 changelogs:
   - { date: "06.12.17", desc: "Rebase to alpine 3.7." }
