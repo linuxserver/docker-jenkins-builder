@@ -11,24 +11,25 @@ common_param_env_vars_enabled: true #PGID, PUID, etc
 param_container_name: "{{ project_name }}"
 param_usage_include_net: true
 param_net: "host"
+param_net_desc: "Shares host networking with container."
 param_usage_include_env: true
 param_env_vars:
-  - { env_var: "VERSION", env_value: "latest" }
-  - { env_var: "TZ", env_value: "Europe/London"}
+  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
+  - { env_var: "TZ", env_value: "Europe/London", desc: "*Optional* Timezone."}
 param_usage_include_vols: true
 param_volumes:
   - { vol_path: "/config", vol_host_path: "</path/to/plex/library>", desc: "Plex metadata location. Budget at 50gb- of disk space for large libraries. An SSD is perferred." }
   - { vol_path: "/data/tv", vol_host_path: "</path/to/tvseries>", desc: "Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc." }
-  - { vol_path: "/data/movies", vol_host_path: "</path/to/movies>", desc: "Shares host networking with container." }
+  - { vol_path: "/data/movies", vol_host_path: "</path/to/movies>", desc: "Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc." }
   - { vol_path: "/transcode", vol_host_path: "</path/for/transcoding>", desc: "Path for transcoding folder, *optional*." }
 param_usage_include_ports: false
 param_ports:
-  - { external_port: "32400", internal_port: "32400" }
-  - { external_port: "32400", internal_port: "32400/udp" }
-  - { external_port: "32469", internal_port: "32400" }
-  - { external_port: "32469", internal_port: "32469/udp" }
-  - { external_port: "5353", internal_port: "5353/udp" }
-  - { external_port: "1900", internal_port: "1900/udp" }
+  - { external_port: "32400", internal_port: "32400", port_desc: "Primary communication port for Plex" } 
+  - { external_port: "32400", internal_port: "32400/udp", port_desc: "Primary communication port for Plex" }
+  - { external_port: "32469", internal_port: "32469", port_desc: "DNLA discovery" }
+  - { external_port: "32469", internal_port: "32469/udp", port_desc: "DNLA discovery" }
+  - { external_port: "5353", internal_port: "5353/udp", port_desc: "Bonjour / Avahi discovery" }
+  - { external_port: "1900", internal_port: "1900/udp", port_desc: "DNLA access" }
 
 optional_block_1: false
 optional_block_1_items:

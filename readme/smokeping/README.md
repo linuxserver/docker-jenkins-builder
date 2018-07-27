@@ -62,6 +62,39 @@ services:
     restart: unless-stopped
 ```
 
+## Parameters
+
+Parameters are split into two halves with the left hand side representing the host and the right the container side. The colon acts as a separator between them.
+For example with a port `-p external:internal` - what this shows is the port mapping from the inside to the outside of the container.
+For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080`
+http://192.168.x.x:8080 would show you what's running inside the container on port 80.
+
+
+| Parameter | Function |
+| :---: | --- |
+| `-e PUID=1001` | for UserID - see below for explanation |
+| `-e PGID=1001` | for GroupID - see below for explanation |
+| `-v /config` | Configure the `Targets` file here |
+| `-v /data` | Storage location for db and application data (graphs etc) |
+
+
+&nbsp;
+
+## User / Group Identifiers
+
+When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.
+
+Ensure any volume directories on the host are owned by the same user you specify and it will "just work" &trade;.
+
+In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as below:
+
+```
+  $ id <dockeruser>
+    uid=1001(dockeruser) gid=1001(dockergroup) groups=1001(dockergroup)
+```
+
+&nbsp;
+
 ## Versions
 
 * **09.12.17:** - Fix continuation lines.
