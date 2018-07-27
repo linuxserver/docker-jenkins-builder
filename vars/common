@@ -7,10 +7,10 @@
 lsio_project_name: "linuxserver.io"
 lsio_short_url: "{{ lsio_project_name }}"
 lsio_full_url: "https://{{ lsio_project_name }}"
-lsio_blog_url: "blog.{{ lsio_short_url }}"
+lsio_blog_url: "https://blog.{{ lsio_short_url }}"
 lsio_discord_url: "https://discord.gg/YWrKVTn"
-lsio_irc_url: "irc.{{ lsio_short_url }}"
-lsio_podcast_url: "podcast.{{ lsio_short_url }}"
+lsio_irc_url: "https://irc.{{ lsio_short_url }}"
+lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
 
 # descriptions
 lsio_discord_desc: "realtime chat with the community and the team."
