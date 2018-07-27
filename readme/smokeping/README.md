@@ -67,7 +67,7 @@ services:
 
 ## Parameters
 
-Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. 
+Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080` outside the container.
 
 | Parameter | Function |
 | :----: | --- |
@@ -76,6 +76,10 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-e PGID=1001` | for GroupID - see below for explanation |
 | `-v /config` | Configure the `Targets` file here |
 | `-v /data` | Storage location for db and application data (graphs etc) |
+
+
+
+
 
 ## User / Group Identifiers
 
