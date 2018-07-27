@@ -112,11 +112,7 @@ services:
 
 ## Parameters
 
-Parameters are split into two halves with the left hand side representing the host and the right the container side. The colon acts as a separator between them.
-For example with a port `-p external:internal` - what this shows is the port mapping from the inside to the outside of the container.
-For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080`
-http://192.168.x.x:8080 would show you what's running inside the container on port 80.
-
+Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080` outside the container. In this example, `http://192.168.x.x:8080` would show you what's running inside the container on port 80. The same `external:internal` pattern is observed for all other parameters.
 
 | Parameter | Function |
 | :----: | --- |
