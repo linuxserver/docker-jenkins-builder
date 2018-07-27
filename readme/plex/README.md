@@ -18,21 +18,49 @@ The [LinuxServer.io](https://linuxserver.io) team brings you another container r
 
 ## Usage
 
+### docker
+
 ```
 docker create \
---name=plex \
---net=host \
--e PUID=1001 \
--e PGID=1001 \
--e VERSION=latest \
--e TZ=Europe/London \
--v </path/to/plex/library>:/config \
--v </path/to/tvseries>:/data/tv \
--v </path/to/movies>:/data/movies \
--v </path/for/transcoding>:/transcode \
-linuxserver/plex
+  --name=plex \
+  --net=host \
+  -e PUID=1001 \
+  -e PGID=1001 \
+  -e VERSION=latest \
+  -e TZ=Europe/London \
+  -v </path/to/plex/library>:/config \
+  -v </path/to/tvseries>:/data/tv \
+  -v </path/to/movies>:/data/movies \
+  -v </path/for/transcoding>:/transcode \
+  linuxserver/plex
 ```
 
+
+### docker-compose
+
+Compatible with docker-compose v2 schemas.
+
+```
+---
+version: "2"
+services:
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - VERSION=latest
+      - TZ=Europe/London
+    volumes:
+      - </path/to/plex/library>:/config
+      - </path/to/tvseries>:/data/tv
+      - </path/to/movies>:/data/movies
+      - </path/for/transcoding>:/transcode
+    mem_limit: 4096m
+    restart: unless-stopped
+```
 
 ## Versions
 

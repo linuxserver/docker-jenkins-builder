@@ -6,7 +6,7 @@ The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container rele
 * [IRC]({{ lsio_irc_url }}) - {{ lsio_irc_desc }}
 * [Podcast]({{ lsio_podcast_url }}) - {{ lsio_podcast_desc }}
 
-# linuxserver/{{ project_name }}
+# {{ lsio_project_name_short }}/{{ project_name }}
 [![]({{ lsio_microbadger_badge_version_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}{{ project_name }} "{{ lsio_microbadger_link_desc }}")
 [![]({{ lsio_microbadger_badge_image_url }}/{{ project_name }}.svg)]({{ lsio_microbadger_image_url }}/{{ project_name }} "{{ lsio_microbadger_link_desc }}")
 ![Docker Pulls]({{ lsio_shieldsio_pull_count_url }}/{{ project_name }}.svg)
@@ -18,33 +18,35 @@ The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container rele
 
 ## Usage
 
+### docker
+
 ```
 docker create \
---name={{ param_container_name }} \
+  --name={{ param_container_name }} \
 {% if param_usage_include_net %}
---net={{ param_net }} \
+  --net={{ param_net }} \
 {% endif %}
-{% if param_usage_include_env %}
 {% if common_param_env_vars_enabled %}
 {% for item in common_param_env_vars %}
--e {{ item.env_var }}={{ item.env_value }} \
+  -e {{ item.env_var }}={{ item.env_value }} \
 {% endfor %}
 {% endif %}
+{% if param_usage_include_env %}
 {% for item in param_env_vars %}
--e {{ item.env_var }}={{ item.env_value }} \
+  -e {{ item.env_var }}={{ item.env_value }} \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_ports %}
 {% for item in param_ports %}
--p {{ item.external_port }}:{{ item.internal_port }} \
+  -p {{ item.external_port }}:{{ item.internal_port }} \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_vols %}
 {% for item in param_volumes %}
--v {{ item.vol_host_path }}:{{ item.vol_path }} \
+  -v {{ item.vol_host_path }}:{{ item.vol_path }} \
 {% endfor %}
 {% endif %}
-{{ lsio_project_name_short }}/{{ project_name }}
+  {{ lsio_project_name_short }}/{{ project_name }}
 ```
 
 {% if optional_block_1 %}
@@ -56,6 +58,47 @@ docker create \
 -p {{ item.external_port }}:{{ item.internal_port }} \
 {% endfor %}
 {% endif %}
+
+### docker-compose
+
+Compatible with docker-compose v2 schemas.
+
+```
+---
+version: "2"
+services:
+  {{ project_name }}:
+    image: {{ lsio_project_name_short }}/{{ project_name }}
+    container_name: {{ project_name }}
+{% if param_usage_include_net %}
+    network_mode: {{ param_net }}
+{% endif %}
+{% if common_param_env_vars_enabled %}
+    environment:
+{% for item in common_param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endfor %}
+{% endif %}
+{% if param_usage_include_env %}
+{% for item in param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endfor %}
+{% endif %}
+{% if param_usage_include_vols %}
+    volumes:
+{% for item in param_volumes %}
+      - {{ item.vol_host_path }}:{{ item.vol_path }}
+{% endfor %}
+{% endif %}
+{% if param_usage_include_ports %}
+    ports:
+{% for item in param_ports %}
+      - {{ item.external_port }}:{{ item.internal_port }}
+{% endfor %}
+{% endif %}
+    mem_limit: 4096m
+    restart: unless-stopped
+```
 
 ## Versions
 

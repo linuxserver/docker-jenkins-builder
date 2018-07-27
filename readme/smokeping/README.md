@@ -18,14 +18,39 @@ The [LinuxServer.io](https://linuxserver.io) team brings you another container r
 
 ## Usage
 
+### docker
+
 ```
 docker create \
---name=smokeping \
--v <path/to/smokeping/config>:/config \
--v </path/to/smokeping/data>:/data \
-linuxserver/smokeping
+  --name=smokeping \
+  -e PUID=1001 \
+  -e PGID=1001 \
+  -v <path/to/smokeping/config>:/config \
+  -v </path/to/smokeping/data>:/data \
+  linuxserver/smokeping
 ```
 
+
+### docker-compose
+
+Compatible with docker-compose v2 schemas.
+
+```
+---
+version: "2"
+services:
+  smokeping:
+    image: linuxserver/smokeping
+    container_name: smokeping
+    environment:
+      - PUID=1001
+      - PGID=1001
+    volumes:
+      - <path/to/smokeping/config>:/config
+      - </path/to/smokeping/data>:/data
+    mem_limit: 4096m
+    restart: unless-stopped
+```
 
 ## Versions
 
