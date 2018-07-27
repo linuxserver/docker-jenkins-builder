@@ -4,5 +4,6 @@
     vars_files:
       - vars/common
     roles:
+        - { role: roles/generate-docs, container_name: "airsonic" }
         - { role: roles/generate-docs, container_name: "plex" }
         - { role: roles/generate-docs, container_name: "smokeping" }

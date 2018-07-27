@@ -1,0 +1,41 @@
+---
+
+# project information
+project_name: airsonic
+project_url: "https://github.com/airsonic/airsonic"
+project_logo: "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/airsonic-banner.png"
+project_blurb: "[{{ project_name|capitalize }}]({{ project_url }}) is a free, web-based media streamer, providing ubiquitious access to your music. Use it to share your music with friends, or to listen to your own music while at work. You can stream to multiple players simultaneously, for instance to one player in your kitchen and another in your living room."
+project_lsio_github_repo_url: "https://github.com/linuxserver/reponame"
+
+# container parameters
+common_param_env_vars_enabled: true #PGID, PUID, etc
+param_container_name: "{{ project_name }}"
+param_usage_include_net: false
+param_net: "host"
+param_net_desc: "Shares host networking with container."
+param_usage_include_env: false
+param_env_vars:
+  - { env_var: "CONTEXT_PATH", env_value: "<url-base>", desc: "for setting url-base in reverse proxy setups - optional" }
+  - { env_var: "JAVA_OPTS", env_value: "<options>", desc: " 	for passing additional java options - optional" }
+param_usage_include_vols: true
+param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration file location." }
+  - { vol_path: "/music", vol_host_path: "</path/to/music>", desc: "Location of music." }
+  - { vol_path: "/playlists", vol_host_path: "</path/to/playlists>", desc: "Location for playlists to be saved to." }
+  - { vol_path: "/podcasts", vol_host_path: "</path/to/podcasts>", desc: "Location of podcasts." }
+  - { vol_path: "/media", vol_host_path: "</path/to/media>", desc: "Location of other media - optional" }
+param_usage_include_ports: true
+param_ports:
+  - { external_port: "4040", internal_port: "4040", port_desc: "WebUI" } 
+
+optional_block_1: false
+optional_block_1_items:
+  - "```"
+  - "include optional stuff"
+  - "```"
+
+# changelog
+
+changelogs:
+  - { date: "22.04.18:", desc: "Add the forgotten JAVA_OPTS to the run command." }
+  - { date: "29.12.17:", desc: "Initial Release." }
