@@ -71,7 +71,7 @@ http://192.168.x.x:8080 would show you what's running inside the container on po
 
 
 | Parameter | Function |
-| :---: | --- |
+| :----: | --- |
 | `-e PUID=1001` | for UserID - see below for explanation |
 | `-e PGID=1001` | for GroupID - see below for explanation |
 | `-v /config` | Configure the `Targets` file here |
