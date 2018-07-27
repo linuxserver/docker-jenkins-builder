@@ -13,23 +13,22 @@ param_container_name: "{{ project_name }}"
 param_usage_include_net: false
 param_net: "host"
 param_net_desc: "Shares host networking with container."
-param_usage_include_env: false
+param_usage_include_env: true
 param_env_vars:
-  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
-param_usage_include_vols: true
+  - { env_var: "MYSQL_HOST", env_value: "db-host", desc: "Points the backend to the MySQL database. This can be either a docker hostname or an IP" }
+  - { env_var: "MYSQL_USERNAME", env_value: "db-user", desc: "The user with access to the _clarkson_ schema" }
+  - { env_var: "MYSQL_PASSWORD", env_value: "db-pass", desc: "The password for the DB user" }
+  - { env_var: "ENABLE_REGISTRATIONS", env_value: "_true_", desc: "If set to _true_, allows new users to register" }
+param_usage_include_vols: false
 param_volumes:
   - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
 param_usage_include_ports: true
 param_ports:
-  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" } 
+  - { external_port: "3000", internal_port: "3000", port_desc: "Application WebUI" } 
 
-optional_block_1: false
-optional_block_1_items:
-  - "```"
-  - "include optional stuff"
-  - "```"
+# application setup block
+app_setup_block: ""
 
 # changelog
-
 changelogs:
-  - { date: "09.12.17:", desc: "changes description" }
+  - { date: "19.02.18", desc: "Initial release." }
