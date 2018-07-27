@@ -9,23 +9,26 @@ project_blurb: "[Plex]({{ project_url }}) organizes video, music and photos from
 # container parameters
 param_container_name: "{{ project_name }}"
 param_net: "host"
+param_usage_include_env: true
 param_env_vars:
   - { env_var: "VERSION", env_value: "latest" }
   - { env_var: "PUID", env_value: "1001" }
   - { env_var: "PGID", env_value: "1001" }
   - { env_var: "TZ", env_value: "Europe/London"}
+param_usage_include_vols: true
 param_volumes:
   - { vol_path: "/config", vol_host_path: "</path/to/plex/library>", desc: "{{ desc_config }}" }
   - { vol_path: "/data/tv", vol_host_path: "</path/to/tvseries>", desc: "{{ desc_data }}" }
   - { vol_path: "/data/movies", vol_host_path: "</path/to/movies>", desc: "{{ desc_data }}" }
   - { vol_path: "/transcode", vol_host_path: "</path/for/transcoding>", desc: "{{ desc_transcode }}" }
+param_usage_include_ports: false
 param_ports:
-  - { internal_port: "32400", external_port: "32400" }
-  - { internal_port: "32400", external_port: "32400/udp" }
-  - { internal_port: "32469", external_port: "32400" }
-  - { internal_port: "32469", external_port: "32469/udp" }
-  - { internal_port: "5353", external_port: "5353/udp" }
-  - { internal_port: "1900", external_port: "1900/udp" }
+  - { external_port: "32400", internal_port: "32400" }
+  - { external_port: "32400", internal_port: "32400/udp" }
+  - { external_port: "32469", internal_port: "32400" }
+  - { external_port: "32469", internal_port: "32469/udp" }
+  - { external_port: "5353", internal_port: "5353/udp" }
+  - { external_port: "1900", internal_port: "1900/udp" }
 
 # descriptions
 desc_config: "Plex metadata location. Budget at 50gb- of disk space for large libraries. An SSD is perferred."

@@ -22,12 +22,21 @@ The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container rele
 docker create \
 --name={{ param_container_name }} \
 --net={{ param_net }} \
+{% if param_usage_include_env %}
 {% for item in param_env_vars %}
 -e {{ item.env_var }}={{ item.env_value }} \
 {% endfor %}
+{% endif %}
+{% if param_usage_include_ports %}
+{% for item in param_ports %}
+-p {{ item.external_port }}:{{ item.internal_port }} \
+{% endfor %}
+{% endif %}
+{% if param_usage_include_vols %}
 {% for item in param_volumes %}
 -v {{ item.vol_host_path }}:{{ item.vol_path }} \
 {% endfor %}
+{% endif %}
 {{ lsio_project_name_short }}/{{ project_name }}
 ```
 

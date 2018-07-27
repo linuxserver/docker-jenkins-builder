@@ -14,9 +14,9 @@ lsio_irc_url: "https://irc.{{ lsio_short_url }}"
 lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
 
 # descriptions
-lsio_discord_desc: "realtime chat with the community and the team."
+lsio_discord_desc: "realtime support / chat with the community and the team."
 lsio_blog_desc: "all the things you can do with our containers including How-To guides, opinions and much more!"
-lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`. Our primary chat is Discord."
+lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`. Our primary support channel is Discord."
 lsio_podcast_desc: "on hiatus. Coming back soon (late 2018)."
 
 # asset urls
