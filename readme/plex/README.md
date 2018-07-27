@@ -74,6 +74,8 @@ services:
 
 ## Parameters
 
+Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. 
+
 | Parameter | Function |
 | :----: | --- |
 | `--net=host` | Shares host networking with container. |
@@ -85,11 +87,6 @@ services:
 | `-v /data/tv` | Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc. |
 | `-v /data/movies` | Media goes here. Add as many as needed e.g. `/data/movies`, `/data/tv`, etc. |
 | `-v /transcode` | Path for transcoding folder, *optional*. |
-
-Container images are configured using parameters passed at runtime (such as those above). These parameters are separated by a colon and indicate `<external>:<internal>` respectively. 
-
-For example, `-p 8080:80` would expose port `80` from inside the container to be accessible from the host's IP on port `8080` outside the container. In this example, `http://192.168.x.x:8080` would show you what's running inside the container on port 80. The same `external:internal` pattern is observed for all other parameters.
-
 
 ## User / Group Identifiers
 
