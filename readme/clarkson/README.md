@@ -99,7 +99,8 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 
 ## Application Setup
 
-**Please ensure MySQL is running before starting this container**.<br/>
+**Please ensure MySQL is running before starting this container**.
+&nbsp;
 It is preferred if you create the `clarkson` schema before initially running the container, then creating a user with granted permissions for the schema. Creating the schema before running the app is important as the `clarkson` user will not have permission to create the schema on your behalf. You can, of course, use the `root` user, which has the ability to create schemas automatically, but this is not recommended.
 <br/>
 ```sql
