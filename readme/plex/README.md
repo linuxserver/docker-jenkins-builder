@@ -1,9 +1,9 @@
 <a href="https://linuxserver.io" rel="linuxserver.io">![linuxserver.io](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png)</a>
 
 The [LinuxServer.io](https://linuxserver.io) team brings you another container release featuring easy user mapping and community support. Find us at:
-* [Discord](https://discord.gg/YWrKVTn) - realtime chat with the community and the team.
+* [Discord](https://discord.gg/YWrKVTn) - realtime support / chat with the community and the team.
 * [Blog](https://blog.linuxserver.io) - all the things you can do with our containers including How-To guides, opinions and much more!
-* [IRC](https://irc.linuxserver.io) - on freenode at `#linuxserver.io`. Our primary chat is Discord.
+* [IRC](https://irc.linuxserver.io) - on freenode at `#linuxserver.io`. Our primary support channel is Discord.
 * [Podcast](https://podcast.linuxserver.io) - on hiatus. Coming back soon (late 2018).
 
 # linuxserver/plex
