@@ -32,7 +32,7 @@ app_setup_nginx_reverse_proxy_block: |
   - Wait 10 minutes.
 
 # changelog
-changelog:
+changelogs:
   - { date: "09.04.18:", desc: "Add bc package." }
   - { date: "08.04.18:", desc: "Add tccping script and tcptraceroute package (thanks rcarmo)." }
   - { date: "13.12.17:", desc: "Expose httpd_conf to /config." }
