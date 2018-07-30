@@ -1,11 +1,7 @@
 # linuxserver/config-manager
 
-You will need Ansible installed on your system.
+You will need docker. Edit the `NAME` variable to match the `container-*` file in vars.
 
-Clone the repo, cd into it and run
-
-    ansible-playbook generate-docs.yml
+    docker run --rm -e NAME=airsonic -v ${PWD}/readme:/ansible/readme config-manager:latest
 
 Then look under the `readme/project_name` directory.
-
-Lots still to do on this but this is the general gist of what I was going for.
