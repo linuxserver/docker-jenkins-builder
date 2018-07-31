@@ -21,10 +21,6 @@ Find us at:
 ![Docker Stars](https://img.shields.io/docker/stars/linuxserver/smokeping.svg)
 
 [Smokeping](https://oss.oetiker.ch/smokeping/) keeps track of your network latency. For a full example of what this application is capable of visit [UCDavis](http://smokeping.ucdavis.edu/cgi-bin/smokeping.fcgi).
-* [Collaboration](https://github.com/Codiad/Codiad-Collaborative)
-* [Terminal](https://github.com/Fluidbyte/Codiad-Terminal)
-* [CodeGit](https://github.com/Andr3as/Codiad-CodeGit)
-* [Drag and Drop](https://github.com/Andr3as/Codiad-DragDrop)
 
 <a href="https://oss.oetiker.ch/smokeping/" rel="smokeping">![smokeping](https://camo.githubusercontent.com/e0694ef783e3fd1d74e6776b28822ced01c7cc17/687474703a2f2f6f73732e6f6574696b65722e63682f736d6f6b6570696e672f696e632f736d6f6b6570696e672d6c6f676f2e706e67)</a>
 
@@ -115,22 +111,20 @@ This snippet has been tested with Linuxserver.io's [Let's Encrypt reverse proxy]
 
 ## Versions
 
-* **09.12.17:** - Fix continuation lines.
+* **09.04.18:** - Add bc package.
+* **08.04.18:** - Add tccping script and tcptraceroute package (thanks rcarmo).
+* **13.12.17:** - Expose httpd_conf to /config.
+* **13.12.17:** - Rebase to alpine 3.7.
+* **24.07.17:** - Add :unraid tag for hosts without ipv6.
 * **12.07.17:** - Add inspect commands to README, move to jenkins build and push.
-* **28.05.17:** - Add unrar package as per requests, for subzero plugin.
-* **11.01.17:** - Use Plex environemt variables from pms docker, change abc home folder to /app to alleviate usermod chowning library folder by default (thanks gbooker, plexinc).
-* **03.01.17:** - Use case insensitive version variable matching rather than export and make lowercase.
-* **17.10.16:** - Allow use of uppercase version variable
-* **01.10.16:** - Add TZ info to README.
-* **09.09.16:** - Add layer badges to README.
-* **27.08.16:** - Add badges to README.
-* **22.08.16:** - Rebased to xenial and s6 overlay
-* **07.04.16:** - removed `/transcode` volume support (upstream Plex change) and modified PlexPass download method to prevent unauthorised usage of paid PMS
-* **24.09.15:** - added optional support for volume transcoding (/transcode), and various typo fixes.
-* **17.09.15:** - Changed to run chmod only once
-* **19.09.15:** - Plex updated their download servers from http to https
-* **28.08.15:** - Removed plexpass from routine, and now uses VERSION as a combination fix.
-* **18.07.15:** - Moved autoupdate to be hosted by linuxserver.io and implemented bugfix thanks to ljm42.
-* **09.07.15:** - Now with ability to pick static version number.
-* **08.07.15:** - Now with autoupdates. (Hosted by fanart.tv)
-* **03.07.15:** - Fixed a mistake that allowed plex to run as user plex rather than abc (99:100). Thanks to double16 for spotting this.
+* **28.05.17:** - Rebase to alpine 3.6.
+* **07.05.17:** - Expose smokeping.conf in /config/site-confs to allow user customisations
+* **12.04.17:** - Fix cropper.js path, thanks nibbledeez.
+* **09.02.17:** - Rebase to alpine 3.5.
+* **17.10.16:** - Add ttf-dejavu package as per [LT forum](http://lime-technology.com/forum/index.php?topic=43602.msg507875#msg507875).
+* **10.09.16:** - Add layer badges to README.
+* **05.09.16:** - Add curl package.
+* **28.08.16:** - Add badges to README.
+* **25.07.16:** - Rebase to alpine linux.
+* **23.07.16:** - Fix apt script confusion.
+* **29.06.15:** - This is the first release, it is mostly stable, but may contain minor defects. (thus a beta tag)

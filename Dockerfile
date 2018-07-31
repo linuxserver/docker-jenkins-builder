@@ -16,4 +16,4 @@ WORKDIR /ansible
 
 VOLUME [ "/readme" ]
 
-CMD [ "ansible-playbook", "generate.yml", "--extra-vars", "name=$NAME" ]
+CMD [ "ansible-playbook", "generate.yml" ]
