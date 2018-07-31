@@ -6,6 +6,10 @@ project_blurb_optional_extras: []
 app_setup_block_enabled: false
 app_setup_block: ""
 
+nginx_reverse_proxy_snippet_enabled: false
+nginx_reverse_proxy_block: ""
+
 common_param_env_vars_enabled: true
 
 optional_block_1: false
+

@@ -23,13 +23,14 @@ param_ports:
 
 # application setup block
 app_setup_block_enabled: false
-app_setup_block: ""
-
-app_setup_nginx_reverse_proxy_snippet: true
-app_setup_nginx_reverse_proxy_block: |
+app_setup_block: |
   - Once running the URL will be `http://<host-ip>/smokeping/smokeping.cgi`.
   - Basics are, edit the `Targets` file to ping the hosts you're interested in to match the format found there. 
   - Wait 10 minutes.
+
+app_setup_nginx_reverse_proxy_snippet_enabled: false
+app_setup_nginx_reverse_proxy_block: ""
+
 
 # changelog
 changelogs:
