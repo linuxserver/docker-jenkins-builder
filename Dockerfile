@@ -14,6 +14,4 @@ RUN \
 COPY . /ansible
 WORKDIR /ansible
 
-VOLUME [ "/readme" ]
-
 CMD [ "ansible-playbook", "generate.yml" ]
