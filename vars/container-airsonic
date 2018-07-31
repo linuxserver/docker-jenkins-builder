@@ -28,6 +28,8 @@ param_usage_include_ports: true
 param_ports:
   - { external_port: "4040", internal_port: "4040", port_desc: "WebUI" } 
 
+project_blurb_optional_extras_enabled: false
+
 optional_block_1: false
 optional_block_1_items:
   - "```"
