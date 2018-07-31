@@ -34,6 +34,8 @@ app_setup_block: |
   - See Beets website for more info.
   - Contains [beets-copyartifacts](https://github.com/sbarakat/beets-copyartifacts) plugin, [configuration details](https://github.com/sbarakat/beets-copyartifacts#configuration){% endraw %}
 
+project_blurb_optional_extras_enabled: false
+
 app_setup_nginx_reverse_proxy_snippet: false
 app_setup_nginx_reverse_proxy_block: ""
 

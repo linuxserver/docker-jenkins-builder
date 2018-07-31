@@ -26,6 +26,8 @@ param_usage_include_ports: true
 param_ports:
   - { external_port: "4040", internal_port: "4040", port_desc: "Application WebUI" } 
 
+project_blurb_optional_extras_enabled: false
+
 app_setup_nginx_reverse_proxy_snippet: false
 app_setup_nginx_reverse_proxy_block: ""
 
