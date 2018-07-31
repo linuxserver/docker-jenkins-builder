@@ -1,5 +1,8 @@
 ---
 
+github_branch: master
+github_user: linuxserver
+
 project_blurb_optional_extras_enabled: false
 project_blurb_optional_extras: []
 
