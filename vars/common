@@ -14,7 +14,7 @@ lsio_irc_url: "https://irc.{{ lsio_short_url }}"
 lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
 
 # supported architectures
-arch_x86-64: "X86-64"
+arch_x86_64: "X86-64"
 arch_arm64: "arm64"
 arch_armhf: "armhf"
 
