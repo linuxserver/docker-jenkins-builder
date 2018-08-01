@@ -44,7 +44,7 @@ The architectures supported by this image are:
 | Architecture | Tag |
 | :----: | --- |
 {% for item in available_architectures %}
-| item.arch | item.tag |
+| {{ item.arch }} | {{ item.tag }} |
 {% endfor %}
 
 ## Usage
