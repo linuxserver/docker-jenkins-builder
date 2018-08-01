@@ -13,6 +13,11 @@ lsio_discord_url: "https://discord.gg/YWrKVTn"
 lsio_irc_url: "https://irc.{{ lsio_short_url }}"
 lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
 
+# supported architectures
+arch_x86-64: "X86-64"
+arch_arm64: "arm64"
+arch_armhf: "armhf"
+
 # descriptions
 lsio_discord_desc: "realtime support / chat with the community and the team."
 lsio_blog_desc: "all the things you can do with our containers including How-To guides, opinions and much more!"
