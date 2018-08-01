@@ -1,7 +1,5 @@
-# linuxserver/config-manager
+# linuxserver/doc-builder
 
-You will need docker. Edit the `NAME` variable to match the `container-*` file in vars.
+Expects to run as part of the LSIO CI process. Not for public consumption.
 
-    docker run --rm -e NAME=airsonic -v ${PWD}/readme:/ansible/readme config-manager:latest
-
-Then look under the `readme/project_name` directory.
+    docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -v ${TEMPDIR}:/ansible/readme linuxserver/doc-builder:latest
