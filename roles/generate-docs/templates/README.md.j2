@@ -165,11 +165,11 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 {{ app_setup_block }}
 {% endif %}
 
-{% if app_setup_nginx_reverse_proxy_snippet %}
+{% if nginx_reverse_proxy_snippet_enabled %}
 ## Reverse Proxy Snippet
 
 This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Let's Encrypt reverse proxy](https://github.com/linuxserver/docker-letsencrypt) container.
-{{ app_setup_nginx_reverse_proxy_block }}
+{{ nginx_reverse_proxy_block }}
 {% endif %}
 
 ## Support Info
