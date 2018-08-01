@@ -3,9 +3,14 @@
   debug:
     msg: "{{ container_name }}"
 
+- name:
+  get_url:
+    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/readme-vars.yml"
+    dest: /tmp/readme-vars.yml
+
 - name: include vars file for this project
   include_vars:
-    file: "{{ playbook_dir }}/vars/container-{{ container_name }}"
+    file: "/tmp/readme-vars.yml"
 
 - name: create destination dir for generated readme
   file:
