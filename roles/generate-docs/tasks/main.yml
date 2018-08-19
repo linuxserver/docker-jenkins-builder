@@ -1,9 +1,11 @@
 ---
 - name: friendly debug
+  when: lookup('env', 'LOCAL') != "true"
   debug:
     msg: "{{ container_name }}"
 
-- name:
+- name: download variables
+  when: lookup('env', 'LOCAL') != "true"
   get_url:
     url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/readme-vars.yml"
     dest: /tmp/readme-vars.yml
@@ -13,12 +15,22 @@
     file: "/tmp/readme-vars.yml"
 
 - name: create destination dir for generated readme
+  when: lookup('env', 'LOCAL') != "true"
   file:
     path: "readme/{{ project_name }}"
     state: directory
 
 - name: write readme file
+  when: lookup('env', 'LOCAL') != "true"
   template:
     src: ../templates/README.md.j2
     dest: "readme/{{ project_name }}/README.md"
   delegate_to: localhost
+
+- name: write readme file local
+  when: lookup('env', 'LOCAL') == "true"
+  template:
+    src: ../templates/README.md.j2
+    dest: "/tmp/GENERATED.md"
+  delegate_to: localhost
+
