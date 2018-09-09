@@ -86,10 +86,6 @@ docker create \
 {% for item in optional_block_1_items %}
 {{ item }}
 {% endfor %}
-
-{% for item in param_ports %}
--p {{ item.external_port }}:{{ item.internal_port }} \
-{% endfor %}
 {% endif %}
 
 ### docker-compose
