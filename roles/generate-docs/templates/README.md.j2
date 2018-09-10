@@ -59,7 +59,7 @@ docker create \
 {% if param_usage_include_net %}
   --net={{ param_net }} \
 {% endif %}
-{% if common_param_env_vars_enabled %}
+{% if not common_param_env_vars_disabled %}
 {% for item in common_param_env_vars %}
   -e {{ item.env_var }}={{ item.env_value }} \
 {% endfor %}
@@ -106,7 +106,7 @@ services:
 {% if param_usage_include_net %}
     network_mode: {{ param_net }}
 {% endif %}
-{% if common_param_env_vars_enabled %}
+{% if not common_param_env_vars_disabled %}
     environment:
 {% for item in common_param_env_vars %}
       - {{ item.env_var }}={{ item.env_value }}
@@ -147,7 +147,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | `-p {{ item.internal_port }}` | {{ item.port_desc }} |
 {% endfor %}
 {% endif %}
-{% if common_param_env_vars_enabled %}
+{% if not common_param_env_vars_disabled %}
 {% for item in common_param_env_vars %}
 | `-e {{ item.env_var }}={{ item.env_value }}` | {{ item.desc }} |
 {% endfor %}
@@ -163,7 +163,6 @@ Container images are configured using parameters passed at runtime (such as thos
 {% endfor %}
 {% endif %}
 
-{% if common_param_env_vars_enabled %}
 ## User / Group Identifiers
 
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.
@@ -176,7 +175,6 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
   $ id username
     uid=1001(dockeruser) gid=1001(dockergroup) groups=1001(dockergroup)
 ```
-{% endif %}
 
 &nbsp;
 {% if app_setup_block_enabled %}
