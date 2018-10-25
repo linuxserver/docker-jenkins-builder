@@ -11,7 +11,7 @@ lsio_full_url: "https://{{ lsio_project_name }}"
 lsio_blog_url: "https://blog.{{ lsio_short_url }}"
 lsio_discord_url: "https://discord.gg/YWrKVTn"
 lsio_irc_url: "https://irc.{{ lsio_short_url }}"
-lsio_podcast_url: "https://podcast.{{ lsio_short_url }}"
+lsio_podcast_url: "https://anchor.fm/linuxserverio"
 
 # supported architectures
 arch_x86_64: "X86-64"
