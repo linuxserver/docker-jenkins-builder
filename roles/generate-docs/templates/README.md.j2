@@ -93,7 +93,7 @@ docker create \
 Compatible with docker-compose v2 schemas.
 
 ```
-{% if not custom_compose %}---
+{% if not custom_compose is defined %}---
 version: "2"
 services:
   {{ project_name }}:
@@ -127,6 +127,7 @@ services:
 {% endif %}
     mem_limit: 4096m
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
+
 ```
 
 ## Parameters
@@ -159,14 +160,12 @@ Container images are configured using parameters passed at runtime (such as thos
 {% endfor %}
 {% endif %}
 
-{% if optional_parameters %}
+{% if optional_parameters is defined %}
 ## Optional Parameters
 
 {{ optional_parameters }}
 
-&nbsp;
 {% endif %}
-
 {% if common_param_env_vars_enabled %}
 ## User / Group Identifiers
 
@@ -183,7 +182,6 @@ In this instance `PUID=1001` and `PGID=1001`, to find yours use `id user` as bel
 {% endif %}
 
 &nbsp;
-
 {% if app_setup_block_enabled %}
 ## Application Setup
 
