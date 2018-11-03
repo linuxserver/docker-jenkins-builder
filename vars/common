@@ -35,7 +35,7 @@ lsio_microbadger_image_url: https://microbadger.com/images/linuxserver
 lsio_microbadger_link_desc: "Get your own version badge on microbadger.com"
 lsio_shieldsio_pull_count_url: https://img.shields.io/docker/pulls/linuxserver
 lsio_shieldsio_stars_count_url: https://img.shields.io/docker/stars/linuxserver
-lsio_shieldsio_discord: https://img.shields.io/discord/354974912613449730.svg?style=for-the-badge
+lsio_shieldsio_discord: https://img.shields.io/discord/354974912613449730.svg?logo=discord&label=LSIO%20Discord&style=flat-square
 
 ######
 # Common Params
