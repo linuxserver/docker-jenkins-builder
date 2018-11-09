@@ -1,0 +1,9 @@
+---
+
+# jenkins variables
+project_name: bookstack
+ext_user: bookstack
+ext_repo: bookstack
+dist_image: alpine
+
+ci_port: 6875
