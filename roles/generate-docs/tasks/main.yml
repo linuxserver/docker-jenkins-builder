@@ -2,35 +2,37 @@
 - name: friendly debug
   when: lookup('env', 'LOCAL') != "true"
   debug:
-    msg: "{{ container_name }}"
+    msg: "{{ jenkins_mode }}"
 
 - name: download variables
   when: lookup('env', 'LOCAL') != "true"
   get_url:
-    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/readme-vars.yml"
-    dest: /tmp/readme-vars.yml
+    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/jenkins-vars.yml"
+    dest: /tmp/jenkins-vars.yml
 
 - name: include vars file for this project
   include_vars:
-    file: "/tmp/readme-vars.yml"
+    file: "/tmp/jenkins-vars.yml"
 
 - name: create destination dir for generated readme
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "readme/{{ project_name }}"
+    path: "jenkins/{{ project_name }}"
     state: directory
 
 - name: write readme file
-  when: lookup('env', 'LOCAL') != "true"
+  when: 
+    - lookup('env', 'LOCAL') != "true"
+    - lookup('env', 'JENKINS_MODE') == "github_devel"
   template:
-    src: ../templates/README.md.j2
-    dest: "readme/{{ project_name }}/README.md"
+    src: ../templates/Jenkins.GitHub.Devel.j2
+    dest: "jenkins/{{ project_name }}/Jenkinsfile"
   delegate_to: localhost
 
 - name: write readme file local
   when: lookup('env', 'LOCAL') == "true"
   template:
-    src: ../templates/README.md.j2
-    dest: "/tmp/GENERATED.md"
+    src: ../templates/Jenkins.GitHub.Devel.j2
+    dest: "/tmp/GENERATED.Jenkinsfile"
   delegate_to: localhost
 
