@@ -25,14 +25,14 @@
     - lookup('env', 'LOCAL') != "true"
     - lookup('env', 'JENKINS_MODE') == "github_devel"
   template:
-    src: ../templates/Jenkins.GitHub.Devel.j2
+    src: ../templates/Jenkinsfile.GitHub.Devel.j2
     dest: "jenkins/{{ project_name }}/Jenkinsfile"
   delegate_to: localhost
 
 - name: write readme file local
   when: lookup('env', 'LOCAL') == "true"
   template:
-    src: ../templates/Jenkins.GitHub.Devel.j2
+    src: ../templates/Jenkinsfile.GitHub.Devel.j2
     dest: "/tmp/GENERATED.Jenkinsfile"
   delegate_to: localhost
 

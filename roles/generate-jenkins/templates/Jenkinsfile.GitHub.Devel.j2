@@ -8,27 +8,28 @@ pipeline {
   }
   // Configuraiton for the variables used for this specific repo
   environment {
-    EXT_GIT_BRANCH = 'master'
-    EXT_USER = 'Radarr'
-    EXT_REPO = 'Radarr'
-    BUILD_VERSION_ARG = 'RADARR_RELEASE'
-    LS_USER = 'linuxserver'
-    LS_REPO = 'docker-radarr'
-    DOCKERHUB_IMAGE = 'linuxserver/radarr'
-    DEV_DOCKERHUB_IMAGE = 'lsiodev/radarr'
-    PR_DOCKERHUB_IMAGE = 'lspipepr/radarr'
+    EXT_GIT_BRANCH = '{{ ext_git_branch }}'
+    EXT_USER = '{{ ext_user }}'
+    EXT_REPO = '{{ ext_repo }}'
+    BUILD_VERSION_ARG = '{{ project_name|upper }}_RELEASE'
+    LS_USER = '{{ ls_user }}'
+    LS_REPO = 'docker-{{ project_name }}'
+    CONTAINER_NAME = '{{ project_name }}'
+    DOCKERHUB_IMAGE = 'linuxserver/{{ project_name }}'
+    DEV_DOCKERHUB_IMAGE = 'lsiodev/{{ project_name }}'
+    PR_DOCKERHUB_IMAGE = 'lspipepr/{{ project_name }}'
     BUILDS_DISCORD = credentials('build_webhook_url')
-    GITHUB_TOKEN = credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
-    DIST_IMAGE = 'ubuntu'
-    MULTIARCH='true'
-    CI='true'
-    CI_WEB='true'
-    CI_PORT='7878'
-    CI_SSL='false'
-    CI_DELAY='120'
-    CI_DOCKERENV='TZ=US/Pacific'
-    CI_AUTH='user:password'
-    CI_WEBPATH=''
+    GITHUB_TOKEN = credentials('{{ github_token }}')
+    DIST_IMAGE = '{{ dist_image }}'
+    MULTIARCH='{{ multiarch_status|lower }}'
+    CI='{{ ci_status|lower }}'
+    CI_WEB='{{ ci_web }}'
+    CI_PORT='{{ ci_port}}'
+    CI_SSL='{{ ci_ssl }}'
+    CI_DELAY='{{ ci_delay }}'
+    CI_DOCKERENV='{{ ci_dockerenv }}'
+    CI_AUTH='{{ ci_auth }}'
+    CI_WEBPATH='{{ ci_webpath }}'
   }
   stages {
     // Setup all the basic environment variables needed for the build

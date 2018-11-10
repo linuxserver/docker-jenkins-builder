@@ -6,4 +6,6 @@ ext_user: bookstack
 ext_repo: bookstack
 dist_image: alpine
 
+# ci variables
+
 ci_port: 6875

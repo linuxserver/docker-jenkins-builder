@@ -11,8 +11,8 @@ dockerhub_dev_image: "lsiodev/{{ project_name }}"
 dockerhub_pr_image: "lspipepr/{{ project_name }}"
 github_token: "498b4638-2d02-4ce5-832d-8a57d01d97ab"
 github_user: linuxserver
-multiarch: true
-ci: true
+multiarch_status: true
+ci_status: true
 ci_web: true
 ci_port: 80
 ci_ssl: false
