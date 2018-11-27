@@ -1,7 +1,4 @@
 ---
-
   - hosts: localhost
-    vars_files:
-      - vars/common
     roles:
         - { role: roles/generate-jenkins }

@@ -17,22 +17,20 @@
 - name: create destination dir for generated readme
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ project_name }}"
+    path: "{{ project_name }}"
     state: directory
 
-- name: write readme file
-  when: 
+- name: write jenkins file
+  when:
     - lookup('env', 'LOCAL') != "true"
-    - lookup('env', 'JENKINS_MODE') == "github_devel"
   template:
-    src: ../templates/Jenkinsfile.GitHub.Devel.j2
-    dest: "jenkins/{{ project_name }}/Jenkinsfile"
+    src: ../templates/Jenkinsfile.j2
+    dest: "{{ project_name }}/Jenkinsfile"
   delegate_to: localhost
 
-- name: write readme file local
+- name: write jenkins file local
   when: lookup('env', 'LOCAL') == "true"
   template:
-    src: ../templates/Jenkinsfile.GitHub.Devel.j2
+    src: ../templates/Jenkinsfile.j2
     dest: "/tmp/GENERATED.Jenkinsfile"
   delegate_to: localhost
-
