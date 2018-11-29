@@ -1,23 +1,19 @@
 ---
-- name: friendly debug
-  when: lookup('env', 'LOCAL') != "true"
-  debug:
-    msg: "{{ jenkins_mode }}"
 
 - name: download variables
   when: lookup('env', 'LOCAL') != "true"
   get_url:
-    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/jenkins-vars.yml"
+    url: "https://raw.githubusercontent.com/{{ github_user }}/{{ project_name }}/{{ github_branch }}/jenkins-vars.yml"
     dest: /tmp/jenkins-vars.yml
 
 - name: include vars file for this project
   include_vars:
     file: "/tmp/jenkins-vars.yml"
 
-- name: create destination dir for generated readme
+- name: create destination dir for generated Jenkinsfile
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "{{ project_name }}"
+    path: "jenkins/{{ project_name }}"
     state: directory
 
 - name: write jenkins file
@@ -25,7 +21,7 @@
     - lookup('env', 'LOCAL') != "true"
   template:
     src: ../templates/Jenkinsfile.j2
-    dest: "{{ project_name }}/Jenkinsfile"
+    dest: "jenkins/{{ project_name }}/Jenkinsfile"
   delegate_to: localhost
 
 - name: write jenkins file local

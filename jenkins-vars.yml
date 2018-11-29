@@ -6,22 +6,20 @@ external_type: os
 release_type: stable
 release_tag: latest
 ls_branch: master
-repo_vars: |
-      BUILD_VERSION_ARG = 'BUILDER_VERSION'
-      LS_USER = 'linuxserver'
-      LS_REPO = 'jenkins-builder'
-      DOCKERHUB_IMAGE = 'linuxserver/jenkins-builder'
-      DEV_DOCKERHUB_IMAGE = 'lsiodev/jenkins-builder'
-      PR_DOCKERHUB_IMAGE = 'lspipepr/jenkins-builder'
-      BUILDS_DISCORD = credentials('build_webhook_url')
-      GITHUB_TOKEN = credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
-      DIST_IMAGE = 'alpine'
-      MULTIARCH='true'
-      CI='true'
-      CI_WEB='true'
-      CI_PORT='8000'
-      CI_SSL='false'
-      CI_DELAY='60'
-      CI_DOCKERENV='CI_RUN=True'
-      CI_AUTH='user:password'
-      CI_WEBPATH=''
+repo_vars:
+  - BUILD_VERSION_ARG='BUILDER_VERSION'
+  - LS_USER='linuxserver'
+  - LS_REPO='jenkins-builder'
+  - DOCKERHUB_IMAGE='linuxserver/jenkins-builder'
+  - DEV_DOCKERHUB_IMAGE='lsiodev/jenkins-builder'
+  - PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
+  - DIST_IMAGE='alpine'
+  - MULTIARCH='true'
+  - CI='true'
+  - CI_WEB='true'
+  - CI_PORT='8000'
+  - CI_SSL='false'
+  - CI_DELAY='60'
+  - CI_DOCKERENV='CI_RUN=True'
+  - CI_AUTH='user:password'
+  - CI_WEBPATH=''
