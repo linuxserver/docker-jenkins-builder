@@ -8,6 +8,7 @@ pipeline {
     LS_REPO='docker-jenkins-builder'
     CONTAINER_NAME='jenkins-builder'
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
+  }
   stages {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
