@@ -177,9 +177,9 @@ pipeline {
       }
       steps {
         sh '''#! /bin/bash
+              set -e
               TEMPDIR=$(mktemp -d)
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=master -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}
-              docker pull linuxserver/doc-builder:latest
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=master -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}              docker pull linuxserver/doc-builder:latest
               docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=master -v ${TEMPDIR}:/ansible/readme linuxserver/doc-builder:latest
               if [ "$(md5sum ${TEMPDIR}/${LS_REPO}/Jenkinsfile | awk '{ print $1 }')" != "$(md5sum Jenkinsfile | awk '{ print $1 }')" ] || [ "$(md5sum ${TEMPDIR}/${CONTAINER_NAME}/README.md | awk '{ print $1 }')" != "$(md5sum README.md | awk '{ print $1 }')" ]; then
                 mkdir -p ${TEMPDIR}/repo
@@ -309,6 +309,7 @@ pipeline {
       }
       steps {
         sh '''#! /bin/bash
+              set -e
               TEMPDIR=$(mktemp -d)
               if [ "${MULTIARCH}" == "true" ]; then
                 LOCAL_CONTAINER=${IMAGE}:amd64-${META_TAG}
@@ -390,6 +391,7 @@ pipeline {
           string(credentialsId: 'spaces-secret', variable: 'DO_SECRET')
         ]) {
           sh '''#! /bin/bash
+                set -e
                 docker pull lsiodev/ci:latest
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER}
