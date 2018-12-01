@@ -13,7 +13,7 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker build --no-cache -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
+        sh "docker build --no-cache -t jenkinslocal:${GIT_COMMIT}-${BUILD_NUMBER} ."
       }
     }
     // Use helper containers to render templated files
