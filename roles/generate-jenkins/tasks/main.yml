@@ -3,7 +3,7 @@
 - name: download variables
   when: lookup('env', 'LOCAL') != "true"
   get_url:
-    url: "https://raw.githubusercontent.com/{{ github_user }}/{{ project_name }}/{{ github_branch }}/jenkins-vars.yml"
+    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container-name }}/{{ github_branch }}/jenkins-vars.yml"
     dest: /tmp/jenkins-vars.yml
 
 - name: include vars file for this project

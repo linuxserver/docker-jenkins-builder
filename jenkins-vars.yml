@@ -1,7 +1,7 @@
 ---
 
 # jenkins variables
-project_name: jenkins-builder
+project_name: docker-jenkins-builder
 external_type: os
 release_type: stable
 release_tag: latest
@@ -9,7 +9,7 @@ ls_branch: master
 repo_vars:
   - BUILD_VERSION_ARG='BUILDER_VERSION'
   - LS_USER='linuxserver'
-  - LS_REPO='jenkins-builder'
+  - LS_REPO='docker-jenkins-builder'
   - DOCKERHUB_IMAGE='linuxserver/jenkins-builder'
   - DEV_DOCKERHUB_IMAGE='lsiodev/jenkins-builder'
   - PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
