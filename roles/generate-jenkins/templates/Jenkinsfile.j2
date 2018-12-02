@@ -658,7 +658,7 @@ pipeline {
         sh '''#! /bin/bash
 {% if external_type == "github_devel" %}
               curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
-{% elif release_type == "github_stable" %}
+{% elif external_type == "github_stable" %}
               curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "alpine_repo" %}
               echo "Updating external repo packages to ${EXT_RELEASE}" > releasebody.json
