@@ -330,7 +330,7 @@ pipeline {
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/${LS_REPO}
                 cp ${TEMPDIR}/package_versions.txt ${TEMPDIR}/${LS_REPO}/
                 cd ${TEMPDIR}/${LS_REPO}/
-                git --git-dir ${TEMPDIR}/${LS_REPO}/.git checkout master
+                git --git-dir ${TEMPDIR}/${LS_REPO}/.git checkout -f master
                 git --git-dir ${TEMPDIR}/${LS_REPO}/.git add package_versions.txt
                 git --git-dir ${TEMPDIR}/${LS_REPO}/.git commit -m 'Bot Updating Package Versions'
                 git --git-dir ${TEMPDIR}/${LS_REPO}/.git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
