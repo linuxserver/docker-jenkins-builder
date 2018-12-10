@@ -201,6 +201,25 @@ pipeline {
        }
      }
     }
+{% elif external_type == "gitlab_commit" %}
+    // If this is a gitlab commit trigger determine the current commit at head
+    stage("Set ENV gitlab_commit"){
+     steps{
+       script{
+         env.EXT_RELEASE = sh(
+           script: '''curl -s https://gitlab.com/api/v4/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq -r '. | .sha' | cut -c1-8 ''',
+           returnStdout: true).trim()
+       }
+     }
+    }
+    // If this is a github commit trigger Set the external release link. This will be based off of whatever branch the commit is from.
+    stage("Set ENV commit_link"){
+     steps{
+       script{
+         env.RELEASE_LINK = 'https://gitlab.com/' + env.EXT_GITLAB_USER + '/' + env.EXT_GITLAB_PROJ + '/tree/' + env.EXT_RELEASE
+       }
+     }
+    }
 {% elif external_type == "npm_version" %}
     // If this is a npm version change set the external release version and link
     stage("Set ENV npm_version"){
@@ -670,6 +689,8 @@ pipeline {
               echo "External Release file changed at ${EXT_BLOB}" > releasebody.json
 {% elif external_type == "github_commit" %}
               curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_GIT_BRANCH} | jq '. | .commit.message' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+{% elif external_type == "gitlab_commit" %}
+              curl -s https://gitlab.com/api/v4/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq '. | .title' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "npm_version" %}
               echo "Updating NPM version of ${EXT_NPM} to ${EXT_RELEASE}" > releasebody.json
 {% elif external_type == "os" %}
@@ -694,6 +715,8 @@ pipeline {
                      "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Remote Changes:**\\n\\n' > start
 {% elif external_type == "github_commit" %}
                      "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
+{% elif external_type == "gitlab_commit" %}
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_GITLAB_PROJ}' Changes:**\\n\\n' > start
 {% elif external_type == "npm_version" %}
                      "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**NPM Changes:**\\n\\n' > start
 {% elif external_type == "os" %}
