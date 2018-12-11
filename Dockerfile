@@ -10,7 +10,8 @@ RUN \
  echo "**** install build packages ****" && \
  apk add --no-cache --upgrade \
    ansible \
-   bash 
+   bash \
+   jq
 
 COPY . /ansible
 
