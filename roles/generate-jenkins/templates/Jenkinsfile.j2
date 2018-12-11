@@ -207,7 +207,7 @@ pipeline {
      steps{
        script{
          env.EXT_RELEASE = sh(
-           script: '''curl -s https://gitlab.com/api/v4/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq -r '. | .sha' | cut -c1-8 ''',
+           script: '''curl -s https://gitlab.com/api/v4/projects/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq -r '. | .id' | cut -c1-8 ''',
            returnStdout: true).trim()
        }
      }
@@ -690,7 +690,7 @@ pipeline {
 {% elif external_type == "github_commit" %}
               curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_GIT_BRANCH} | jq '. | .commit.message' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "gitlab_commit" %}
-              curl -s https://gitlab.com/api/v4/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq '. | .title' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -s https://gitlab.com/api/v4/projects/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq '. | .title' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "npm_version" %}
               echo "Updating NPM version of ${EXT_NPM} to ${EXT_RELEASE}" > releasebody.json
 {% elif external_type == "os" %}
