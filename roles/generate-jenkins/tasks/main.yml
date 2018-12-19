@@ -30,3 +30,9 @@
     src: ../templates/Jenkinsfile.j2
     dest: "/tmp/GENERATED.Jenkinsfile"
   delegate_to: localhost
+
+- name: Allow non root host to delete temp files
+  when:
+    - lookup('env', 'LOCAL') != "true"
+  command: chmod -R 777 /ansible/jenkins
+  delegate_to: localhost
