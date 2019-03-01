@@ -285,9 +285,9 @@ pipeline {
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm32v6-${META_TAG} lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER}"
               sh "docker push lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER}"
-              sh ```docker rmi \
+              sh '''docker rmi \
                     ${IMAGE}:arm32v6-${META_TAG} \
-                    lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER} ```
+                    lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER} '''
             }
           }
         }
@@ -314,9 +314,9 @@ pipeline {
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm64v8-${META_TAG} lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
               sh "docker push lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
-              sh ```docker rmi \
+              sh '''docker rmi \
                     ${IMAGE}:arm64v8-${META_TAG} \
-                    lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ```
+                    lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} '''
             }
           }
         }
@@ -478,9 +478,9 @@ pipeline {
           sh "docker tag ${IMAGE}:${META_TAG} ${IMAGE}:latest"
           sh "docker push ${IMAGE}:latest"
           sh "docker push ${IMAGE}:${META_TAG}"
-          sh ```docker rmi \
+          sh '''docker rmi \
                 ${IMAGE}:${META_TAG} \
-                ${IMAGE}:latest ```
+                ${IMAGE}:latest '''
                 
         }
       }
@@ -529,7 +529,7 @@ pipeline {
           sh "docker manifest annotate ${IMAGE}:${META_TAG} ${IMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8"
           sh "docker manifest push --purge ${IMAGE}:latest"
           sh "docker manifest push --purge ${IMAGE}:${META_TAG}"
-          sh ```docker rmi \
+          sh '''docker rmi \
                 ${IMAGE}:amd64-${META_TAG} \
                 ${IMAGE}:amd64-latest \
                 ${IMAGE}:arm32v6-${META_TAG} \
@@ -537,7 +537,7 @@ pipeline {
                 ${IMAGE}:arm64v8-${META_TAG} \
                 ${IMAGE}:arm64v8-latest \
                 lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER} \
-                lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ```
+                lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} '''
         }
       }
     }
