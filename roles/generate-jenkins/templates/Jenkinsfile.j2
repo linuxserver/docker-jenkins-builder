@@ -28,7 +28,7 @@ pipeline {
 {% endif %}
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
-            script: '''git log -1 --pretty=%B | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
+            script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
             returnStdout: true).trim()
           env.GITHUB_DATE = sh(
             script: '''date '+%Y-%m-%dT%H:%M:%S%:z' ''',
@@ -795,6 +795,18 @@ pipeline {
                   -e GIT_BRANCH=master \
                   lsiodev/readme-sync bash -c 'node sync' '''
         }
+      }
+    }
+    // If this is a Pull request send the CI link as a comment on it
+    stage('Pull Request Comment') {
+      when {
+        not {environment name: 'CHANGE_ID', value: ''}
+        environment name: 'CI', value: 'true'
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/issues/${PULL_REQUEST}/comments \
+        -d '{"body": "I am a bot, here are the test results for this PR '${CI_URL}'"}' '''
       }
     }
   }
