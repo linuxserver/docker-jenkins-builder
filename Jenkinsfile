@@ -38,7 +38,7 @@ pipeline {
             script: '''curl -s https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases | jq -r 'first(.[] | select(.prerelease == true)) | .tag_name' ''',
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
-            script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
+            script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n\\\\n/g' ''',
             returnStdout: true).trim()
           env.GITHUB_DATE = sh(
             script: '''date '+%Y-%m-%dT%H:%M:%S%:z' ''',
