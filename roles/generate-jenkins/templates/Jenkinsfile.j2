@@ -733,7 +733,7 @@ pipeline {
               echo "Updating to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% endif %}
 {% if external_type == "github_devel" %}
-              curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq '.[0] |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "github_stable" %}
               curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "alpine_repo" %}
