@@ -192,6 +192,7 @@ pipeline {
                 docker run --rm \
                 -e DESTINATION=\"${IMAGE}/${META_TAG}/shellcheck-result.xml\" \
                 -e FILE_NAME="shellcheck-result.xml" \
+                -e MIMETYPE="text/xml" \
                 -v ${WORKSPACE}:/mnt \
                 -e SECRET_KEY=\"${DO_SECRET}\" \
                 -e ACCESS_KEY=\"${DO_KEY}\" \
@@ -635,7 +636,7 @@ pipeline {
       }
       steps {
         sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/issues/${PULL_REQUEST}/comments \
-        -d '{"body": "I am a bot, here are the test results for this PR '${CI_URL}' '${SHELLCHECK_URL}'"}' '''
+        -d '{"body": "I am a bot, here are the test results for this PR: \\n'${CI_URL}' \\n'${SHELLCHECK_URL}'"}' '''
       }
     }
   }
