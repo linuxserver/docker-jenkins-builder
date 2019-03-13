@@ -172,6 +172,34 @@ pipeline {
         sh "docker build --no-cache -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
       }
     }
+    // Run ShellCheck
+    stage('ShellCheck') {
+      when {
+        environment name: 'CI', value: 'true'
+      }
+      steps {
+        withCredentials([
+          string(credentialsId: 'spaces-key', variable: 'DO_KEY'),
+          string(credentialsId: 'spaces-secret', variable: 'DO_SECRET')
+        ]) {
+          script{
+            env.SHELLCHECK_URL = 'https://lsio-ci.ams3.digitaloceanspaces.com/' + env.IMAGE + '/' + env.META_TAG + '/shellcheck-result.xml'
+          }
+          sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-shellcheck/master/checkrun.sh | /bin/bash'''
+          sh '''#! /bin/bash
+                set -e
+                docker pull lsiodev/spaces-file-upload:latest
+                docker run --rm \
+                -e DESTINATION=\"${IMAGE}/${META_TAG}/shellcheck-result.xml\" \
+                -e FILE_NAME="shellcheck-result.xml" \
+                -v ${WORKSPACE}:/mnt \
+                -e SECRET_KEY=\"${DO_SECRET}\" \
+                -e ACCESS_KEY=\"${DO_KEY}\" \
+                -t lsiodev/spaces-file-upload:latest \
+                python /upload.py'''
+        }
+      }
+    }
     // Use helper containers to render templated files
     stage('Update-Templates') {
       when {
@@ -340,13 +368,13 @@ pipeline {
               fi
               if [ "${DIST_IMAGE}" == "alpine" ]; then
                 docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  apk info > packages && \
-                  apk info -v > versions && \
-                  paste -d " " packages versions > /tmp/package_versions.txt && \
+                  apk info -v > /tmp/package_versions.txt && \
+                  sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
                   chmod 777 /tmp/package_versions.txt'
               elif [ "${DIST_IMAGE}" == "ubuntu" ]; then
                 docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  apt list -qq --installed | cut -d" " -f1-2 > /tmp/package_versions.txt && \
+                  apt list -qq --installed | sed "s#/.*now ##g" | cut -d" " -f1 > /tmp/package_versions.txt && \
+                  sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
                   chmod 777 /tmp/package_versions.txt'
               fi
               NEW_PACKAGE_TAG=$(md5sum ${TEMPDIR}/package_versions.txt | cut -c1-8 )
@@ -607,7 +635,7 @@ pipeline {
       }
       steps {
         sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/issues/${PULL_REQUEST}/comments \
-        -d '{"body": "I am a bot, here are the test results for this PR '${CI_URL}'"}' '''
+        -d '{"body": "I am a bot, here are the test results for this PR '${CI_URL}' '${SHELLCHECK_URL}'"}' '''
       }
     }
   }
@@ -622,12 +650,12 @@ pipeline {
         }
         else if (currentBuild.currentResult == "SUCCESS"){
           sh ''' curl -X POST --data '{"avatar_url": "https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png","embeds": [{"color": 1681177,\
-                 "description": "**Build:**  '${BUILD_NUMBER}'\\n**CI Results:**  '${CI_URL}'\\n**Status:**  Success\\n**Job:** '${RUN_DISPLAY_URL}'\\n**Change:** '${CODE_URL}'\\n**External Release:**: '${RELEASE_LINK}'\\n**DockerHub:** '${DOCKERHUB_LINK}'\\n"}],\
+                 "description": "**Build:**  '${BUILD_NUMBER}'\\n**CI Results:**  '${CI_URL}'\\n**ShellCheck Results:**  '${SHELLCHECK_URL}'\\n**Status:**  Success\\n**Job:** '${RUN_DISPLAY_URL}'\\n**Change:** '${CODE_URL}'\\n**External Release:**: '${RELEASE_LINK}'\\n**DockerHub:** '${DOCKERHUB_LINK}'\\n"}],\
                  "username": "Jenkins"}' ${BUILDS_DISCORD} '''
         }
         else {
           sh ''' curl -X POST --data '{"avatar_url": "https://wiki.jenkins-ci.org/download/attachments/2916393/headshot.png","embeds": [{"color": 16711680,\
-                 "description": "**Build:**  '${BUILD_NUMBER}'\\n**CI Results:**  '${CI_URL}'\\n**Status:**  failure\\n**Job:** '${RUN_DISPLAY_URL}'\\n**Change:** '${CODE_URL}'\\n**External Release:**: '${RELEASE_LINK}'\\n**DockerHub:** '${DOCKERHUB_LINK}'\\n"}],\
+                 "description": "**Build:**  '${BUILD_NUMBER}'\\n**CI Results:**  '${CI_URL}'\\n**ShellCheck Results:**  '${SHELLCHECK_URL}'\\n**Status:**  failure\\n**Job:** '${RUN_DISPLAY_URL}'\\n**Change:** '${CODE_URL}'\\n**External Release:**: '${RELEASE_LINK}'\\n**DockerHub:** '${DOCKERHUB_LINK}'\\n"}],\
                  "username": "Jenkins"}' ${BUILDS_DISCORD} '''
         }
       }
