@@ -725,6 +725,7 @@ pipeline {
           sh "docker manifest annotate ${IMAGE}:${META_TAG} ${IMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8"
           sh "docker manifest push --purge ${IMAGE}:{{ release_tag }}"
           sh "docker manifest push --purge ${IMAGE}:${META_TAG}"
+          {% if not project_name == "docker-doc-builder" %}
           sh '''docker rmi \
                 ${IMAGE}:amd64-${META_TAG} \
                 ${IMAGE}:amd64-{{ release_tag }} \
@@ -734,6 +735,7 @@ pipeline {
                 ${IMAGE}:arm64v8-{{ release_tag }} \
                 lsiodev/buildcache:arm32v6-${COMMIT_SHA}-${BUILD_NUMBER} \
                 lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} '''
+          {% endif %}
         }
       }
     }
