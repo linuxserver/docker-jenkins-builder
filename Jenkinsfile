@@ -169,7 +169,7 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker build --no-cache -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
+        sh "docker build --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
       }
     }
     // Run ShellCheck
@@ -274,7 +274,7 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
-        sh "docker build --no-cache -t ${IMAGE}:${META_TAG} \
+        sh "docker build --no-cache --pull -t ${IMAGE}:${META_TAG} \
         --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
     }
@@ -287,7 +287,7 @@ pipeline {
       parallel {
         stage('Build X86') {
           steps {
-            sh "docker build --no-cache -t ${IMAGE}:amd64-${META_TAG} \
+            sh "docker build --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} \
             --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
         }
@@ -310,7 +310,7 @@ pipeline {
                  '''
               sh "curl https://lsio-ci.ams3.digitaloceanspaces.com/qemu-arm-static -o qemu-arm-static"
               sh "chmod +x qemu-*"
-              sh "docker build --no-cache -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
+              sh "docker build --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm32v7-${META_TAG} lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
               sh "docker push lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -339,7 +339,7 @@ pipeline {
                  '''
               sh "curl https://lsio-ci.ams3.digitaloceanspaces.com/qemu-aarch64-static -o qemu-aarch64-static"
               sh "chmod +x qemu-*"
-              sh "docker build --no-cache -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
+              sh "docker build --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm64v8-${META_TAG} lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
               sh "docker push lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
