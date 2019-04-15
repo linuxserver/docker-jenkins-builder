@@ -474,10 +474,6 @@ pipeline {
               sh '''#! /bin/bash
                  echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
                  '''
-{% if "docker-baseimage" in project_name %}
-              sh "curl https://lsio-ci.ams3.digitaloceanspaces.com/qemu-arm-static -o qemu-arm-static"
-              sh "chmod +x qemu-*"
-{% endif %}
               sh "docker build --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm32v7-${META_TAG} lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -505,10 +501,6 @@ pipeline {
               sh '''#! /bin/bash
                  echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
                  '''
-{% if "docker-baseimage" in project_name %}
-              sh "curl https://lsio-ci.ams3.digitaloceanspaces.com/qemu-aarch64-static -o qemu-aarch64-static"
-              sh "chmod +x qemu-*"
-{% endif %}
               sh "docker build --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
                            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
               sh "docker tag ${IMAGE}:arm64v8-${META_TAG} lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
