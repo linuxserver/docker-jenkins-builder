@@ -1,6 +1,5 @@
-FROM alpine:3.8
-# Add qemu to build on x86_64 systems
-COPY qemu-arm-static /usr/bin
+FROM lsiobase/alpine:arm32v7-3.9
+
 # set version label
 ARG BUILD_DATE
 ARG VERSION
@@ -15,4 +14,4 @@ RUN \
 
 COPY . /ansible
 
-CMD [ "/ansible/entrypoint.sh" ]
+ENTRYPOINT [ "/ansible/entrypoint.sh" ]

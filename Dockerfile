@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM lsiobase/alpine:3.9
 
 # set version label
 ARG BUILD_DATE
@@ -14,4 +14,4 @@ RUN \
 
 COPY . /ansible
 
-CMD [ "/ansible/entrypoint.sh" ]
+ENTRYPOINT [ "/ansible/entrypoint.sh" ]
