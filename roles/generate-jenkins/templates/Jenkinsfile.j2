@@ -370,7 +370,6 @@ pipeline {
         }
       }
     }
-{% if "docker-baseimage" not in project_name %}
     // Use helper containers to render templated files
     stage('Update-Templates') {
       when {
@@ -440,7 +439,6 @@ pipeline {
         }
       }
     }
-{% endif %}
     /* ###############
        Build Container
        ############### */
