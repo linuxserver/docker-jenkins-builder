@@ -729,7 +729,7 @@ pipeline {
           sh "docker manifest annotate ${IMAGE}:${META_TAG} ${IMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8"
           sh "docker manifest push --purge ${IMAGE}:{{ release_tag }}"
           sh "docker manifest push --purge ${IMAGE}:${META_TAG}"
-{% if not project_name == "docker-doc-builder" or "docker-baseimage" not in project_name %}
+{% if not project_name == "docker-doc-builder" and "docker-baseimage" not in project_name %}
           sh '''docker rmi \
                 ${IMAGE}:amd64-${META_TAG} \
                 ${IMAGE}:amd64-{{ release_tag }} \
