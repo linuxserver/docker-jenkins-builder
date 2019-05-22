@@ -31,6 +31,21 @@
     dest: "/tmp/GENERATED.Jenkinsfile"
   delegate_to: localhost
 
+- name: write license file
+  when:
+    - lookup('env', 'LOCAL') != "true"
+  template:
+    src: ../templates/LICENSE.j2
+    dest: "jenkins/{{ project_name }}/LICENSE"
+  delegate_to: localhost
+
+- name: write license file local
+  when: lookup('env', 'LOCAL') == "true"
+  template:
+    src: ../templates/LICENSE.j2
+    dest: "/tmp/LICENSE"
+  delegate_to: localhost
+
 - name: Allow non root host to delete temp files
   when:
     - lookup('env', 'LOCAL') != "true"
