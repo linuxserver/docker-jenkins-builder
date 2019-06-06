@@ -468,7 +468,11 @@ pipeline {
         }
         stage('Build ARMHF') {
           agent {
+{% if use_qemu is defined %}
+            label 'X86-64-MULTI'
+{% else %}
             label 'ARMHF'
+{% endif %}
           }
           steps {
             withCredentials([
@@ -495,7 +499,11 @@ pipeline {
         }
         stage('Build ARM64') {
           agent {
+{% if use_qemu is defined %}
+            label 'X86-64-MULTI'
+{% else %}
             label 'ARM64'
+{% endif %}
           }
           steps {
             withCredentials([
