@@ -530,6 +530,7 @@ pipeline {
         }
       }
     }
+{% if skip_package_check is not defined %}
     // Take the image we just built and dump package versions for comparison
     stage('Update-packages') {
       when {
@@ -613,6 +614,7 @@ pipeline {
         }
       }
     }
+{% endif %}
     /* #######
        Testing
        ####### */
