@@ -228,7 +228,9 @@ pipeline {
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
                 git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git checkout -f looptest
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github
-                cp "${TEMPLATED_FILES}" ${TEMPDIR}/repo/${LS_REPO}/
+                find .
+                pwd
+                cp --parents "${TEMPLATED_FILES}" ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 git add "${TEMPLATED_FILES}"
                 git commit -m 'Bot Updating Templated Files'
