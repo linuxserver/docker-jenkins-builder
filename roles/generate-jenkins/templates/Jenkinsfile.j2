@@ -386,7 +386,7 @@ pipeline {
 {% endif %}
               docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if project_name != "docker-jenkins-builder" %}linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}
               CURRENTHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
-              cd ${TEMPDIR}/${CONTAINER_NAME}
+              cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               if [ "${CURRENTHASH}" != "${NEWHASH}" ]; then
                 mkdir -p ${TEMPDIR}/repo
