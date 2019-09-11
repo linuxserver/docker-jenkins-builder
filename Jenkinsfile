@@ -49,12 +49,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile \
-                                 README.md \
-                                 LICENSE \
-                                 ./.github/FUNDING.yml \
-                                 ./.github/ISSUE_TEMPLATE.md \
-                                 ./.github/PULL_REQUEST_TEMPLATE.md'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE.md ./.github/PULL_REQUEST_TEMPLATE.md'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
@@ -220,7 +215,8 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}              CURRENTHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}              
+              CURRENTHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               if [ "${CURRENTHASH}" != "${NEWHASH}" ]; then
