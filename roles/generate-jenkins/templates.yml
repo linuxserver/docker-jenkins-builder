@@ -2,7 +2,7 @@
 
 templated_files:
  - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
- - { src: 'DOCUMENTATION.j2', dest: "docker-{{ project_name }}.md" , readme: 'true' }
+ - { src: 'DOCUMENTATION.j2', dest: "{{ project_name }}.md" , readme: 'true' }
  - { src: 'Jenkinsfile.j2', dest: 'Jenkinsfile' }
  - { src: 'LICENSE.j2', dest: 'LICENSE' }
  - { src: 'FUNDING.j2', dest: '.github/FUNDING.yml' }
