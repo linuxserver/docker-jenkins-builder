@@ -1,0 +1,69 @@
+---
+######
+# URLs
+######
+
+# site urls
+lsio_project_name: "linuxserver.io"
+lsio_project_name_short: "linuxserver"
+lsio_short_url: "{{ lsio_project_name }}"
+lsio_full_url: "https://{{ lsio_project_name }}"
+lsio_blog_url: "https://blog.{{ lsio_short_url }}"
+lsio_ci_url: "https://ci.linuxserver.io"
+lsio_discord_url: "https://discord.gg/YWrKVTn"
+lsio_discourse_url: "https://discourse.{{ lsio_short_url }}"
+lsio_fleet_url: "https://fleet.{{ lsio_short_url }}"
+lsio_irc_url: "https://irc.{{ lsio_short_url }}"
+lsio_microbadger_url: "https://microbadger.com/images/{{ lsio_project_name_short }}"
+lsio_object_url: "https://lsio-ci.ams3.digitaloceanspaces.com"
+lsio_opencollective_url: "https://opencollective.com/{{ lsio_project_name_short }}"
+lsio_podcast_url: "https://anchor.fm/linuxserverio"
+
+# This goes in readme-vars in each individual repo
+project_lsio_docker_hub_url: "https://hub.docker.com/r/{{ lsio_project_name_short }}/{{ project_name }}"
+
+# supported architectures
+arch_x86_64: "x86-64"
+arch_arm64: "arm64"
+arch_armhf: "armhf"
+
+# descriptions
+lsio_blog_desc: "all the things you can do with our containers including How-To guides, opinions and much more!"
+lsio_discord_desc: "realtime support / chat with the community and the team."
+lsio_discourse_desc: "post on our community forum."
+lsio_fleet_desc: "an online web interface which displays all of our maintained images."
+lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`. Our primary support channel is Discord."
+lsio_microbadger_desc: "Get your own version badge on microbadger.com"
+lsio_opencollective_desc: "please consider helping us by either donating or contributing to our budget"
+lsio_podcast_desc: "on hiatus. Coming back soon (late 2018)."
+
+# asset urls
+lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png
+lsio_favicon_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png
+
+# badges
+lsio_ci_badge: "{{ lsio_ci_url }}/view/all/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/master/badge/icon?style=flat-square"
+lsio_shieldsio_discord: "https://img.shields.io/discord/354974912613449730.svg?style=flat-square&color=E68523&label=Discord&logo=discord&logoColor=FFFFFF"
+lsio_shieldsio_discourse_topics: "https://img.shields.io/discourse/https/discourse.{{ lsio_short_url }}/topics.svg?style=flat-square&color=E68523&logo=discourse&logoColor=FFFFFF"
+lsio_shieldsio_docker_pulls: "https://img.shields.io/docker/pulls/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_docker_stars: "https://img.shields.io/docker/stars/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_github_release: "https://img.shields.io/github/release/{{ lsio_project_name_short }}/docker-{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_microbadger_layers: "https://img.shields.io/microbadger/layers/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_microbadger_size: "https://img.shields.io/microbadger/image-size/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_opencollective_all: "https://img.shields.io/opencollective/all/{{ lsio_project_name_short }}.svg?style=flat-square&color=E68523&label=Open%20Collective%20Supporters"
+lsio_shieldsio_static_blog: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Blog"
+lsio_shieldsio_static_fleet: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Fleet"
+lsio_shieldsio_static_irc: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=IRC"
+lsio_shieldsio_static_podcast: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Podcast"
+
+######
+# Common Params
+######
+
+# param strings
+common_container_param_config_description: ""
+
+# default param values
+common_param_env_vars:
+  - { env_var: "PUID", env_value: "1000", desc: "for UserID - see below for explanation" }
+  - { env_var: "PGID", env_value: "1000", desc: "for GroupID - see below for explanation" }

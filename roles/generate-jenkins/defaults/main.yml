@@ -2,3 +2,42 @@
 
 github_branch: master
 github_user: linuxserver
+templated_vars:
+ - 'readme-vars.yml'
+ - 'jenkins-vars.yml'
+project_blurb_optional_extras_enabled: false
+project_blurb_optional_extras: []
+available_architectures: []
+development_versions: false
+development_versions_items: []
+# PGID, PUID
+common_param_env_vars_enabled: true
+param_usage_include_net: false
+param_net: ""
+privileged: false
+cap_add_param: false
+cap_add_param_vars: []
+opt_cap_add_param: false
+opt_cap_add_param_vars: []
+param_usage_include_env: false
+param_env_vars: []
+opt_param_usage_include_env: false
+opt_param_env_vars: []
+param_usage_include_vols: false
+param_volumes: []
+opt_param_usage_include_vols: false
+opt_param_volumes: []
+param_usage_include_ports: false
+param_ports: []
+opt_param_usage_include_ports: false
+opt_param_ports: []
+param_device_map: false
+param_devices: []
+opt_param_device_map: false
+opt_param_devices: []
+app_setup_block_enabled: false
+app_setup_block: ""
+nginx_reverse_proxy_snippet_enabled: false
+nginx_reverse_proxy_block: ""
+optional_block_1: false
+changelogs: []

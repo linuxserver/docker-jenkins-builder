@@ -1,78 +1,119 @@
 ---
 
+######################################
+#   Grab the Variables from github   #
+######################################
 - name: download variables
   when: lookup('env', 'LOCAL') != "true"
   get_url:
-    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/jenkins-vars.yml"
-    dest: /tmp/jenkins-vars.yml
+    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/{{ item }}"
+    dest: "/tmp/{{ item }}"
+  loop: "{{  templated_vars  }}"
 
-- name: include vars file for this project
+- name: include var files for this project
   include_vars:
-    file: "/tmp/jenkins-vars.yml"
+    file: "/tmp/{{ item }}"
+  loop: "{{  templated_vars  }}"
 
+- name: Inlcude template loop variables
+  include_vars: 
+    file: "/ansible/roles/generate-jenkins/templates.yml"
+
+############################
+#   Directory Management   #
+############################
 - name: create destination dir for generated Jenkinsfile
   when: lookup('env', 'LOCAL') != "true"
   file:
     path: "jenkins/{{ project_name }}"
     state: directory
 
-- name: create destination dir for generated FUNDING file
+- name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.github"
     state: directory
 
-- name: create destination dir for generated FUNDING file
+- name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') != "true"
   file:
     path: "jenkins/{{ project_name }}/.github"
     state: directory
 
-- name: write jenkins file
+##############################
+#   Loop Through Templates   #
+##############################
+
+# Normal Files
+- name: write templates
   when:
     - lookup('env', 'LOCAL') != "true"
+    - item.readme is not defined
   template:
-    src: ../templates/Jenkinsfile.j2
-    dest: "jenkins/{{ project_name }}/Jenkinsfile"
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
   delegate_to: localhost
+  loop: "{{  templated_files  }}"
 
-- name: write jenkins file local
-  when: lookup('env', 'LOCAL') == "true"
+- name: write templates local
+  when: 
+    - lookup('env', 'LOCAL') == "true"
+    - item.readme is not defined
   template:
-    src: ../templates/Jenkinsfile.j2
-    dest: "/tmp/GENERATED.Jenkinsfile"
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
   delegate_to: localhost
+  loop: "{{  templated_files  }}"
 
-- name: write license file
+# Readme templating
+
+- name: write readme normal
   when:
     - lookup('env', 'LOCAL') != "true"
+    - item.readme is defined
+    - full_custom_readme is not defined
   template:
-    src: ../templates/LICENSE.j2
-    dest: "jenkins/{{ project_name }}/LICENSE"
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
   delegate_to: localhost
+  loop: "{{  templated_files  }}"
 
-- name: write license file local
-  when: lookup('env', 'LOCAL') == "true"
-  template:
-    src: ../templates/LICENSE.j2
-    dest: "/tmp/LICENSE"
-  delegate_to: localhost
-
-- name: write funding file
+- name: write readme normal local
   when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.readme is defined
+    - full_custom_readme is not defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write readme full custom
+  when: 
     - lookup('env', 'LOCAL') != "true"
+    - item.readme is defined
+    - full_custom_readme is defined
   template:
-    src: ../templates/FUNDING.j2
-    dest: "jenkins/{{ project_name }}/.github/FUNDING.yml"
+    src: "../templates/{{ item.src }}-CUSTOM"
+    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
   delegate_to: localhost
+  loop: "{{  templated_files  }}"
 
-- name: write funding file local
-  when: lookup('env', 'LOCAL') == "true"
+- name: write readme full custom local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.readme is defined
+    - full_custom_readme is defined
   template:
-    src: ../templates/FUNDING.j2
-    dest: "/tmp/.github/FUNDING.yml"
+    src: "../templates/{{ item.src }}-CUSTOM"
+    dest: "/tmp/{{ item.dest }}"
   delegate_to: localhost
+  loop: "{{  templated_files  }}"
 
+##########################################
+#  For build nodes not running as Root   #
+##########################################
 - name: Allow non root host to delete temp files
   when:
     - lookup('env', 'LOCAL') != "true"
