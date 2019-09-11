@@ -2,6 +2,10 @@ pipeline {
   agent {
     label 'X86-64-MULTI'
   }
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '10'))
+    parallelsAlwaysFailFast()
+  }
   // Input to determine if this is a package check
   parameters {
      string(defaultValue: 'false', description: 'package check run', name: 'PACKAGE_CHECK')
