@@ -215,17 +215,15 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}              
-              CURRENTHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} 
+              CURRENTHASH=$(grep -hs ^ "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
-              NEWHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              NEWHASH=$(grep -hs ^ "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               if [ "${CURRENTHASH}" != "${NEWHASH}" ]; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
                 git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git checkout -f looptest
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github
-                find .
-                pwd
                 cp --parents "${TEMPLATED_FILES}" ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 git add "${TEMPLATED_FILES}"
