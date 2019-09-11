@@ -219,6 +219,7 @@ pipeline {
               CURRENTHASH=$(grep -hs ^ "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              echo "CURRENTHASH IS ${CURRENTHASH} NEWHASH IS ${NEWHASH}"
               if [[ "${CURRENTHASH}" != "${NEWHASH}" ]]; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
