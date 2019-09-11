@@ -40,6 +40,12 @@
     path: "jenkins/{{ project_name }}/.github"
     state: directory
 
+- name: Create symbolic link for legacy pathing
+  when: lookup('env', 'LOCAL') != "true"
+  shell: "ln -s {{ project_name }} {{ project_name | regex_replace('docker-') }}"
+  args: 
+    chdir: /ansible/jenkins
+
 ##############################
 #   Loop Through Templates   #
 ##############################
