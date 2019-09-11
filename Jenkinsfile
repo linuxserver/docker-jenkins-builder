@@ -49,22 +49,12 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.LICENSE_TAG = sh(
-            script: '''#!/bin/bash
-                       if [ -e LICENSE ] ; then
-                         cat LICENSE | md5sum | cut -c1-8
-                       else
-                         echo none
-                       fi''',
-            returnStdout: true).trim()
-          env.FUNDING_TAG = sh(
-            script: '''#!/bin/bash
-                       if [ -e ./.github/FUNDING.yml ] ; then
-                         cat ./.github/FUNDING.yml | md5sum | cut -c1-8
-                       else
-                         echo none
-                       fi''',
-            returnStdout: true).trim()
+          env.TEMPLATED_FILES = 'Jenkinsfile \
+                                 README.md \
+                                 LICENSE \
+                                 ./.github/FUNDING.yml \
+                                 ./.github/ISSUE_TEMPLATE.md \
+                                 ./.github/PULL_REQUEST_TEMPLATE.md'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
@@ -230,25 +220,19 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} 
-              docker pull linuxserver/doc-builder:latest
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/readme linuxserver/doc-builder:latest
-              if [ "$(md5sum ${TEMPDIR}/${LS_REPO}/Jenkinsfile | awk '{ print $1 }')" != "$(md5sum Jenkinsfile | awk '{ print $1 }')" ] || \
-                 [ "$(md5sum ${TEMPDIR}/${CONTAINER_NAME}/README.md | awk '{ print $1 }')" != "$(md5sum README.md | awk '{ print $1 }')" ] || \
-                 [ "$(cat ${TEMPDIR}/${LS_REPO}/LICENSE | md5sum | cut -c1-8)" != "${LICENSE_TAG}" ] || \
-                 [ "$(cat ${TEMPDIR}/${LS_REPO}/.github/FUNDING.yml | md5sum | cut -c1-8)" != "${FUNDING_TAG}" ]; then
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=looptest -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}              CURRENTHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              cd ${TEMPDIR}/docker-${CONTAINER_NAME}
+              NEWHASH=$(grep -hs "${TEMPLATED_FILES}" | md5sum | cut -c1-8)
+              if [ "${CURRENTHASH}" != "${NEWHASH}" ]; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
                 git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git checkout -f looptest
-                cp ${TEMPDIR}/${CONTAINER_NAME}/README.md ${TEMPDIR}/repo/${LS_REPO}/
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/Jenkinsfile ${TEMPDIR}/repo/${LS_REPO}/
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/LICENSE ${TEMPDIR}/repo/${LS_REPO}/
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.github/FUNDING.yml ${TEMPDIR}/repo/${LS_REPO}/.github/FUNDING.yml
+                cp "${TEMPLATED_FILES}" ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
-                git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git add Jenkinsfile README.md LICENSE ./.github/FUNDING.yml
-                git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git commit -m 'Bot Updating Templated Files'
-                git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
+                git add "${TEMPLATED_FILES}"
+                git commit -m 'Bot Updating Templated Files'
+                git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
               else
                 echo "false" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
