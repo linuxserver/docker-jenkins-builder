@@ -20,6 +20,7 @@ lsio_opencollective_url: "https://opencollective.com/{{ lsio_project_name_short 
 lsio_podcast_url: "https://anchor.fm/linuxserverio"
 
 # This goes in readme-vars in each individual repo
+github_project_name: "docker-{{ project_name }}"
 project_lsio_docker_hub_url: "https://hub.docker.com/r/{{ lsio_project_name_short }}/{{ project_name }}"
 
 # supported architectures
@@ -42,12 +43,12 @@ lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-temp
 lsio_favicon_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png
 
 # badges
-lsio_ci_badge: "{{ lsio_ci_url }}/view/all/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/master/badge/icon?style=flat-square"
+lsio_ci_badge: "{{ lsio_ci_url }}/view/all/job/Docker-Pipeline-Builders/job/{{ github_project_name }}/job/master/badge/icon?style=flat-square"
 lsio_shieldsio_discord: "https://img.shields.io/discord/354974912613449730.svg?style=flat-square&color=E68523&label=Discord&logo=discord&logoColor=FFFFFF"
 lsio_shieldsio_discourse_topics: "https://img.shields.io/discourse/https/discourse.{{ lsio_short_url }}/topics.svg?style=flat-square&color=E68523&logo=discourse&logoColor=FFFFFF"
 lsio_shieldsio_docker_pulls: "https://img.shields.io/docker/pulls/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
 lsio_shieldsio_docker_stars: "https://img.shields.io/docker/stars/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
-lsio_shieldsio_github_release: "https://img.shields.io/github/release/{{ lsio_project_name_short }}/docker-{{ project_name }}.svg?style=flat-square&color=E68523"
+lsio_shieldsio_github_release: "https://img.shields.io/github/release/{{ lsio_project_name_short }}/{{ github_project_name }}.svg?style=flat-square&color=E68523"
 lsio_shieldsio_microbadger_layers: "https://img.shields.io/microbadger/layers/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
 lsio_shieldsio_microbadger_size: "https://img.shields.io/microbadger/image-size/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
 lsio_shieldsio_opencollective_all: "https://img.shields.io/opencollective/all/{{ lsio_project_name_short }}.svg?style=flat-square&color=E68523&label=Open%20Collective%20Supporters"

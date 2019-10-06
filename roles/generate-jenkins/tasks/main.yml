@@ -25,7 +25,7 @@
 - name: create destination dir for generated Jenkinsfile
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ project_name }}"
+    path: "jenkins/{{ github_project_name }}"
     state: directory
 
 - name: create destination dir for generated github files
@@ -37,12 +37,12 @@
 - name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ project_name }}/.github"
+    path: "jenkins/{{ github_project_name }}/.github"
     state: directory
 
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
-  shell: "ln -s {{ project_name }} {{ project_name | regex_replace('docker-') }}"
+  shell: "ln -s {{ github_project_name }} {{ project_name }}"
   args: 
     chdir: /ansible/jenkins
 
@@ -57,7 +57,7 @@
     - item.readme is not defined
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -80,7 +80,7 @@
     - full_custom_readme is not defined
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -102,7 +102,7 @@
     - full_custom_readme is defined
   template:
     src: "../templates/{{ item.src }}-CUSTOM"
-    dest: "jenkins/{{ project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
