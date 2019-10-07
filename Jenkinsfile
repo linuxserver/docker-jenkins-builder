@@ -226,7 +226,9 @@ pipeline {
               if [[ "${CURRENTHASH}" != "${NEWHASH}" ]]; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
-                git --git-dir ${TEMPDIR}/repo/${LS_REPO}/.git checkout -f master
+                cd ${TEMPDIR}/repo/${LS_REPO}
+                git checkout -f master
+                cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
