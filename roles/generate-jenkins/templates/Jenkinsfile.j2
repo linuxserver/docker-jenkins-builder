@@ -330,7 +330,7 @@ pipeline {
         }
       }
     }
-{% if project_name == "docker-jenkins-builder" %}
+{% if github_project_name == "docker-jenkins-builder" %}
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
@@ -380,10 +380,10 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-{% if project_name != "docker-jenkins-builder" %}
+{% if github_project_name != "docker-jenkins-builder" %}
               docker pull linuxserver/jenkins-builder:latest
 {% endif %}
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if project_name != "docker-jenkins-builder" %}linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %} 
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %} 
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
@@ -735,7 +735,7 @@ pipeline {
           sh "docker manifest annotate ${IMAGE}:${META_TAG} ${IMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8"
           sh "docker manifest push --purge ${IMAGE}:{{ release_tag }}"
           sh "docker manifest push --purge ${IMAGE}:${META_TAG}"
-{% if not project_name == "docker-doc-builder" and "docker-baseimage" not in project_name %}
+{% if not github_project_name == "docker-jenkins-builder" and "docker-baseimage" not in github_project_name %}
           sh '''docker rmi \
                 ${IMAGE}:amd64-${META_TAG} \
                 ${IMAGE}:amd64-{{ release_tag }} \
