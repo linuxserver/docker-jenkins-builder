@@ -1,0 +1,81 @@
+---
+
+# project information
+project_name: name
+project_url: "https://url.com/"
+project_logo: "http://www.logo.com/logo.png"
+project_blurb: "[{{ project_name_short|capitalize }}]({{ project_url }}) short description goes here."
+project_lsio_github_repo_url: "https://github.com/{{ lsio_project_name_short }}/{{ github_project_name }}"
+project_lsio_docker_hub_url: "https://hub.docker.com/r/{{ lsio_project_name_short }}/{{ project_name }}"
+
+project_blurb_optional_extras_enabled: false
+project_blurb_optional_extras: []
+
+# supported architectures
+available_architectures:
+  - { arch: "{{ arch_x86_64 }}", tag: "amd64-latest"}
+  - { arch: "{{ arch_arm64 }}", tag: "arm64v8-latest"}
+  - { arch: "{{ arch_armhf }}", tag: "arm32v6-latest"}
+
+# development version
+development_versions: false
+development_versions_items:
+  - { tag: "latest", desc: "Stable Ombi releases" }
+  - { tag: "development", desc: "Releases from the `develop` branch of Ombi" }
+
+
+# container parameters
+common_param_env_vars_enabled: true #PGID, PUID, etc, you can set it to 'optional'
+param_container_name: "{{ project_name }}"
+param_usage_include_net: false #you can set it to 'optional'
+param_net: "host"
+param_net_desc: "Shares host networking with container."
+param_usage_include_env: true
+param_env_vars:
+  - { env_var: "TZ", env_value: "Europe/London", desc: "Specify a timezone to use EG Europe/London." }
+param_usage_include_vols: true
+param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+param_usage_include_ports: true
+param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+param_device_map: false
+param_devices:
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+cap_add_param: false
+cap_add_param_vars:
+  - { cap_add_var: "NET_ADMIN" }
+
+# optional container parameters
+opt_param_usage_include_env: false
+opt_param_env_vars:
+  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
+opt_param_usage_include_vols: false
+opt_param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+opt_param_usage_include_ports: false
+opt_param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+opt_param_device_map: false
+opt_param_devices:
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+opt_cap_add_param: false
+opt_cap_add_param_vars:
+  - { cap_add_var: "NET_ADMIN" }
+
+optional_block_1: false
+optional_block_1_items:
+  - "```"
+  - "include optional stuff"
+  - "```"
+
+# application setup block
+app_setup_block_enabled: false
+app_setup_block: ""
+
+app_setup_nginx_reverse_proxy_snippet: false
+app_setup_nginx_reverse_proxy_block: ""
+# changelog
+
+changelogs:
+  - { date: "09.12.17:", desc: "changes description" }

@@ -1,5 +1,7 @@
 ---
   - hosts: localhost
+    vars_files:
+      - vars/common
     pre_tasks:
       - set_fact:
           container_name: "{{ lookup('env', 'CONTAINER_NAME' ) | ternary (lookup('env', 'CONTAINER_NAME' ), omit) }}"
