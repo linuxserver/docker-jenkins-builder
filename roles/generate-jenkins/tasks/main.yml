@@ -1,5 +1,22 @@
 ---
 
+#######################
+#   Set UID and GID   #
+#######################
+
+- name: set UID
+  when: lookup('env', 'PUID')
+  user:
+    name: abc
+    non_unique: yes
+    uid: "{{ lookup('env', 'PUID') | int }}"
+- name: set UID
+  when: lookup('env', 'PGID')
+  group:
+    name: abc
+    non_unique: yes
+    gid: "{{ lookup('env', 'PGID') | int }}"
+
 ######################################
 #   Grab the Variables from github   #
 ######################################
@@ -27,18 +44,24 @@
   file:
     path: "jenkins/{{ github_project_name }}"
     state: directory
+    owner: "abc"
+    group: "abc"
 
 - name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.github"
     state: directory
+    owner: "abc"
+    group: "abc"
 
 - name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') != "true"
   file:
     path: "jenkins/{{ github_project_name }}/.github"
     state: directory
+    owner: "abc"
+    group: "abc"
 
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
@@ -58,6 +81,8 @@
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -68,6 +93,8 @@
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -81,6 +108,8 @@
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -92,6 +121,8 @@
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -103,6 +134,8 @@
   template:
     src: "../templates/{{ item.src }}-CUSTOM"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
@@ -114,6 +147,8 @@
   template:
     src: "../templates/{{ item.src }}-CUSTOM"
     dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
