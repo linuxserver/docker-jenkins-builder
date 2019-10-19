@@ -14,6 +14,8 @@ pipeline {
   environment {
     BUILDS_DISCORD=credentials('build_webhook_url')
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
+    GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
+    GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
     BUILD_VERSION_ARG='BUILDER_VERSION'
     LS_USER='linuxserver'
     LS_REPO='docker-jenkins-builder'
@@ -126,6 +128,7 @@ pipeline {
           env.IMAGE = env.DOCKERHUB_IMAGE
           env.QUAYIMAGE = 'quay.io/linuxserver.io/' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/' + env.CONTAINER_NAME
+          env.GITLABIMAGE = 'registry.gitlab.com/Linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           } else {
@@ -146,6 +149,7 @@ pipeline {
           env.IMAGE = env.DEV_DOCKERHUB_IMAGE
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lsiodev-' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
+          env.GITLABIMAGE = 'registry.gitlab.com/Linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           } else {
@@ -166,6 +170,7 @@ pipeline {
           env.IMAGE = env.PR_DOCKERHUB_IMAGE
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lspipepr-' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
+          env.GITLABIMAGE = 'registry.gitlab.com/Linuxserver.io/' + env.LS_REPO + '/lspipepr' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
           } else {
@@ -277,6 +282,25 @@ pipeline {
           env.EXIT_STATUS = 'ABORTED'
         }
       }
+    }
+    /* #######################
+           GitLab Mirroring
+       ####################### */
+    // Ping into Gitlab to mirror this repo and have a registry endpoint
+    stage("GitLab Mirror"){
+      when {
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps{
+        sh '''curl -H "Private-Token: ${GITLAB_TOKEN}" -X POST https://gitlab.com/api/v4/projects \
+        -d '{"namespace_id":'${GITLAB_NAMESPACE}',\
+             "name":"'${LS_REPO}'",
+             "mirror":true,\
+             "import_url":"https://github.com/linuxserver/'${LS_REPO}'.git",\
+             "issues_access_level":"disabled",\
+             "merge_requests_access_level":"disabled",\
+             "repository_access_level":"enabled"}' '''
+      } 
     }
     /* ###############
        Build Container
@@ -521,13 +545,14 @@ pipeline {
                 echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                 echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
                 echo $GITHUB_TOKEN | docker login docker.pkg.github.com -u LinuxServer-CI --password-stdin
-                for PUSHIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "${IMAGE}"; do
+                echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
+                for PUSHIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
                   docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
                   docker tag ${PUSHIMAGE}:${META_TAG} ${IMAGE}:latest
                   docker push ${PUSHIMAGE}:latest
                   docker push ${PUSHIMAGE}:${META_TAG}
                 done
-                for DELETEIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "${IMAGE}"; do
+                for DELETEIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "{GITLABIMAGE}" "${IMAGE}"; do
                   docker rmi \
                   ${DELETEIMAGE}:${META_TAG} \
                   ${DELETEIMAGE}:latest || :
@@ -561,13 +586,14 @@ pipeline {
                 echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                 echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
                 echo $GITHUB_TOKEN | docker login docker.pkg.github.com -u LinuxServer-CI --password-stdin
+                echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                 if [ "${CI}" == "false" ]; then
                   docker pull lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker pull lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker tag lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm32v7-${META_TAG}
                   docker tag lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                 fi
-                for MANIFESTIMAGE in "${IMAGE}"; do
+                for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}"; do
                   docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
                   docker tag ${IMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG}
                   docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
