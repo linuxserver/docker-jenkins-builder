@@ -292,7 +292,7 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps{
-        sh '''curl -H "Private-Token: ${GITLAB_TOKEN}" -X POST https://gitlab.com/api/v4/projects \
+        sh '''curl -H "Content-Type: application/json" -H "Private-Token: ${GITLAB_TOKEN}" -X POST https://gitlab.com/api/v4/projects \
         -d '{"namespace_id":'${GITLAB_NAMESPACE}',\
              "name":"'${LS_REPO}'",
              "mirror":true,\
