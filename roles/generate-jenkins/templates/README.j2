@@ -4,6 +4,7 @@
 [![Discord]({{ lsio_shieldsio_discord }})]({{ lsio_discord_url }} "{{ lsio_discord_desc }}")
 [![Discourse]({{ lsio_shieldsio_discourse_topics }})]({{ lsio_discourse_url }} "{{ lsio_discourse_desc }}")
 [![Fleet]({{ lsio_shieldsio_static_fleet }})]({{ lsio_fleet_url }} "{{ lsio_fleet_desc }}")
+[![GitHub]({{ lsio_shieldsio_static_github }})]({{ lsio_github_url }} "{{ lsio_github_desc }}")
 [![Podcast]({{ lsio_shieldsio_static_podcast }})]({{ lsio_podcast_url }} "{{ lsio_podcast_desc }}")
 [![Open Collective]({{ lsio_shieldsio_opencollective_all }})]({{ lsio_opencollective_url }} "{{ lsio_opencollective_desc }}")
 
@@ -20,10 +21,13 @@ Find us at:
 * [Discord]({{ lsio_discord_url }}) - {{ lsio_discord_desc }}
 * [Discourse]({{ lsio_discourse_url }}) - {{ lsio_discourse_desc }}
 * [Fleet]({{ lsio_fleet_url }}) - {{ lsio_fleet_desc }}
+* [GitHub]({{ lsio_github_url }}) - {{ lsio_fleet_github }}
 * [Podcast]({{ lsio_podcast_url }}) - {{ lsio_podcast_desc }}
 * [Open Collective]({{ lsio_opencollective_url }}) - {{ lsio_opencollective_desc }}
 
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
+
+[![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_lsio_github_repo_url }})
 [![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_lsio_github_repo_url }}/releases)
 [![MicroBadger Layers]({{ lsio_shieldsio_microbadger_layers }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
 [![MicroBadger Size]({{ lsio_shieldsio_microbadger_size }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
@@ -403,7 +407,7 @@ Below are the instructions for updating containers:
 
 If you want to make local modifications to these images for development purposes or just to customize the logic:
 ```
-git clone https://github.com/{{ lsio_project_name_short }}/{{ github_project_name }}.git
+git clone {{ lsio_github_url }}/{{ github_project_name }}.git
 cd {{ github_project_name }}
 docker build \
   --no-cache \
