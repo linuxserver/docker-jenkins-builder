@@ -29,6 +29,9 @@ Find us at:
 
 [![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_lsio_github_repo_url }})
 [![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_lsio_github_repo_url }}/releases)
+[![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ project_lsio_github_repo_url }}/packages)
+[![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})](https://gitlab.com/Linuxserver.io/{{ github_project_name }}/container_registry)
+[![Quay.io]({{ lsio_shieldsio_static_quay }})](https://quay.io/repository/linuxserver.io/{{ project_name }})
 [![MicroBadger Layers]({{ lsio_shieldsio_microbadger_layers }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
 [![MicroBadger Size]({{ lsio_shieldsio_microbadger_size }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
 [![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ project_lsio_docker_hub_url }})
@@ -58,12 +61,6 @@ The architectures supported by this image are:
 {% for item in available_architectures %}
 | {{ item.arch }} | {{ item.tag }} |
 {% endfor %}
-
-Our images can also be pulled from:
-
-[![Quay.io]({{ lsio_shieldsio_static_quay }})](https://quay.io/repository/linuxserver.io/{{ project_name }})
-[![GitHub Package Repository]({{ lsio_shieldsio_static_github }})]({{ project_lsio_github_repo_url }}/packages)
-[![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab }})](https://gitlab.com/Linuxserver.io/{{ github_project_name }}/container_registry)
 
 {% if development_versions %}
 ## Version Tags
