@@ -58,8 +58,10 @@ lsio_shieldsio_opencollective_all: "https://img.shields.io/opencollective/all/{{
 lsio_shieldsio_static_blog: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Blog"
 lsio_shieldsio_static_fleet: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Fleet"
 lsio_shieldsio_static_github: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=GitHub&logo=github&logoColor=FFFFFF"
+lsio_shieldsio_static_gitlab: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=GitLab&logo=gitlab&logoColor=FFFFFF"
 lsio_shieldsio_static_irc: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=IRC"
 lsio_shieldsio_static_podcast: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Podcast"
+lsio_shieldsio_static_quay: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Quay.io"
 
 ######
 # Common Params
