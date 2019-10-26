@@ -53,7 +53,6 @@ lsio_shieldsio_docker_stars: "https://img.shields.io/docker/stars/{{ lsio_projec
 lsio_shieldsio_github_release: "https://img.shields.io/github/release/{{ lsio_project_name_short }}/{{ github_project_name }}.svg?style=flat-square&color=E68523&logo=github&logoColor=FFFFFF"
 lsio_shieldsio_github_stars: "https://img.shields.io/github/stars/{{ lsio_project_name_short }}/{{ github_project_name }}.svg?style=flat-square&color=E68523&logo=github&logoColor=FFFFFF"
 lsio_shieldsio_microbadger_layers: "https://img.shields.io/microbadger/layers/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
-lsio_shieldsio_microbadger_size: "https://img.shields.io/microbadger/image-size/{{ lsio_project_name_short }}/{{ project_name }}.svg?style=flat-square&color=E68523"
 lsio_shieldsio_opencollective_all: "https://img.shields.io/opencollective/all/{{ lsio_project_name_short }}.svg?style=flat-square&color=E68523&label=Supporters&logo=open%20collective&logoColor=FFFFFF"
 lsio_shieldsio_static_blog: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Blog"
 lsio_shieldsio_static_fleet: "https://img.shields.io/static/v1.svg?style=flat-square&color=E68523&label={{ lsio_project_name }}&message=Fleet"
