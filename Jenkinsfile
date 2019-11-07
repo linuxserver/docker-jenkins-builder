@@ -596,7 +596,7 @@ pipeline {
                   docker tag lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm32v7-${META_TAG}
                   docker tag lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                 fi
-                for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}"; do
+                for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}"; do
                   docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
                   docker tag ${IMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG}
                   docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
@@ -620,7 +620,7 @@ pipeline {
                   docker manifest push --purge ${MANIFESTIMAGE}:latest
                   docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} 
                 done
-                for LEGACYIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}"; do
+                for LEGACYIMAGE in "${GITHUBIMAGE}"; do
                   docker tag ${IMAGE}:amd64-${META_TAG} ${LEGACYIMAGE}:amd64-${META_TAG}
                   docker tag ${IMAGE}:arm32v7-${META_TAG} ${LEGACYIMAGE}:arm32v7-${META_TAG}
                   docker tag ${IMAGE}:arm64v8-${META_TAG} ${LEGACYIMAGE}:arm64v8-${META_TAG}
