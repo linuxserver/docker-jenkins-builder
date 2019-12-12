@@ -274,6 +274,9 @@ Container images are configured using parameters passed at runtime (such as thos
 
 | Parameter | Function |
 | :----: | --- |
+{% if param_usage_include_hostname %}
+| `--hostname={{ param_hostname }}` | {{ param_hostname_desc }} |
+{% endif %}
 {% if param_usage_include_net %}
 | `--net={{ param_net }}` | {{ param_net_desc }} |
 {% endif %}

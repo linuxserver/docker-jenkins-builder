@@ -29,6 +29,7 @@ common_param_env_vars_enabled: true #PGID, PUID, etc, you can set it to 'optiona
 param_container_name: "{{ project_name }}"
 param_usage_include_hostname: false #you can set it to 'optional'
 param_hostname: "hostname"
+param_hostname_desc: "Set hostname for the container."
 param_usage_include_net: false #you can set it to 'optional'
 param_net: "host"
 param_net_desc: "Shares host networking with container."
