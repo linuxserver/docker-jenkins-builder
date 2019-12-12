@@ -53,6 +53,11 @@ Here are some example snippets to help you get started creating a container from
 ```
 docker create \
   --name={{ param_container_name }} \
+{% if param_usage_include_hostname is sameas true %}
+  --hostname={{ param_hostname }} \
+{% elif param_usage_include_hostname == 'optional' %}
+  --hostname={{ param_hostname }} `#optional` \
+{% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
 {% elif param_usage_include_net == 'optional' %}
@@ -143,6 +148,11 @@ services:
   {{ project_name }}:
     image: {{ lsio_project_name_short }}/{{ project_name }}
     container_name: {{ project_name }}
+{% if param_usage_include_hostname is sameas true %}
+    hostname: {{ param_hostname }}
+{% elif param_usage_include_hostname == 'optional' %}
+    hostname: {{ param_hostname }} #optional
+{% endif %}
 {% if privileged is sameas true %}
     privileged: true
 {% elif privileged == 'optional' %}
