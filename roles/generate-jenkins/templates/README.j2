@@ -154,6 +154,16 @@ docker create \
   --device {{ item.device_host_path }}:{{ item.device_path }} `#optional` \
 {% endfor %}
 {% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+  --{{ item.name }}="{{ item.value }}" \
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+  --{{ item.name }}="{{ item.value }}" `#optional` \
+{% endfor %}
+{% endif %}
   --restart unless-stopped \
   {{ lsio_project_name_short }}/{{ project_name }}
 ```
@@ -264,6 +274,16 @@ services:
       - {{ item.device_host_path }}:{{ item.device_path }} #optional
 {% endfor %}
 {% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+    {{ item.name_compose }}: "{{ item.value }}" \
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+    {{ item.name_compose }}: "{{ item.value }}" #optional \
+{% endfor %}
+{% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
 
 ```
@@ -323,6 +343,16 @@ Container images are configured using parameters passed at runtime (such as thos
 {% if opt_param_device_map %}
 {% for item in opt_param_devices %}
 | `--device {{ item.device_path }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+| `--{{ item.name }}=` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+| `--{{ item.name }}=` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
 
