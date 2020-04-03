@@ -63,6 +63,26 @@
     owner: "abc"
     group: "abc"
 
+- name: create destination dir for generated donate.txt
+  when: 
+    - lookup('env', 'LOCAL') == "true"
+    - sponsor_links is defined
+  file:
+    path: "/tmp/root"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated donate.txt
+  when: 
+    - lookup('env', 'LOCAL') != "true"
+    - sponsor_links is defined
+  file:
+    path: "jenkins/{{ github_project_name }}/root"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
   shell: "ln -s {{ github_project_name }} {{ project_name }}"
@@ -78,6 +98,7 @@
   when:
     - lookup('env', 'LOCAL') != "true"
     - item.readme is not defined
+    - item.donate is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -90,6 +111,7 @@
   when: 
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
+    - item.donate is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
@@ -146,6 +168,34 @@
     - full_custom_readme is defined
   template:
     src: "../templates/{{ item.src }}-CUSTOM"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# Donation links templating
+
+- name: write donation links
+  when: 
+    - lookup('env', 'LOCAL') != "true"
+    - item.donate is defined
+    - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write donation links local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.donate is defined
+    - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
     owner: "abc"
     group: "abc"
