@@ -348,6 +348,11 @@ In this instance `PUID=1000` and `PGID=1000`, to find yours use `id user` as bel
 {{ app_setup_block }}
 {% endif %}
 
+## Docker Mods
+[![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})](https://mods.linuxserver.io/?mod={{ project_name }})
+
+We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) can be accessed via the dynamic badge above.
+
 {% if nginx_reverse_proxy_snippet_enabled %}
 ## Reverse Proxy Snippet
 
