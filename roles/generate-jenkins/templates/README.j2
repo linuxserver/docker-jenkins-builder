@@ -7,7 +7,7 @@
 [![GitHub]({{ lsio_shieldsio_static_github }})]({{ lsio_github_url }} "{{ lsio_github_desc }}")
 [![Open Collective]({{ lsio_shieldsio_opencollective_all }})]({{ lsio_opencollective_url }} "{{ lsio_opencollective_desc }}")
 
-The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring :-
+The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring:
 
  * regular and timely application updates
  * easy user mappings (PGID, PUID)
@@ -157,10 +157,10 @@ docker create \
 {% if custom_params is defined %}
 {% for item in custom_params %}
 {% if item.array is not defined %}
-  --{{ item.name }}="{{ item.value }}"
+  --{{ item.name }}="{{ item.value }}" \
 {% else %}
 {% for item2 in item.value %}
-  --{{ item.name }}="{{ item2 }}"
+  --{{ item.name }}="{{ item2 }}" \
 {% endfor %}
 {% endif %}
 {% endfor %}

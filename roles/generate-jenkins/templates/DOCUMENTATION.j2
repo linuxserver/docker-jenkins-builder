@@ -130,10 +130,10 @@ docker create \
 {% if custom_params is defined %}
 {% for item in custom_params %}
 {% if item.array is not defined %}
-  --{{ item.name }}="{{ item.value }}"
+  --{{ item.name }}="{{ item.value }}" \
 {% else %}
 {% for item2 in item.value %}
-  --{{ item.name }}="{{ item2 }}"
+  --{{ item.name }}="{{ item2 }}" \
 {% endfor %}
 {% endif %}
 {% endfor %}
