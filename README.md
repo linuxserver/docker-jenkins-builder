@@ -16,6 +16,7 @@ If you need to test functionality just navigate to the folder with the jenkins-v
 docker run --rm \
   -v $(pwd):/tmp \
   -e LOCAL=true \
+  -e PUID=$(id -u) -e PGID=$(id -g) \
   linuxserver/jenkins-builder:latest && \
 rm -f "$(basename $PWD).md"
 ```

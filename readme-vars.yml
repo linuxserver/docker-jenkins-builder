@@ -22,6 +22,7 @@ full_custom_readme: |
   docker run --rm \
     -v $(pwd):/tmp \
     -e LOCAL=true \
+    -e PUID=$(id -u) -e PGID=$(id -g) \
     linuxserver/jenkins-builder:latest && \
   rm -f "$(basename $PWD).md"
   ```
