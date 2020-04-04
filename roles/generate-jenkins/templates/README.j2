@@ -276,12 +276,12 @@ services:
 {% endif %}
 {% if custom_params is defined %}
 {% for item in custom_params %}
-    {{ item.name_compose }}: "{{ item.value }}" \
+    {{ item.name_compose }}: "{{ item.value }}"
 {% endfor %}
 {% endif %}
 {% if opt_custom_params is defined %}
 {% for item in opt_custom_params %}
-    {{ item.name_compose }}: "{{ item.value }}" #optional \
+    {{ item.name_compose }}: "{{ item.value }}" #optional
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
