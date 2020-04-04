@@ -127,6 +127,28 @@ docker create \
   --device {{ item.device_host_path }}:{{ item.device_path }} `#optional` \
 {% endfor %}
 {% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+{% if item.array is not defined %}
+  --{{ item.name }}="{{ item.value }}"
+{% else %}
+{% for item2 in item.value %}
+  --{{ item.name }}="{{ item2 }}"
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+{% if item.array is not defined %}
+  --{{ item.name }}="{{ item.value }}" `#optional` \
+{% else %}
+{% for item2 in item.value %}
+  --{{ item.name }}="{{ item2 }}" `#optional` \
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
   --restart unless-stopped \
   {{ lsio_project_name_short }}/{{ project_name }}
 ```
@@ -143,7 +165,7 @@ Compatible with docker-compose v2 schemas.
 
 ```yaml
 {% if not custom_compose is defined %}---
-version: "2"
+version: "2.1"
 services:
   {{ project_name }}:
     image: {{ lsio_project_name_short }}/{{ project_name }}
@@ -239,6 +261,30 @@ services:
       - {{ item.device_host_path }}:{{ item.device_path }} #optional
 {% endfor %}
 {% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}"
+{% else %}
+    {{ item.name_compose }}:
+{% for item2 in item.value %}
+      - {{ item2 }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}" #optional
+{% else %}
+    {{ item.name_compose }}: #optional
+{% for item2 in item.value %}
+      - {{ item2 }} #optional
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
 
 ```
@@ -316,6 +362,25 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% if opt_param_device_map %}
 {% for item in opt_param_devices %}
 | `{{ item.device_path }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% endif %}
+
+{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname %}
+#### Miscellaneous Options
+| Parameter | Function |
+| :-----:   | --- |
+{% if param_usage_include_hostname %}
+| `--hostname=` | {{ param_hostname_desc }} |
+{% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+| `--{{ item.name }}=` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+| `--{{ item.name }}=` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
 {% endif %}
