@@ -4,7 +4,7 @@ FROM lsiobase/alpine:3.11
 ARG BUILD_DATE
 ARG VERSION
 LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="ironicbadger, homer, thelamer"
+LABEL maintainer="homer, thelamer"
 
 RUN \
  echo "**** install build packages ****" && \
