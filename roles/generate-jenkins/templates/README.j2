@@ -7,7 +7,7 @@
 [![GitHub]({{ lsio_shieldsio_static_github }})]({{ lsio_github_url }} "{{ lsio_github_desc }}")
 [![Open Collective]({{ lsio_shieldsio_opencollective_all }})]({{ lsio_opencollective_url }} "{{ lsio_opencollective_desc }}")
 
-The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring :-
+The [LinuxServer.io]({{ lsio_full_url }}) team brings you another container release featuring:
 
  * regular and timely application updates
  * easy user mappings (PGID, PUID)
@@ -156,12 +156,24 @@ docker create \
 {% endif %}
 {% if custom_params is defined %}
 {% for item in custom_params %}
+{% if item.array is not defined %}
   --{{ item.name }}="{{ item.value }}" \
+{% else %}
+{% for item2 in item.value %}
+  --{{ item.name }}="{{ item2 }}" \
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_custom_params is defined %}
 {% for item in opt_custom_params %}
+{% if item.array is not defined %}
   --{{ item.name }}="{{ item.value }}" `#optional` \
+{% else %}
+{% for item2 in item.value %}
+  --{{ item.name }}="{{ item2 }}" `#optional` \
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
@@ -180,7 +192,7 @@ Compatible with docker-compose v2 schemas.
 
 ```
 {% if not custom_compose is defined %}---
-version: "2"
+version: "2.1"
 services:
   {{ project_name }}:
     image: {{ lsio_project_name_short }}/{{ project_name }}
@@ -276,12 +288,26 @@ services:
 {% endif %}
 {% if custom_params is defined %}
 {% for item in custom_params %}
-    {{ item.name_compose }}: "{{ item.value }}" \
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}"
+{% else %}
+    {{ item.name_compose }}:
+{% for item2 in item.value %}
+      - {{ item2 }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_custom_params is defined %}
 {% for item in opt_custom_params %}
-    {{ item.name_compose }}: "{{ item.value }}" #optional \
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}" #optional
+{% else %}
+    {{ item.name_compose }}: #optional
+{% for item2 in item.value %}
+      - {{ item2 }} #optional
+{% endfor %}
+{% endif %}
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
@@ -295,7 +321,7 @@ Container images are configured using parameters passed at runtime (such as thos
 | Parameter | Function |
 | :----: | --- |
 {% if param_usage_include_hostname %}
-| `--hostname={{ param_hostname }}` | {{ param_hostname_desc }} |
+| `--hostname=` | {{ param_hostname_desc }} |
 {% endif %}
 {% if param_usage_include_net %}
 | `--net={{ param_net }}` | {{ param_net_desc }} |
@@ -399,6 +425,11 @@ You only need to set the PUID and PGID variables if you are mounting the /config
 
 {{ app_setup_block }}
 {% endif %}
+
+## Docker Mods
+[![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})]({{ lsio_mods_url }} "{{ lsio_mods_desc }}")
+
+We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) can be accessed via the dynamic badge above.
 
 {% if nginx_reverse_proxy_snippet_enabled %}
 ## Reverse Proxy Snippet

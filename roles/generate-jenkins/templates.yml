@@ -8,3 +8,4 @@ templated_files:
  - { src: 'FUNDING.j2', dest: '.github/FUNDING.yml' }
  - { src: 'ISSUE_TEMPLATE.j2', dest: '.github/ISSUE_TEMPLATE.md' }
  - { src: 'PULL_REQUEST_TEMPLATE.j2', dest: '.github/PULL_REQUEST_TEMPLATE.md' }
+ - { src: 'DONATE.j2', dest: 'root/donate.txt' , donate: 'true' }
