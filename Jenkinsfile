@@ -559,13 +559,15 @@ pipeline {
                     docker push ${PUSHIMAGE}:latest
                     docker push ${PUSHIMAGE}:${META_TAG}
                   done
-                  for DELETEIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "{GITLABIMAGE}" "${IMAGE}"; do
-                    docker rmi \
-                    ${DELETEIMAGE}:${META_TAG} \
-                    ${DELETEIMAGE}:latest || :
-                  done
                '''
           }
+          sh '''#! /bin/bash
+                for DELETEIMAGE in "${QUAYIMAGE}" "${GITHUBIMAGE}" "{GITLABIMAGE}" "${IMAGE}"; do
+                  docker rmi \
+                  ${DELETEIMAGE}:${META_TAG} \
+                  ${DELETEIMAGE}:latest || :
+                done
+             '''
         }
       }
     }
