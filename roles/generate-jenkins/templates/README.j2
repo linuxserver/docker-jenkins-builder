@@ -32,7 +32,7 @@ Find us at:
 [![MicroBadger Layers]({{ lsio_shieldsio_microbadger_layers }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
 [![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ project_lsio_docker_hub_url }})
 [![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ project_lsio_docker_hub_url }})
-[![Build Status]({{ lsio_ci_badge }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ github_project_name }}/job/master/)
+[![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ github_project_name }}/job/{{ ls_branch }}/)
 [![]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/badge.svg)]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/index.html)
 
 {{ project_blurb }}
@@ -383,7 +383,7 @@ Container images are configured using parameters passed at runtime (such as thos
 
 ## Environment variables from files (Docker secrets)
 
-You can set any environment variable from a file by using a special prepend `FILE__`. 
+You can set any environment variable from a file by using a special prepend `FILE__`.
 
 As an example:
 
