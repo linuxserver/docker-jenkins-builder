@@ -2,6 +2,7 @@
 
 templated_files:
  - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
+ - { src: 'lite.j2', dest: 'README.lite' , readme: 'true' }
  - { src: 'DOCUMENTATION.j2', dest: "{{ github_project_name }}.md" , readme: 'true' }
  - { src: 'Jenkinsfile.j2', dest: 'Jenkinsfile' }
  - { src: 'LICENSE.j2', dest: 'LICENSE' }
