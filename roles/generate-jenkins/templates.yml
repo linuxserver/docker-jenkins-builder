@@ -9,3 +9,5 @@ templated_files:
  - { src: 'ISSUE_TEMPLATE.j2', dest: '.github/ISSUE_TEMPLATE.md' }
  - { src: 'PULL_REQUEST_TEMPLATE.j2', dest: '.github/PULL_REQUEST_TEMPLATE.md' }
  - { src: 'DONATE.j2', dest: 'root/donate.txt' , donate: 'true' }
+ - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }
+ - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
