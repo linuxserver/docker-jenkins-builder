@@ -391,7 +391,7 @@ pipeline {
 {% if github_project_name != "docker-jenkins-builder" %}
               docker pull linuxserver/jenkins-builder:latest
 {% endif %}
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
@@ -401,7 +401,7 @@ pipeline {
                 cd ${TEMPDIR}/repo/${LS_REPO}
                 git checkout -f {{ ls_branch }}
                 cd ${TEMPDIR}/docker-${CONTAINER_NAME}
-                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github
+                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 git add ${TEMPLATED_FILES}
@@ -462,7 +462,7 @@ pipeline {
              "merge_requests_access_level":"disabled",\
              "repository_access_level":"enabled",\
              "visibility":"public"}' '''
-      }
+      }{{ ' ' }}
     }
     /* ###############
        Build Container
@@ -784,7 +784,7 @@ pipeline {
                     docker manifest annotate ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG} --os linux --arch arm
                     docker manifest annotate ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }}
-                    docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG}
+                    docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG}{{ ' ' }}
                   done
                   docker tag ${IMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-${META_TAG}
                   docker tag ${IMAGE}:arm32v7-${META_TAG} ${GITHUBIMAGE}:arm32v7-${META_TAG}
