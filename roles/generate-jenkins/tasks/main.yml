@@ -33,7 +33,7 @@
   loop: "{{  templated_vars  }}"
 
 - name: Inlcude template loop variables
-  include_vars: 
+  include_vars:
     file: "/ansible/roles/generate-jenkins/templates.yml"
 
 ############################
@@ -63,8 +63,24 @@
     owner: "abc"
     group: "abc"
 
+- name: create destination dir for generated github workflow files
+  when: lookup('env', 'LOCAL') == "true"
+  file:
+    path: "/tmp/.github/workflows"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated github workflow files
+  when: lookup('env', 'LOCAL') != "true"
+  file:
+    path: "jenkins/{{ github_project_name }}/.github/workflows"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
 - name: create destination dir for generated donate.txt
-  when: 
+  when:
     - lookup('env', 'LOCAL') == "true"
     - sponsor_links is defined
   file:
@@ -74,7 +90,7 @@
     group: "abc"
 
 - name: create destination dir for generated donate.txt
-  when: 
+  when:
     - lookup('env', 'LOCAL') != "true"
     - sponsor_links is defined
   file:
@@ -86,7 +102,7 @@
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
   shell: "ln -s {{ github_project_name }} {{ project_name }}"
-  args: 
+  args:
     chdir: /ansible/jenkins
 
 ##############################
@@ -108,7 +124,7 @@
   loop: "{{  templated_files  }}"
 
 - name: write templates local
-  when: 
+  when:
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
@@ -149,7 +165,7 @@
   loop: "{{  templated_files  }}"
 
 - name: write readme full custom
-  when: 
+  when:
     - lookup('env', 'LOCAL') != "true"
     - item.readme is defined
     - full_custom_readme is defined
@@ -177,7 +193,7 @@
 # Donation links templating
 
 - name: write donation links
-  when: 
+  when:
     - lookup('env', 'LOCAL') != "true"
     - item.donate is defined
     - sponsor_links is defined
