@@ -677,6 +677,9 @@ pipeline {
           ]
         ]) {
           sh '''#! /bin/bash
+                set -e
+                TEMPDIR=$(mktemp -d)
+                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=master -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} 
                 docker pull lsiodev/readme-sync
                 docker run --rm=true \
                   -e DOCKERHUB_USERNAME=$DOCKERUSER \
@@ -684,7 +687,9 @@ pipeline {
                   -e GIT_REPOSITORY=${LS_USER}/${LS_REPO} \
                   -e DOCKER_REPOSITORY=${IMAGE} \
                   -e GIT_BRANCH=master \
-                  lsiodev/readme-sync bash -c 'node sync' '''
+                  -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
+                  lsiodev/readme-sync bash -c 'node sync' 
+                rm -Rf ${TEMPDIR} '''
         }
       }
     }
