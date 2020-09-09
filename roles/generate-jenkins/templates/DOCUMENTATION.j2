@@ -228,7 +228,6 @@ services:
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_vols %}
-    volumes:
 {% for item in opt_param_volumes %}
       - {{ item.vol_host_path }}:{{ item.vol_path }} #optional
 {% endfor %}
@@ -242,7 +241,6 @@ services:
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_ports %}
-    ports:
 {% for item in opt_param_ports %}
       - {{ item.external_port }}:{{ item.internal_port }} #optional
 {% endfor %}
