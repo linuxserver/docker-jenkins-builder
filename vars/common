@@ -31,16 +31,17 @@ arch_arm64: "arm64"
 arch_armhf: "armhf"
 
 # descriptions
-lsio_blog_desc: "all the things you can do with our containers including How-To guides, opinions and much more!"
+lsio_blog_desc: "How-To guides, annoucements and much more!"
 lsio_discord_desc: "realtime support / chat with the community and the team."
-lsio_discourse_desc: "post on our community forum."
+lsio_discourse_desc: "our community forum."
 lsio_fleet_desc: "an online web interface which displays all of our maintained images."
-lsio_github_desc: "view the source for all of our repositories."
+lsio_github_desc: "view the source for all of our repositories - we are 100% open-source."
 lsio_irc_desc: "on freenode at `#{{ lsio_project_name }}`. Our primary support channel is Discord."
 lsio_microbadger_desc: "Get your own version badge on microbadger.com"
 lsio_mods_desc: "view available mods for this container."
 lsio_opencollective_desc: "please consider helping us by either donating or contributing to our budget"
 lsio_podcast_desc: "on hiatus. Coming back soon (late 2018)."
+lsio_site_desc: "home to our [blog](https://blog.linuxserver.io), [forum](https://discourse.linuxserver.io), [image list](https://fleet.linuxserver.io) and more!"
 
 # asset urls
 lsio_primary_logo_url: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png
@@ -87,3 +88,5 @@ common_container_param_config_description: ""
 common_param_env_vars:
   - { env_var: "PUID", env_value: "1000", desc: "for UserID - see below for explanation" }
   - { env_var: "PGID", env_value: "1000", desc: "for GroupID - see below for explanation" }
+
+docker_mods: false
