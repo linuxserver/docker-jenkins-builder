@@ -2,21 +2,22 @@
 
 ## Gotchas
 
-* While contributing make sure to make all your changes before creating a Pull Request, as our pipeline build on each commit in a PR.
+* While contributing make sure to make all your changes before creating a Pull Request, as our pipeline builds each commit after the PR is open.
 * Read, and fill the Pull Request template
   * If this is a fix for a typo in code or documentation in the README please file an issue
-  * That if the PR is addressing an existing issue include, closes #\<issue number>, in the body of the PR commit message
+  * If the PR is addressing an existing issue include, closes #\<issue number>, in the body of the PR commit message
 
 ## Common files
 
 | File | Use case |
 | :----: | --- |
 | `Dockerfile` | Dockerfile used to build amd64 images |
-| `Dockerfile.aarch64` | Dockerfile used to build for 64bit ARM architectures |
-| `Dockerfile.armhf` | Dockerfile used to build for 32bit ARM architectures |
-| `Jenkinsfile` | This file is also a product of our builder, this shows the Jenkinsfile that was used to build the image for the commit. |
+| `Dockerfile.aarch64` | Dockerfile used to build 64bit ARM architectures |
+| `Dockerfile.armhf` | Dockerfile used to build 32bit ARM architectures |
+| `Jenkinsfile` | This file is a product of our builder and should not be edited directly. This is used to build the image |
 | `jenkins-vars.yml` | This file is used to generate the `Jenkinsfile` mentioned above, it only affects the build-process |
 | `package_versions.txt` | This file is generated as a part of the build-process, it lists all the installed packages and its version |
+| `README.md` | This file is a product of our builder and should not be edited directly. This displays the readme for the repository and image registries |
 | `readme-vars.yml` | This file is used to generate the `README.md` |
 
 ## Readme
