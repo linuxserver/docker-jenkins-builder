@@ -1,0 +1,116 @@
+# Contributing to {{ project_name }}
+
+## Gotchas
+
+* While contributing make sure to make all your changes before creating a Pull Request, as our pipeline build on each commit in a PR.
+* Read, and fill the Pull Request template
+  * If this is a fix for a typo in code or documentation in the README please file an issue
+  * That if the PR is addressing an existing issue include, closes #\<issue number>, in the body of the PR commit message
+
+## Common files
+
+| File | Use case |
+| :----: | --- |
+| `Dockerfile` | Dockerfile used to build amd64 images |
+| `Dockerfile.aarch64` | Dockerfile used to build for 64bit ARM architectures |
+| `Dockerfile.armhf` | Dockerfile used to build for 32bit ARM architectures |
+| `Jenkinsfile` | This file is also a product of our builder, this shows the Jenkinsfile that was used to build the image for the commit. |
+| `jenkins-vars.yml` | This file is used to generate the `Jenkinsfile` mentioned above, it only affects the build-process |
+| `package_versions.txt` | This file is generated as a part of the build-process, it lists all the installed packages and its version |
+| `readme-vars.yml` | This file is used to generate the `README.md` |
+
+## Readme
+
+If you would like to change our readme, please __**do not**__ directly edit the readme, as it is generated on each commit.
+Instead edit the [readme-vars.yml]({{ project_lsio_github_repo_url }}/edit/master/jenkins-vars.yml).
+
+These variables are used in a template for our [Jenkins Builder]({{ lsio_github_url }}/docker-jenkins-builder) as part of a ansible play.
+Most of these variables is also carried over to [docs.linuxserver.io]({{ "https://docs.linuxserver.io/images/" + github_project_name if full_custom_readme is not defined else "https://docs.linuxserver.io" }})
+
+### Fixing typos or clarify the text in the readme
+
+There are variables for multiple parts of the readme, the most common ones are:
+
+| Variable | Description |
+| :----: | --- |
+| `project_blurb` | This is the short excerpt shown above the project logo. |
+| `app_setup_block` | This is the text that shows up under "Application Setup" if enabled |
+
+### Parameters
+
+The compose and run examples are also generated from these variables.
+
+We have a [reference file]({{ lsio_github_url }}/docker-jenkins-builder/blob/master/vars/_container-vars-blank) in our Jenkins Builder.
+
+These are prefixed with `param_` for required parameters, or `opt_param` for optional parameters, except for `cap_add`.
+Remember to enable param, if currently disabled. This differ between parameters, and can be seen in the reference file.
+
+Devices, environment variables, ports and volumes expects its variables in a certain way.
+
+### Devices
+
+```yml
+param_devices:
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+opt_param_devices:
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+```
+
+#### Environment variables
+
+```yml
+param_env_vars:
+  - { env_var: "TZ", env_value: "Europe/London", desc: "Specify a timezone to use EG Europe/London." }
+opt_param_env_vars:
+  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
+```
+
+#### Ports
+
+```yml
+param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+opt_param_ports:
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+```
+
+#### Volumes
+
+```yml
+param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+opt_param_volumes:
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+```
+
+## Dockerfiles
+
+We use multiple Dockerfiles in our repos, this is because sometimes some CPU architectures needs different packages to work.
+If you are proposing additional packages to be added, ensure that you added the packages to all the Dockerfiles.
+
+### Testing your changes
+
+```
+git clone {{ lsio_github_url }}/{{ github_project_name }}.git
+cd {{ github_project_name }}
+docker build \
+  --no-cache \
+  --pull \
+  -t {{ lsio_project_name_short }}/{{ project_name }}:latest .
+```
+
+The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`
+```
+docker run --rm --privileged multiarch/qemu-user-static:register --reset
+```
+
+Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64`.
+
+## Update the chagelog
+
+If you are modifying the Dockerfiles or any of the startup scripts in [root]({{project_lsio_github_repo_url}}/tree/master/root), add an entry to the changelog
+
+```yml
+changelogs:
+  - { date: "DD.MM.YY:", desc: "Added some love to templates" }
+```

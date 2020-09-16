@@ -12,3 +12,4 @@ templated_files:
  - { src: 'DONATE.j2', dest: 'root/donate.txt' , donate: 'true' }
  - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }
  - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
+ - { src: 'CONTRIBUTING.j2', dest: 'CONTRIBUTING.md' }
