@@ -82,17 +82,17 @@ docker create \
 {% if param_usage_include_hostname is sameas true %}
   --hostname={{ param_hostname }} \
 {% elif param_usage_include_hostname == 'optional' %}
-  --hostname={{ param_hostname }} `#optional` \
+  --hostname={{ param_hostname }} #optional \
 {% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
 {% elif param_usage_include_net == 'optional' %}
-  --net={{ param_net }} `#optional` \
+  --net={{ param_net }} #optional \
 {% endif %}
 {% if privileged is sameas true %}
   --privileged \
 {% elif privileged == 'optional' %}
-  --privileged `#optional` \
+  --privileged #optional \
 {% endif %}
 {% if cap_add_param %}
 {% for item in cap_add_param_vars %}
@@ -101,7 +101,7 @@ docker create \
 {% endif %}
 {% if opt_cap_add_param %}
 {% for item in opt_cap_add_param_vars %}
-  --cap-add={{ item.cap_add_var }} `#optional` \
+  --cap-add={{ item.cap_add_var }} #optional \
 {% endfor %}
 {% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
@@ -110,7 +110,7 @@ docker create \
 {% endfor %}
 {% elif common_param_env_vars_enabled == 'optional' %}
 {% for item in common_param_env_vars %}
-  -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+  -e {{ item.env_var }}={{ item.env_value }} #optional \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
@@ -120,7 +120,7 @@ docker create \
 {% endif %}
 {% if opt_param_usage_include_env %}
 {% for item in opt_param_env_vars %}
-  -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+  -e {{ item.env_var }}={{ item.env_value }} #optional \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_ports %}
@@ -130,7 +130,7 @@ docker create \
 {% endif %}
 {% if opt_param_usage_include_ports %}
 {% for item in opt_param_ports %}
-  -p {{ item.external_port }}:{{ item.internal_port }} `#optional` \
+  -p {{ item.external_port }}:{{ item.internal_port }} #optional \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_vols %}
@@ -140,7 +140,7 @@ docker create \
 {% endif %}
 {% if opt_param_usage_include_vols %}
 {% for item in opt_param_volumes %}
-  -v {{ item.vol_host_path }}:{{ item.vol_path }} `#optional` \
+  -v {{ item.vol_host_path }}:{{ item.vol_path }} #optional \
 {% endfor %}
 {% endif %}
 {% if param_device_map %}
@@ -150,7 +150,7 @@ docker create \
 {% endif %}
 {% if opt_param_device_map %}
 {% for item in opt_param_devices %}
-  --device {{ item.device_host_path }}:{{ item.device_path }} `#optional` \
+  --device {{ item.device_host_path }}:{{ item.device_path }} #optional \
 {% endfor %}
 {% endif %}
 {% if custom_params is defined %}
@@ -167,10 +167,10 @@ docker create \
 {% if opt_custom_params is defined %}
 {% for item in opt_custom_params %}
 {% if item.array is not defined %}
-  --{{ item.name }}="{{ item.value }}" `#optional` \
+  --{{ item.name }}="{{ item.value }}" #optional \
 {% else %}
 {% for item2 in item.value %}
-  --{{ item.name }}="{{ item2 }}" `#optional` \
+  --{{ item.name }}="{{ item2 }}" #optional \
 {% endfor %}
 {% endif %}
 {% endfor %}
