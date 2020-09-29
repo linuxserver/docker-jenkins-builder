@@ -55,7 +55,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/greetings.yml ./.github/workflows/stale.yml'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/greetings.yml ./.github/workflows/stale.yml'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
