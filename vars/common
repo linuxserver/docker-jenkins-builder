@@ -24,6 +24,7 @@ lsio_podcast_url: "https://anchor.fm/linuxserverio"
 
 # This goes in readme-vars in each individual repo
 github_project_name: "docker-{{ project_name }}"
+project_lsio_github_repo_url: "{{ lsio_github_url }}/{{ github_project_name }}"
 project_lsio_docker_hub_url: "https://hub.docker.com/r/{{ lsio_project_name_short }}/{{ project_name }}"
 
 # supported architectures
