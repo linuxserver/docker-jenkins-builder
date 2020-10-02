@@ -8,7 +8,11 @@
 [![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ project_lsio_docker_hub_url }})
 [![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ project_lsio_docker_hub_url }})
 [![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ github_project_name }}/job/{{ ls_branch }}/)
+{% for var in repo_vars %}
+{% if 'CI' in var and 'TRUE' in var.upper() and '_' not in var %}
 [![LSIO CI]({{ lsio_shieldsio_dynamic_ci }})]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/index.html)
+{% endif %}
+{% endfor %}
 
 {{ project_blurb }}
 {% if project_blurb_optional_extras_enabled %}
@@ -47,10 +51,138 @@ This image provides various versions that are available via tags. `latest` tag u
 
 Here are some example snippets to help you get started creating a container from this image.
 
-### docker
+### docker-compose ([recommended](https://docs.linuxserver.io/general/docker-compose))
+
+Compatible with docker-compose v2 schemas.
+
+```yaml
+{% if not custom_compose is defined %}---
+version: "2.1"
+services:
+  {{ project_name }}:
+    image: {{ lsio_project_name_short }}/{{ project_name }}
+    container_name: {{ project_name }}
+{% if param_usage_include_hostname is sameas true %}
+    hostname: {{ param_hostname }}
+{% elif param_usage_include_hostname == 'optional' %}
+    hostname: {{ param_hostname }} #optional
+{% endif %}
+{% if privileged is sameas true %}
+    privileged: true
+{% elif privileged == 'optional' %}
+    privileged: true #optional
+{% endif %}
+{% if cap_add_param or opt_cap_add_param %}
+    cap_add:
+{% endif %}
+{% if cap_add_param %}
+{% for item in cap_add_param_vars %}
+      - {{ item.cap_add_var }}
+{% endfor %}
+{% endif %}
+{% if opt_cap_add_param %}
+{% for item in opt_cap_add_param_vars %}
+      - {{ item.cap_add_var }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_net is sameas true %}
+    network_mode: {{ param_net }}
+{% elif param_usage_include_net == 'optional' %}
+    network_mode: {{ param_net }} #optional
+{% endif %}
+{% if common_param_env_vars_enabled or param_usage_include_env or opt_param_usage_include_env %}
+    environment:
+{% endif %}
+{% if common_param_env_vars_enabled is sameas true %}
+{% for item in common_param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endfor %}
+{% elif common_param_env_vars_enabled == 'optional' %}
+{% for item in common_param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_env %}
+{% for item in param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_env %}
+{% for item in opt_param_env_vars %}
+      - {{ item.env_var }}={{ item.env_value }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_vols or opt_param_usage_include_vols %}
+    volumes:
+{% endif %}
+{% if param_usage_include_vols %}
+{% for item in param_volumes %}
+      - {{ item.vol_host_path }}:{{ item.vol_path }}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_vols %}
+{% for item in opt_param_volumes %}
+      - {{ item.vol_host_path }}:{{ item.vol_path }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_ports or opt_param_usage_include_ports %}
+    ports:
+{% endif %}
+{% if param_usage_include_ports %}
+{% for item in param_ports %}
+      - {{ item.external_port }}:{{ item.internal_port }}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_ports %}
+{% for item in opt_param_ports %}
+      - {{ item.external_port }}:{{ item.internal_port }} #optional
+{% endfor %}
+{% endif %}
+{% if param_device_map or opt_param_device_map %}
+    devices:
+{% endif %}
+{% if param_device_map %}
+{% for item in param_devices %}
+      - {{ item.device_host_path }}:{{ item.device_path }}
+{% endfor %}
+{% endif %}
+{% if opt_param_device_map %}
+{% for item in opt_param_devices %}
+      - {{ item.device_host_path }}:{{ item.device_path }} #optional
+{% endfor %}
+{% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}"
+{% else %}
+    {{ item.name_compose }}:
+{% for item2 in item.value %}
+      - {{ item2 }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}" #optional
+{% else %}
+    {{ item.name_compose }}: #optional
+{% for item2 in item.value %}
+      - {{ item2 }} #optional
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+    restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
 
 ```
-docker create \
+
+### docker cli
+
+```
+docker run -d \
   --name={{ param_container_name }} \
 {% if param_usage_include_hostname is sameas true %}
   --hostname={{ param_hostname }} \
@@ -157,136 +289,6 @@ docker create \
 {{ item }}
 {% endfor %}
 {% endif %}
-
-### docker-compose
-
-Compatible with docker-compose v2 schemas.
-
-```yaml
-{% if not custom_compose is defined %}---
-version: "2.1"
-services:
-  {{ project_name }}:
-    image: {{ lsio_project_name_short }}/{{ project_name }}
-    container_name: {{ project_name }}
-{% if param_usage_include_hostname is sameas true %}
-    hostname: {{ param_hostname }}
-{% elif param_usage_include_hostname == 'optional' %}
-    hostname: {{ param_hostname }} #optional
-{% endif %}
-{% if privileged is sameas true %}
-    privileged: true
-{% elif privileged == 'optional' %}
-    privileged: true #optional
-{% endif %}
-{% if cap_add_param or opt_cap_add_param %}
-    cap_add:
-{% endif %}
-{% if cap_add_param %}
-{% for item in cap_add_param_vars %}
-      - {{ item.cap_add_var }}
-{% endfor %}
-{% endif %}
-{% if opt_cap_add_param %}
-{% for item in opt_cap_add_param_vars %}
-      - {{ item.cap_add_var }} #optional
-{% endfor %}
-{% endif %}
-{% if param_usage_include_net is sameas true %}
-    network_mode: {{ param_net }}
-{% elif param_usage_include_net == 'optional' %}
-    network_mode: {{ param_net }} #optional
-{% endif %}
-{% if common_param_env_vars_enabled or param_usage_include_env or opt_param_usage_include_env %}
-    environment:
-{% endif %}
-{% if common_param_env_vars_enabled is sameas true %}
-{% for item in common_param_env_vars %}
-      - {{ item.env_var }}={{ item.env_value }}
-{% endfor %}
-{% elif common_param_env_vars_enabled == 'optional' %}
-{% for item in common_param_env_vars %}
-      - {{ item.env_var }}={{ item.env_value }} #optional
-{% endfor %}
-{% endif %}
-{% if param_usage_include_env %}
-{% for item in param_env_vars %}
-      - {{ item.env_var }}={{ item.env_value }}
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_env %}
-{% for item in opt_param_env_vars %}
-      - {{ item.env_var }}={{ item.env_value }} #optional
-{% endfor %}
-{% endif %}
-{% if param_usage_include_vols or opt_param_usage_include_vols %}
-    volumes:
-{% endif %}
-{% if param_usage_include_vols %}
-{% for item in param_volumes %}
-      - {{ item.vol_host_path }}:{{ item.vol_path }}
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_vols %}
-    volumes:
-{% for item in opt_param_volumes %}
-      - {{ item.vol_host_path }}:{{ item.vol_path }} #optional
-{% endfor %}
-{% endif %}
-{% if param_usage_include_ports or opt_param_usage_include_ports %}
-    ports:
-{% endif %}
-{% if param_usage_include_ports %}
-{% for item in param_ports %}
-      - {{ item.external_port }}:{{ item.internal_port }}
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_ports %}
-    ports:
-{% for item in opt_param_ports %}
-      - {{ item.external_port }}:{{ item.internal_port }} #optional
-{% endfor %}
-{% endif %}
-{% if param_device_map or opt_param_device_map %}
-    devices:
-{% endif %}
-{% if param_device_map %}
-{% for item in param_devices %}
-      - {{ item.device_host_path }}:{{ item.device_path }}
-{% endfor %}
-{% endif %}
-{% if opt_param_device_map %}
-{% for item in opt_param_devices %}
-      - {{ item.device_host_path }}:{{ item.device_path }} #optional
-{% endfor %}
-{% endif %}
-{% if custom_params is defined %}
-{% for item in custom_params %}
-{% if item.array is not defined %}
-    {{ item.name_compose }}: "{{ item.value }}"
-{% else %}
-    {{ item.name_compose }}:
-{% for item2 in item.value %}
-      - {{ item2 }}
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if opt_custom_params is defined %}
-{% for item in opt_custom_params %}
-{% if item.array is not defined %}
-    {{ item.name_compose }}: "{{ item.value }}" #optional
-{% else %}
-    {{ item.name_compose }}: #optional
-{% for item2 in item.value %}
-      - {{ item2 }} #optional
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-    restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
-
-```
 
 ## Parameters
 
@@ -430,14 +432,14 @@ In this instance `PUID=1000` and `PGID=1000`, to find yours use `id user` as bel
 {% endif %}
 
 ## Docker Mods
-[![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})]({{ lsio_mods_url }} "{{ lsio_mods_desc }}")
+[![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})]({{ lsio_mods_url }} "{{ lsio_mods_desc }}") [![Docker Universal Mods]({{ lsio_shieldsio_dynamic_universal_mods }})]({{ lsio_universal_mods_url }} "{{ lsio_universal_mods_desc }}")
 
-We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) can be accessed via the dynamic badge above.
+We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) as well as universal mods that can be applied to any one of our images can be accessed via the dynamic badges above.
 
 {% if nginx_reverse_proxy_snippet_enabled %}
 ## Reverse Proxy Snippet
 
-This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Let's Encrypt reverse proxy](https://github.com/linuxserver/docker-letsencrypt) container.
+This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure Web Application Gateway](https://github.com/linuxserver/docker-swag) container.
 {{ nginx_reverse_proxy_block }}
 {% endif %}
 

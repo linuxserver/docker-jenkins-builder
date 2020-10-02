@@ -7,7 +7,7 @@ This readme has been truncated from the full version found [HERE]({{ project_lsi
 ## Usage
 
 ```
-docker create \
+docker run -d \
   --name={{ param_container_name }} \
 {% if param_usage_include_hostname is sameas true %}
   --hostname={{ param_hostname }} \
