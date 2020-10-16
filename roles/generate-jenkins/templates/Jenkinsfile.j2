@@ -356,11 +356,11 @@ pipeline {
       }
       steps {
         withCredentials([
-          string(credentialsId: 'spaces-key', variable: 'DO_KEY'),
-          string(credentialsId: 'spaces-secret', variable: 'DO_SECRET')
+          string(credentialsId: 'ci-tests-s3-key-id', variable: 'S3_KEY'),
+          string(credentialsId: 'ci-tests-s3-secret-access-key', variable: 'S3_SECRET')
         ]) {
           script{
-            env.SHELLCHECK_URL = 'https://lsio-ci.ams3.digitaloceanspaces.com/' + env.IMAGE + '/' + env.META_TAG + '/shellcheck-result.xml'
+            env.SHELLCHECK_URL = 'https://ci-tests.linuxserver.io/' + env.IMAGE + '/' + env.META_TAG + '/shellcheck-result.xml'
           }
           sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-shellcheck/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
@@ -371,8 +371,8 @@ pipeline {
                 -e FILE_NAME="shellcheck-result.xml" \
                 -e MIMETYPE="text/xml" \
                 -v ${WORKSPACE}:/mnt \
-                -e SECRET_KEY=\"${DO_SECRET}\" \
-                -e ACCESS_KEY=\"${DO_KEY}\" \
+                -e SECRET_KEY=\"${S3_SECRET}\" \
+                -e ACCESS_KEY=\"${S3_KEY}\" \
                 -t lsiodev/spaces-file-upload:latest \
                 python /upload.py'''
         }
@@ -658,11 +658,11 @@ pipeline {
       }
       steps {
         withCredentials([
-          string(credentialsId: 'spaces-key', variable: 'DO_KEY'),
-          string(credentialsId: 'spaces-secret', variable: 'DO_SECRET')
+          string(credentialsId: 'ci-tests-s3-key-id', variable: 'S3_KEY'),
+          string(credentialsId: 'ci-tests-s3-secret-access-key	', variable: 'S3_SECRET')
         ]) {
           script{
-            env.CI_URL = 'https://lsio-ci.ams3.digitaloceanspaces.com/' + env.IMAGE + '/' + env.META_TAG + '/index.html'
+            env.CI_URL = 'https://ci-tests.linuxserver.io/' + env.IMAGE + '/' + env.META_TAG + '/index.html'
           }
           sh '''#! /bin/bash
                 set -e
@@ -683,14 +683,14 @@ pipeline {
                 -e PORT=\"${CI_PORT}\" \
                 -e SSL=\"${CI_SSL}\" \
                 -e BASE=\"${DIST_IMAGE}\" \
-                -e SECRET_KEY=\"${DO_SECRET}\" \
-                -e ACCESS_KEY=\"${DO_KEY}\" \
+                -e SECRET_KEY=\"${S3_SECRET}\" \
+                -e ACCESS_KEY=\"${S3_KEY}\" \
                 -e DOCKER_ENV=\"${CI_DOCKERENV}\" \
                 -e WEB_SCREENSHOT=\"${CI_WEB}\" \
                 -e WEB_AUTH=\"${CI_AUTH}\" \
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
-                -e DO_REGION="ams3" \
-                -e DO_BUCKET="lsio-ci" \
+                -e S3_REGION="us-east-1" \
+                -e S3_BUCKET="ci-tests.linuxserver.io" \
                 -t lsiodev/ci:latest \
                 python /ci/ci.py'''
         }
