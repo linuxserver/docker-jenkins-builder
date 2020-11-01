@@ -126,7 +126,7 @@ pipeline {
       steps {
         script{
           env.IMAGE = env.DOCKERHUB_IMAGE
-          env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/' + env.CONTAINER_NAME
+          env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
@@ -147,7 +147,7 @@ pipeline {
       steps {
         script{
           env.IMAGE = env.DEV_DOCKERHUB_IMAGE
-          env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
+          env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/lsiodev-' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
@@ -168,7 +168,7 @@ pipeline {
       steps {
         script{
           env.IMAGE = env.PR_DOCKERHUB_IMAGE
-          env.GITHUBIMAGE = 'docker.pkg.github.com/' + env.LS_USER + '/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
+          env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/lspipepr-' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
             env.CI_TAGS = 'amd64-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm32v7-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm64v8-' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
@@ -544,7 +544,7 @@ pipeline {
             sh '''#! /bin/bash
                   set -e
                   echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
-                  echo $GITHUB_TOKEN | docker login docker.pkg.github.com -u LinuxServer-CI --password-stdin
+                  echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   for PUSHIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
                     docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
@@ -586,7 +586,7 @@ pipeline {
             sh '''#! /bin/bash
                   set -e
                   echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
-                  echo $GITHUB_TOKEN | docker login docker.pkg.github.com -u LinuxServer-CI --password-stdin
+                  echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   if [ "${CI}" == "false" ]; then
                     docker pull lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
@@ -594,7 +594,7 @@ pipeline {
                     docker tag lsiodev/buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm32v7-${META_TAG}
                     docker tag lsiodev/buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                   fi
-                  for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}"; do
+                  for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}"; do
                     docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
                     docker tag ${IMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG}
                     docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
@@ -628,28 +628,6 @@ pipeline {
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} 
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} 
                   done
-                  docker tag ${IMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-${META_TAG}
-                  docker tag ${IMAGE}:arm32v7-${META_TAG} ${GITHUBIMAGE}:arm32v7-${META_TAG}
-                  docker tag ${IMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-${META_TAG}
-                  docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:latest
-                  docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:${META_TAG}
-                  docker tag ${GITHUBIMAGE}:arm32v7-${META_TAG} ${GITHUBIMAGE}:arm32v7-latest
-                  docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-latest
-                  docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG}
-                  docker tag ${GITHUBIMAGE}:amd64-${META_TAG} ${GITHUBIMAGE}:${EXT_RELEASE_TAG}
-                  docker tag ${GITHUBIMAGE}:arm32v7-${META_TAG} ${GITHUBIMAGE}:arm32v7-${EXT_RELEASE_TAG}
-                  docker tag ${GITHUBIMAGE}:arm64v8-${META_TAG} ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                  docker push ${GITHUBIMAGE}:amd64-${META_TAG}
-                  docker push ${GITHUBIMAGE}:arm32v7-${META_TAG}
-                  docker push ${GITHUBIMAGE}:arm64v8-${META_TAG}
-                  docker push ${GITHUBIMAGE}:latest
-                  docker push ${GITHUBIMAGE}:${META_TAG}
-                  docker push ${GITHUBIMAGE}:arm32v7-latest
-                  docker push ${GITHUBIMAGE}:arm64v8-latest
-                  docker push ${GITHUBIMAGE}:${EXT_RELEASE_TAG}
-                  docker push ${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG}
-                  docker push ${GITHUBIMAGE}:arm32v7-${EXT_RELEASE_TAG}
-                  docker push ${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                '''
           }
         }
