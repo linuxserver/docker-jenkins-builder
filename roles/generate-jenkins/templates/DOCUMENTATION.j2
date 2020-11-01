@@ -25,7 +25,7 @@
 
 Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
@@ -173,6 +173,13 @@ services:
       - {{ item2 }} #optional
 {% endfor %}
 {% endif %}
+  --restart unless-stopped \
+  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
+```
+
+{% if optional_block_1 %}
+{% for item in optional_block_1_items %}
+{{ item }}
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
@@ -181,6 +188,13 @@ services:
 
 ### docker cli
 
+```yaml
+{% if not custom_compose is defined %}---
+version: "2.1"
+services:
+  {{ project_name }}:
+    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
+    container_name: {{ project_name }}
 ```
 docker run -d \
   --name={{ param_container_name }} \
@@ -452,7 +466,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * Container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * Image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 
 ## Versions
 
