@@ -335,28 +335,19 @@ pipeline {
             label 'ARMHF'
           }
           steps {
-            withCredentials([
-              [
-                $class: 'UsernamePasswordMultiBinding',
-                credentialsId: '3f9ba4d5-100d-45b0-a3c4-633fd6061207',
-                usernameVariable: 'DOCKERUSER',
-                passwordVariable: 'DOCKERPASS'
-              ]
-            ]) {
-              echo 'Logging into DockerHub'
-              sh '''#! /bin/bash
-                 echo $DOCKERPASS | docker login -u $DOCKERUSER --password-stdin
-                 '''
-              sh "docker build --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
-                           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
-              sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
-              retry(5) {
-                sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
-              }
-              sh '''docker rmi \
-                    ${IMAGE}:arm32v7-${META_TAG} \
-                    ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :'''
+            echo 'Logging into DockerHub'
+            sh '''#! /bin/bash
+                  echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
+               '''
+            sh "docker build --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
+                         --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
+            retry(5) {
+              sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             }
+            sh '''docker rmi \
+                  ${IMAGE}:arm32v7-${META_TAG} \
+                  ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :'''
           }
         }
         stage('Build ARM64') {
