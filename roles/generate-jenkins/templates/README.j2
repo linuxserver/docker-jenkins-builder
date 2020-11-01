@@ -23,7 +23,7 @@ Find us at:
 * [GitHub]({{ lsio_github_url }}) - {{ lsio_github_desc }}
 * [Open Collective]({{ lsio_opencollective_url }}) - {{ lsio_opencollective_desc }}
 
-# [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
+# [ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
 
 [![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_lsio_github_repo_url }})
 [![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_lsio_github_repo_url }}/releases)
@@ -48,7 +48,7 @@ Find us at:
 
 Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
@@ -176,7 +176,7 @@ docker create \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  {{ lsio_project_name_short }}/{{ project_name }}
+  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
 ```
 
 {% if optional_block_1 %}
@@ -194,7 +194,7 @@ Compatible with docker-compose v2 schemas.
 version: "2.1"
 services:
   {{ project_name }}:
-    image: {{ lsio_project_name_short }}/{{ project_name }}
+    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -449,7 +449,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 
 ## Updating Info
 
@@ -458,7 +458,7 @@ Most of our images are static, versioned, and require an image update and contai
 Below are the instructions for updating containers:
 
 ### Via Docker Run/Create
-* Update the image: `docker pull {{ lsio_project_name_short }}/{{ project_name }}`
+* Update the image: `docker pull ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 * Stop the running container: `docker stop {{ project_name }}`
 * Delete the container: `docker rm {{ project_name }}`
 * Recreate a new container with the same docker create parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
@@ -494,7 +494,7 @@ cd {{ github_project_name }}
 docker build \
   --no-cache \
   --pull \
-  -t {{ lsio_project_name_short }}/{{ project_name }}:latest .
+  -t ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}:latest .
 ```
 
 The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`
