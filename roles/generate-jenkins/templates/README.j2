@@ -26,7 +26,7 @@ Find us at:
 * [GitHub]({{ lsio_github_url }}) - {{ lsio_github_desc }}
 * [Open Collective]({{ lsio_opencollective_url }}) - {{ lsio_opencollective_desc }}
 
-# [ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
+# [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
 
 [![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_lsio_github_repo_url }})
 [![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_lsio_github_repo_url }}/releases)
@@ -90,7 +90,7 @@ Compatible with docker-compose v2 schemas.
 version: "2.1"
 services:
   {{ project_name }}:
-    image: {{ lsio_project_name_short }}/{{ project_name }}
+    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -203,13 +203,6 @@ services:
       - {{ item2 }} #optional
 {% endfor %}
 {% endif %}
-  --restart unless-stopped \
-  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
-```
-
-{% if optional_block_1 %}
-{% for item in optional_block_1_items %}
-{{ item }}
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
@@ -219,12 +212,6 @@ services:
 ### docker cli
 
 ```
-{% if not custom_compose is defined %}---
-version: "2.1"
-services:
-  {{ project_name }}:
-    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
-    container_name: {{ project_name }}
 docker run -d \
   --name={{ param_container_name }} \
 {% if param_usage_include_hostname is sameas true %}
@@ -324,7 +311,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  {{ lsio_project_name_short }}/{{ project_name }}
+  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
 ```
 
 {% if optional_block_1 %}
@@ -477,14 +464,6 @@ Most of our images are static, versioned, and require an image update and contai
 
 Below are the instructions for updating containers:
 
-### Via Docker Run/Create
-* Update the image: `docker pull ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
-* Stop the running container: `docker stop {{ project_name }}`
-* Delete the container: `docker rm {{ project_name }}`
-* Recreate a new container with the same docker create parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
-* Start the new container: `docker start {{ project_name }}`
-* You can also remove the old dangling images: `docker image prune`
-
 ### Via Docker Compose
 * Update all images: `docker-compose pull`
   * or update a single image: `docker-compose pull {{ project_name }}`
@@ -493,7 +472,7 @@ Below are the instructions for updating containers:
 * You can also remove the old dangling images: `docker image prune`
 
 ### Via Docker Run
-* Update the image: `docker pull {{ lsio_project_name_short }}/{{ project_name }}`
+* Update the image: `docker pull ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 * Stop the running container: `docker stop {{ project_name }}`
 * Delete the container: `docker rm {{ project_name }}`
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)

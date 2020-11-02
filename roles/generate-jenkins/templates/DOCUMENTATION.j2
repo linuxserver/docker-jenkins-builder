@@ -60,7 +60,7 @@ Compatible with docker-compose v2 schemas.
 version: "2.1"
 services:
   {{ project_name }}:
-    image: {{ lsio_project_name_short }}/{{ project_name }}
+    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -173,13 +173,6 @@ services:
       - {{ item2 }} #optional
 {% endfor %}
 {% endif %}
-  --restart unless-stopped \
-  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
-```
-
-{% if optional_block_1 %}
-{% for item in optional_block_1_items %}
-{{ item }}
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
@@ -188,13 +181,6 @@ services:
 
 ### docker cli
 
-```yaml
-{% if not custom_compose is defined %}---
-version: "2.1"
-services:
-  {{ project_name }}:
-    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
-    container_name: {{ project_name }}
 ```
 docker run -d \
   --name={{ param_container_name }} \
@@ -295,7 +281,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  {{ lsio_project_name_short }}/{{ project_name }}
+  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
 ```
 
 {% if optional_block_1 %}
