@@ -115,6 +115,7 @@
     - lookup('env', 'LOCAL') != "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.package is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -128,6 +129,7 @@
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.package is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
@@ -210,6 +212,34 @@
     - lookup('env', 'LOCAL') == "true"
     - item.donate is defined
     - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# Package trigger templating
+
+- name: write package trigger
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.package is defined
+    - custom_package_trigger is not defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write package trigger local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.package is defined
+    - custom_package_trigger is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
