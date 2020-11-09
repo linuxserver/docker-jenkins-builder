@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Package Trigger
+        if: github.ref == 'refs/heads/master'
         run: |
           curl -X POST \
             https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-jenkins-builder/job/master/buildWithParameters?PACKAGE_CHECK=true \

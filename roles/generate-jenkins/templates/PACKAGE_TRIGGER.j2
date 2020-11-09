@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Package Trigger
+        if: github.ref == 'refs/heads/{{ ls_branch }}'
         run: |
           curl -X POST \
             https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=true \
