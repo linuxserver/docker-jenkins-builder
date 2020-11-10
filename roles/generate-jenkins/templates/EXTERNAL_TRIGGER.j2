@@ -65,11 +65,7 @@ jobs:
           fi
           echo "retrieving last pushed version"
           image="${LS_USER}/{{ project_name }}"
-{% if release_type == 'stable' %}
-          tag="latest"
-{% elif release_type == 'prerelease' %}
           tag="{{ release_tag }}"
-{% endif %}
           token=$(curl -s \
             "https://auth.docker.io/token?scope=repository:${image}:pull&service=registry.docker.io" \
             | jq -r '.token')
