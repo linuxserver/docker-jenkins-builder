@@ -227,6 +227,7 @@
     - lookup('env', 'LOCAL') != "true"
     - item.package is defined
     - custom_package_trigger is not defined
+    - ls_branch == 'master' or ls_branch == 'main'
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -240,6 +241,7 @@
     - lookup('env', 'LOCAL') == "true"
     - item.package is defined
     - custom_package_trigger is not defined
+    - ls_branch == 'master' or ls_branch == 'main'
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
