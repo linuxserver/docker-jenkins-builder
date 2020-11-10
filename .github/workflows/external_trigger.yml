@@ -1,0 +1,12 @@
+name: External Trigger Main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  external-trigger-master:
+    runs-on: ubuntu-latest
+    steps:
+      - name: External Trigger
+        run: |
+          echo "external trigger running off of master branch"
