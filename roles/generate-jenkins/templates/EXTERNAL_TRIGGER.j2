@@ -12,12 +12,16 @@ jobs:
       - name: External Trigger
         if: github.ref == 'refs/heads/{{ ls_branch }}'
         run: |
-          echo "external trigger running off of {{ ls_branch }} branch"
-          echo "setting env vars"
+          if [ -n ${{ '{{' }} secrets.PAUSE_EXTERNAL_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} {{ '}}' }} ]; then
+            echo "Github secret PAUSE_EXTERNAL_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} is set; skipping trigger."
+            exit 0
+          fi
+          echo "External trigger running off of {{ ls_branch }} branch. To disable this trigger, set a Github secret named \"PAUSE_EXTERNAL_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }}\"."
+          echo "Setting env vars"
 {% for repo_var in repo_vars %}
           {{ repo_var|regex_replace('\s(?==)','')|regex_replace('(?<==)\s','') }}
 {% endfor %}
-          echo "retrieving external version"
+          echo "Retrieving external version"
 {% if custom_version_command is defined %}
           EXT_RELEASE=$({{ custom_version_command }})
 {% endif %}
@@ -63,7 +67,8 @@ jobs:
               "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}
             exit 1
           fi
-          echo "retrieving last pushed version"
+          echo "External version: ${EXT_RELEASE}"
+          echo "Retrieving last pushed version"
           image="${LS_USER}/{{ project_name }}"
           tag="{{ release_tag }}"
           token=$(curl -s \
@@ -88,6 +93,7 @@ jobs:
               "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}
             exit 1
           fi
+          echo "Last pushed version: ${IMAGE_VERSION}"
           if [ "${EXT_RELEASE}" == "${IMAGE_VERSION}" ]; then
             echo "Version ${EXT_RELEASE} already pushed, exiting"
             exit 0

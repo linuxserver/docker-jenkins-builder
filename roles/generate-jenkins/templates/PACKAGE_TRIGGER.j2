@@ -1,38 +1,22 @@
-name: Package Trigger
+name: Package Trigger Main
 
 on:
-  schedule:
-    - cron:  '{{ ('docker-' + project_name + '/' + ls_branch)|hash('sha512')|regex_replace('[^0-9]+','')|truncate(2,True,'')|replace('6','0')|replace('7','1')|replace('8','3')|replace('9','5') }} {{ ('docker-' + project_name + '/' + ls_branch)|hash('sha512')|truncate(1,True,'')|replace('a','10')|replace('b','11')|replace('c','12')|replace('d','13')|replace('e','14')|replace('f','15') }} * * {{ ('docker-' + project_name + '/' + ls_branch)|hash('sha512')|regex_replace('[^0-9]+','')|truncate(1,True,'')|replace('7','0')|replace('8','2')|replace('9','4') }}'
   workflow_dispatch:
 
 jobs:
-  package-trigger:
+  package-trigger-{{ ls_branch }}:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.3
-        with:
-          fetch-depth: '0'
-        
+
       - name: Package Trigger
+        if: github.ref == 'refs/heads/{{ ls_branch }}'
         run: |
-          git for-each-ref --format='%(refname:short)' refs/remotes
-          docker pull ghcr.io/linuxserver/yq
-          for br in $(git for-each-ref --format='%(refname:short)' refs/remotes)
-          do
-            br=$(echo "$br" | sed 's|origin/||g')
-            echo "Evaluating branch ${br}"
-            ls_branch=$(curl -sX GET https://raw.githubusercontent.com/linuxserver/docker-{{ project_name }}/${br}/jenkins-vars.yml \
-              | docker run --rm -i --entrypoint yq ghcr.io/linuxserver/yq -r .ls_branch)
-            pause_trigger="$(eval echo \${pause_package_trigger_{{ project_name }}_$ls_branch})"
-            if [ "${br}" == "${ls_branch}" ] && [ -z "${pause_triger}" ]; then
-              echo "${br} is a live branch; triggering package build (you can pause this trigger by setting a github secret \"pause_package_trigger_{{ project_name }}_${ls_branch}\")."
-              curl -X POST \
-                https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/${br}/buildWithParameters?PACKAGE_CHECK=true \
-                --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }}
-              sleep 30
-            elif [ "${br}" == "${ls_branch}" ] && [ -n "${pause_triger}" ]; then
-              echo "Github secret \"pause_package_trigger_{{ project_name }}_${ls_branch}\" is set; skipping trigger."
-            else
-              echo "${br} appears to be a dev branch; skipping."
-            fi
-          done
+          if [ -n ${{ '{{' }} secrets.PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} {{ '}}' }} ]; then
+            echo "Github secret PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} is set; skipping trigger."
+            exit 0
+          fi
+          echo "Package trigger running off of {{ ls_branch }} branch. To disable, set a Github secret named \"PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }}\"."
+          curl -X POST \
+            https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=true \
+            --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }}

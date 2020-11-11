@@ -20,24 +20,18 @@ jobs:
           for br in $(git for-each-ref --format='%(refname:short)' refs/remotes)
           do
             br=$(echo "$br" | sed 's|origin/||g')
-            echo "evaluating branch ${br}"
+            echo "Evaluating branch ${br}"
             ls_branch=$(curl -sX GET https://raw.githubusercontent.com/linuxserver/docker-{{ project_name }}/${br}/jenkins-vars.yml \
               | docker run --rm -i --entrypoint yq ghcr.io/linuxserver/yq -r .ls_branch)
             if [ "$br" == "$ls_branch" ]; then
               echo "${br} is a live branch, checking workflow."
               if curl -sfX GET https://raw.githubusercontent.com/linuxserver/docker-{{ project_name }}/${br}/.github/workflows/external_trigger.yml > /dev/null 2>&1; then
-                echo "Workflow exists."
-                pause_trigger="$(eval echo \${pause_external_trigger_{{ project_name }}_$ls_branch})"
-                if [ -z "$pause_trigger" ]; then
-                  echo "Triggering external build for branch ${br} (you can pause this trigger by setting a github secret \"pause_external_trigger_{{ project_name }}_${ls_branch}\")."
-                  curl -iX POST \
-                    -H "Authorization: token ${{ '{{' }} secrets.CR_PAT {{ '}}' }}" \
-                    -H "Accept: application/vnd.github.v3+json" \
-                    -d "{\"ref\":\"refs/heads/${br}\"}" \
-                    https://api.github.com/repos/linuxserver/docker-{{ project_name }}/actions/workflows/external_trigger.yml/dispatches
-                else
-                  echo "Github secret \"pause_external_trigger_{{ project_name }}_${ls_branch}\" is set; skipping trigger."
-                fi
+                echo "Workflow exists. Triggering external trigger workflow for branch ${br}."
+                curl -iX POST \
+                  -H "Authorization: token ${{ '{{' }} secrets.CR_PAT {{ '}}' }}" \
+                  -H "Accept: application/vnd.github.v3+json" \
+                  -d "{\"ref\":\"refs/heads/${br}\"}" \
+                  https://api.github.com/repos/linuxserver/docker-{{ project_name }}/actions/workflows/external_trigger.yml/dispatches
               else
                 echo "Workflow doesn't exist; skipping trigger."
               fi
