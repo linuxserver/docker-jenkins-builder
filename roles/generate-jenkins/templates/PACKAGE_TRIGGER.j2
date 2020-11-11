@@ -12,7 +12,7 @@ jobs:
       - name: Package Trigger
         if: github.ref == 'refs/heads/{{ ls_branch }}'
         run: |
-          if [ -n ${{ '{{' }} secrets.PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} {{ '}}' }} ]; then
+          if [ -n "${{ '{{' }} secrets.PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} {{ '}}' }}" ]; then
             echo "Github secret PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} is set; skipping trigger."
             exit 0
           fi
