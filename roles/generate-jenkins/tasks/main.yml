@@ -232,7 +232,7 @@
   when:
     - lookup('env', 'LOCAL') != "true"
     - item.package_trigger is defined
-    - custom_package_trigger != "true"
+    - custom_package_trigger != true
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -245,7 +245,7 @@
   when:
     - lookup('env', 'LOCAL') == "true"
     - item.package_trigger is defined
-    - custom_package_trigger != "true"
+    - custom_package_trigger != true
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
@@ -288,7 +288,7 @@
   when:
     - lookup('env', 'LOCAL') != "true"
     - item.external_trigger is defined
-    - custom_external_trigger != "true"
+    - custom_external_trigger != true
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -301,7 +301,7 @@
   when:
     - lookup('env', 'LOCAL') == "true"
     - item.external_trigger is defined
-    - custom_external_trigger != "true"
+    - custom_external_trigger != true
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
