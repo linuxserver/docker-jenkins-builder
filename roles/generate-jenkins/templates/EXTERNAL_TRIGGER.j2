@@ -33,7 +33,11 @@ jobs:
           EXT_RELEASE=$(docker run --rm alpine:${DIST_TAG} sh -c 'apk update --quiet --repository '"${DIST_REPO}"'\
             && apk info --repository '"${DIST_REPO}"' '"${DIST_REPO_PACKAGES}"' | md5sum | cut -c1-8')
 {% elif external_type == "custom_json" %}
-          EXT_RELEASE=$(curl -s "${JSON_URL}" | jq -r ". | ${JSON_PATH}")
+          if [[ "${JSON_URL}" == *"api.github.com"* ]]; then
+            EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "${JSON_URL}" | jq -r ". | ${JSON_PATH}")
+          else
+            EXT_RELEASE=$(curl -s "${JSON_URL}" | jq -r ". | ${JSON_PATH}")
+          fi
 {% elif external_type == "deb_repo" %}
           EXT_RELEASE=$(docker run --rm "${DIST_IMAGE}":"${DIST_TAG}" bash -c \
             'echo -e "'"${DIST_REPO}"'" > /etc/apt/sources.list.d/check.list \
@@ -71,17 +75,30 @@ jobs:
           echo "Retrieving last pushed version"
           image="${LS_USER}/{{ project_name }}"
           tag="{{ release_tag }}"
-          token=$(curl -s \
-            "https://auth.docker.io/token?scope=repository:${image}:pull&service=registry.docker.io" \
+          token=$(curl -sX GET \
+            "https://ghcr.io/token?scope=repository%3A${LS_USER}%2F{{ project_name }}%3Apull" \
             | jq -r '.token')
-          digest=$(curl -s \
-            --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
-            --header "Authorization: Bearer ${token}" \
-            "https://registry-1.docker.io/v2/${image}/manifests/${tag}" \
-            | jq -r '.config.digest')
+          if [ "${MULTIARCH}" == "true" ]; then
+            multidigest=$(curl -s \
+              --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              --header "Authorization: Bearer ${token}" \
+              "https://ghcr.io/v2/${image}/manifests/${tag}" \
+              | jq -r 'first(.manifests[].digest)')
+            digest=$(curl -s \
+              --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              --header "Authorization: Bearer ${token}" \
+              "https://ghcr.io/v2/${image}/manifests/${multidigest}" \
+              | jq -r '.config.digest')
+          else
+            digest=$(curl -s \
+              --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+              --header "Authorization: Bearer ${token}" \
+              "https://ghcr.io/v2/${image}/manifests/${tag}" \
+              | jq -r '.config.digest')
+          fi
           image_info=$(curl -sL \
             --header "Authorization: Bearer ${token}" \
-            "https://registry-1.docker.io/v2/${image}/blobs/${digest}" \
+            "https://ghcr.io/v2/${image}/blobs/${digest}" \
             | jq -r '.container_config')
           IMAGE_RELEASE=$(echo ${image_info} | jq -r '.Labels.build_version' | awk '{print $3}')
           IMAGE_VERSION=$(echo ${IMAGE_RELEASE} | awk -F'-ls' '{print $1}')
