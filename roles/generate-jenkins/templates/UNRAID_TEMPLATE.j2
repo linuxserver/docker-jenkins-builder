@@ -1,0 +1,132 @@
+{#- Create a real object from repo_vars -#}
+{%- set better_vars={} -%}
+{%- for i in repo_vars -%}
+{%- set i=(i | replace(" = ", "=", 1) | replace("'", "") | replace('"', "")).split('=') -%}
+{%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
+{%- endfor -%}
+{#- Create a real object from repo_vars -#}
+{#- Create ExtraParam for REQUIRED stuff-#}
+{%- set ExtraParam=[] -%}
+{%- set x=ExtraParam.append(param_hostname) if param_usage_include_hostname is sameas true -%}
+{%- if cap_add_param is defined -%}
+{%- for item in cap_add_param_vars -%}
+{%- set x=ExtraParam.append("--cap-add=" + item.cap_add_var) -%}
+{%- endfor -%}
+{#- custom_params -#}
+{%- if custom_params is defined -%}
+{%- for item in custom_params -%}
+{%- if item.array is not defined -%}
+{%- set x=ExtraParam.append("--" + item.name+ "=" + item.value) -%}
+{%- else -%}
+{%- for item2 in item.value -%}
+{%- set x=ExtraParam.append("--" + item.name+ "=" + item2) -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endfor -%}
+{%- endif -%}
+{%- endif -%}
+{#- Create ExtraParam for REQUIRED stuff-#}
+<?xml version="1.0"?>
+<Container version="2">
+    <Name>{{ param_container_name | lower }}</Name>
+    <Repository>ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}</Repository>
+    <Registry>https://github.com/orgs/{{ lsio_project_name_short }}/packages/container/package/{{ project_name }}</Registry>
+    <DonateText>Donations</DonateText>
+    <DonateLink>https://www.linuxserver.io/donate</DonateLink>
+    <DonateImg>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/donate.png</DonateImg>
+    <Network>{{ param_net if param_usage_include_net is sameas true else 'bridge' }}</Network>
+    <Privileged>{{ "true" if privileged is sameas true else "false" }}</Privileged>
+    <Support>https://www.linuxserver.io/support</Support>
+{# Set the Branches, if any #}
+{% if development_versions is defined and development_versions %}
+{% for item in development_versions_items %}
+    <Branch>
+        <Tag>{{ item.tag }}</Tag>
+        <TagDescription>{{ item.desc }}</TagDescription>
+{% if item.extra is defined %} {#- Allow for branch-specific stuff #}
+        {{ item.extra | indent(8) | trim }}
+{% endif %}
+    </Branch>
+{% endfor %}
+{% endif %}
+{# Set the Branches, if any #}
+    <Project>{{ project_url }}</Project>
+    <Overview>{{ project_blurb | trim }}</Overview>
+{# Set the ExtraParmas, if any #}
+{% if ExtraParam is defined and ExtraParam!=[] %}
+    <ExtraParams>{{ ExtraParam|join(" ") }}</ExtraParams>
+{% endif %}
+{# Set the WebUI link based on the link the CI runs against #}
+{% if better_vars.get("CI_WEB") and better_vars.get("CI") == "true" %}
+    <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]</WebUI>
+{% endif %}
+{# Set the WebUI link based on the link the CI runs against #}
+    <TemplateURL>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/{{ project_name | lower }}.xml</TemplateURL>
+    <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/digikam.png</Icon>
+{# Set required ports, gets the name from the name atribute if present, or "WebUI" if it is the first port #}
+{% if param_usage_include_ports | default(false) %}
+{% for item in param_ports %}
+{% set port, proto=item.internal_port.split('/') if "/" in item.internal_port else [item.internal_port, false] %} {#- Logic to get the protocol #}
+    <Config Name="{{ item.name if item.name is defined else "WebUI" if loop.first else "Port: " + port }}" Target="{{ port }}" Default="{{ item.external_port }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ item.port_desc if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="true" Mask="false"/>
+{% endfor %}
+{% endif %}
+{#- Set required ports, gets the name from the name atribute if present, or "WebUI" if it is the first port #}
+{#- Set optional ports #}
+{% if opt_param_usage_include_ports | default(false) %}
+{% for item in opt_param_ports %}
+{% set port, proto=item.internal_port.split('/') if "/" in item.internal_port else [item.internal_port, false] %} {#- Logic to get the protocol #}
+    <Config Name="{{ item.name if item.name is defined else "Port: " + port }}" Target="{{ port }}" Default="{{ item.external_port }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ item.port_desc if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="false" Mask="false"/>
+{% endfor %}
+{% endif %}
+{#- Set optional ports #}
+{#- Set required volumes, gets the name from the name atribute if present, or "Appdata" if it is the /config location #}
+{% if param_usage_include_vols | default(false) %}
+{% for item in param_volumes %}
+{% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
+    <Config Name="{{ item.name if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ path }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ item.desc if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="true" Mask="false"/>
+{% endfor %}
+{% endif %}
+{#- Set required volumes, gets the name from the name atribute if present, or "Appdata" if it is the /config location #}
+{#- Set optional volumes #}
+{% if opt_param_usage_include_vols | default(false) %}
+{% for item in opt_param_volumes %}
+{% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
+    <Config Name="{{ item.name if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ path }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ item.desc if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
+{% endfor %}
+{% endif %}
+{#- Set optional volumes #}
+{% set skip_envs=["puid", "pgid", "tz"] %} {#- Drop envs that are either hardcoded, or automaticcly added by unraid #}
+{#- Set required variables, gets the name from the name atribute #}
+{% if param_usage_include_env | default(false) %}
+{% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
+{% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
+    <Config Name="{{ item.name if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_value }}" Description="{{ item.desc if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
+{% endfor %}
+{% endif %}
+{#- Set required variables, gets the name from the name atribute #}
+{#- Set optional variables #}
+{% if opt_param_usage_include_env | default(false) %}
+{% for item in opt_param_env_vars if not item.env_var | lower is in skip_envs %}
+{% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
+    <Config Name="{{ item.name if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_value }}" Description="{{ item.desc if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask }}"/>
+{% endfor %}
+{% endif %}
+{#- Set optional variables #}
+    <Config Name="PUID" Target="PUID" Default="99" Description="Container Variable: PUID" Type="Variable" Display="always" Required="false" Mask="false"/>
+    <Config Name="PGID" Target="PGID" Default="100" Description="Container Variable: PGID" Type="Variable" Display="always" Required="false" Mask="false"/>
+{#- Set required devices, gets the name from the name atribute #}
+{% if param_device_map | default(false) %}
+{% for item in param_devices %}
+    <Config Name="{{ item.name if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ item.desc if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+{% endfor %}
+{% endif %}
+{#- Set required variables, gets the name from the name atribute #}
+{#- Set optional devices #}
+{% if opt_param_device_map | default(false) %}
+{% for item in opt_param_devices %}
+    <Config Name="{{ item.name if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ item.desc if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+{% endfor %}
+{% endif %}
+{# Set optional devices #}
+
+</Container>
