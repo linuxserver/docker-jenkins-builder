@@ -1,0 +1,22 @@
+name: Package Trigger Main
+
+on:
+  workflow_dispatch:
+
+jobs:
+  package-trigger-{{ ls_branch }}:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.3
+
+      - name: Package Trigger
+        if: github.ref == 'refs/heads/{{ ls_branch }}'
+        run: |
+          if [ -n "${{ '{{' }} secrets.PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} {{ '}}' }}" ]; then
+            echo "Github secret PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }} is set; skipping trigger."
+            exit 0
+          fi
+          echo "Package trigger running off of {{ ls_branch }} branch. To disable, set a Github secret named \"PAUSE_PACKAGE_TRIGGER_{{ project_name|regex_replace('-','_')|upper }}_{{ ls_branch|regex_replace('-','_')|upper }}\"."
+          curl -X POST \
+            https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=true \
+            --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }}

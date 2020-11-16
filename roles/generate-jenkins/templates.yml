@@ -13,3 +13,7 @@ templated_files:
  - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }
  - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
  - { src: 'CONTRIBUTING.j2', dest: '.github/CONTRIBUTING.md' }
+ - { src: 'PACKAGE_TRIGGER.j2', dest: '.github/workflows/package_trigger.yml', package_trigger: 'true' }
+ - { src: 'PACKAGE_TRIGGER_SCHEDULER.j2', dest: '.github/workflows/package_trigger_scheduler.yml' }
+ - { src: 'EXTERNAL_TRIGGER.j2', dest: '.github/workflows/external_trigger.yml', external_trigger: 'true' }
+ - { src: 'EXTERNAL_TRIGGER_SCHEDULER.j2', dest: '.github/workflows/external_trigger_scheduler.yml' }
