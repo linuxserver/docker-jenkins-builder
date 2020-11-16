@@ -12,29 +12,5 @@ jobs:
       - name: External Trigger
         if: github.ref == 'refs/heads/master'
         run: |
-          if [ -n "${{ secrets.PAUSE_EXTERNAL_TRIGGER_JENKINS_BUILDER_MASTER }}" ]; then
-            echo "Github secret PAUSE_EXTERNAL_TRIGGER_JENKINS_BUILDER_MASTER is set; skipping trigger."
-            exit 0
-          fi
-          echo "External trigger running off of master branch. To disable this trigger, set a Github secret named \"PAUSE_EXTERNAL_TRIGGER_JENKINS_BUILDER_MASTER\"."
-          echo "Setting env vars"
-          BUILD_VERSION_ARG='BUILDER_VERSION'
-          LS_USER='linuxserver'
-          LS_REPO='docker-jenkins-builder'
-          CONTAINER_NAME='jenkins-builder'
-          DOCKERHUB_IMAGE='linuxserver/jenkins-builder'
-          DEV_DOCKERHUB_IMAGE='lsiodev/jenkins-builder'
-          PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
-          DIST_IMAGE='alpine'
-          MULTIARCH='true'
-          CI='true'
-          CI_WEB='true'
-          CI_PORT='8000'
-          CI_SSL='false'
-          CI_DELAY='60'
-          CI_DOCKERENV='CI_RUN=True'
-          CI_AUTH='user:password'
-          CI_WEBPATH=''
-          echo "Retrieving external version"
           echo "No external release, exiting."
           exit 0
