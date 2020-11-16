@@ -2,7 +2,7 @@ name: External Trigger Scheduler
 
 on:
   schedule:
-    - cron:  '{{ ('docker-' + project_name)|hash('sha512')|regex_replace('[^0-9]+','')|truncate(2,True,'')|replace('6','0')|replace('7','1')|replace('8','3')|replace('9','5') }} * * * *'
+    - cron:  '{{ ('docker-' + project_name + '-external')|hash('sha512')|regex_replace('[^0-9]+','')|truncate(2,True,'')|replace('6','0')|replace('7','1')|replace('8','3')|replace('9','5') }} * * * *'
   workflow_dispatch:
 
 jobs:

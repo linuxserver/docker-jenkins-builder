@@ -32,7 +32,7 @@
     file: "/tmp/{{ item }}"
   loop: "{{  templated_vars  }}"
 
-- name: Inlcude template loop variables
+- name: include template loop variables
   include_vars:
     file: "/ansible/roles/generate-jenkins/templates.yml"
 
@@ -116,9 +116,7 @@
     - item.readme is not defined
     - item.donate is not defined
     - item.package_trigger is not defined
-    - item.package_trigger_scheduler is not defined
     - item.external_trigger is not defined
-    - item.external_trigger_scheduler is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -133,9 +131,7 @@
     - item.readme is not defined
     - item.donate is not defined
     - item.package_trigger is not defined
-    - item.package_trigger_scheduler is not defined
     - item.external_trigger is not defined
-    - item.external_trigger_scheduler is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
@@ -254,34 +250,6 @@
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
-# Package trigger scheduler templating
-
-- name: write package trigger scheduler
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.package_trigger_scheduler is defined
-    - ls_branch == 'master' or ls_branch == 'main'
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write package trigger scheduler local
-  when:
-    - lookup('env', 'LOCAL') == "true"
-    - item.package_trigger_scheduler is defined
-    - ls_branch == 'master' or ls_branch == 'main'
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "/tmp/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
 # External trigger templating
 
 - name: write external trigger
@@ -302,34 +270,6 @@
     - lookup('env', 'LOCAL') == "true"
     - item.external_trigger is defined
     - custom_external_trigger != true
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "/tmp/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-# External trigger scheduler templating
-
-- name: write external trigger scheduler
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.external_trigger_scheduler is defined
-    - ls_branch == 'master' or ls_branch == 'main'
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write external trigger scheduler local
-  when:
-    - lookup('env', 'LOCAL') == "true"
-    - item.external_trigger_scheduler is defined
-    - ls_branch == 'master' or ls_branch == 'main'
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
