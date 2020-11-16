@@ -20,7 +20,15 @@ available_architectures:
 development_versions: false
 development_versions_items:
   - { tag: "latest", desc: "Stable Ombi releases" }
-  - { tag: "development", desc: "Releases from the `develop` branch of Ombi" }
+  - tag: "development"
+    desc: "Releases from the `develop` branch of Ombi"
+    extra: |
+      <Environment>
+          <Variable>
+              <Name>SomeDevelopSpecificVar</Name>
+              <Value>1337</Value>
+          </Variable>
+      </Environment>
 
 
 # container parameters
@@ -34,16 +42,16 @@ param_net: "host"
 param_net_desc: "Shares host networking with container."
 param_usage_include_env: true
 param_env_vars:
-  - { env_var: "TZ", env_value: "Europe/London", desc: "Specify a timezone to use EG Europe/London." }
+  - { env_var: "TZ", env_value: "Europe/London", desc: "Specify a timezone to use EG Europe/London.", name: "Timezone" }
 param_usage_include_vols: true
 param_volumes:
-  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files.", name: "Appdata" }
 param_usage_include_ports: true
 param_ports:
-  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI", name: "WebUI" }
 param_device_map: false
 param_devices:
-  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding", name: "QuckSync" }
 cap_add_param: false
 cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
@@ -51,16 +59,16 @@ cap_add_param_vars:
 # optional container parameters
 opt_param_usage_include_env: false
 opt_param_env_vars:
-  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number." }
+  - { env_var: "VERSION", env_value: "latest", desc: "Supported values are LATEST, PLEXPASS or a specific version number.", name: "Version" }
 opt_param_usage_include_vols: false
 opt_param_volumes:
-  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files." }
+  - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files.", name: "Config" }
 opt_param_usage_include_ports: false
 opt_param_ports:
-  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI" }
+  - { external_port: "80", internal_port: "80", port_desc: "Application WebUI", name: "WebUI" }
 opt_param_device_map: false
 opt_param_devices:
-  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding" }
+  - { device_path: "/dev/dri", device_host_path: "/dev/dri", desc: "For hardware transcoding", name: "QuckSync" }
 opt_cap_add_param: false
 opt_cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
