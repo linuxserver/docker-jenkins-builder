@@ -13,3 +13,4 @@ templated_files:
  - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }
  - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
  - { src: 'CONTRIBUTING.j2', dest: '.github/CONTRIBUTING.md' }
+ - { src: 'UNRAID_TEMPLATE.j2', dest: "{{ project_name | lower }}.xml" , unraid_template: 'true' }
