@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  external-trigger-{{ ls_branch }}:
+  external-trigger-{{ ls_branch|regex_replace('[^a-zA-Z0-9-]','-') }}:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.3
@@ -119,13 +119,20 @@ jobs:
             exit 0
           else
             echo "New version ${EXT_RELEASE} found; old version was ${IMAGE_VERSION}. Triggering new build"
-            curl -X POST \
+            response=$(curl -iX POST \
               https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=false \
-              --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }}
+              --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }} | grep -i location | sed "s|^[L|l]ocation: \(.*\)|\1|")
+            buildurl=$(curl -s "${response%$'\r'}api/json" | jq -r '.executable.url')
+            buildurl="${buildurl%$'\r'}"
+            curl -iX POST \
+              "${buildurl}submitDescription" \
+              --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }} \
+              --data-urlencode "description=GHA external trigger https://github.com/${{ '{{' }} github.repository {{ '}}' }}/actions/runs/${{ '{{' }} github.run_id {{ '}}' }}" \
+              --data-urlencode "Submit=Submit"
             echo "Notifying Discord"
             TRIGGER_REASON="A version change was detected for {{ project_name }} tag {{ release_tag }}. Old version:${IMAGE_VERSION} New version:${EXT_RELEASE}"
             curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://cdn.discordapp.com/avatars/354986384542662657/df91181b3f1cf0ef1592fbe18e0962d7.png","embeds": [{"color": 9802903,
-              "description": "**Build Triggered** \n**Reason:** '"${TRIGGER_REASON}"' \n"}],
+              "description": "**Build Triggered** \n**Reason:** '"${TRIGGER_REASON}"' \n**Build URL:** '"${buildurl}display/redirect"' \n"}],
               "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}
           fi
 {% endif %}
