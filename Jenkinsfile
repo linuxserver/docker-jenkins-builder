@@ -313,6 +313,7 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
+        echo "Running on node: ${NODE_NAME}"
         sh "docker build --no-cache --pull -t ${IMAGE}:${META_TAG} \
         --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
@@ -326,6 +327,7 @@ pipeline {
       parallel {
         stage('Build X86') {
           steps {
+            echo "Running on node: ${NODE_NAME}"
             sh "docker build --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} \
             --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${META_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
@@ -335,6 +337,7 @@ pipeline {
             label 'ARMHF'
           }
           steps {
+            echo "Running on node: ${NODE_NAME}"
             echo 'Logging into Github'
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
@@ -355,6 +358,7 @@ pipeline {
             label 'ARM64'
           }
           steps {
+            echo "Running on node: ${NODE_NAME}"
             echo 'Logging into Github'
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
