@@ -1,6 +1,6 @@
 {%- set better_vars={} -%}
 {%- for i in repo_vars -%}
-{%- set i=(i | replace(" = ", "=", 1) | replace("'", "") | replace('"', "")).split('=') -%}
+{%- set i=(i | replace(' = ', '=', 1) | replace('=', '¯\_(ツ)_/¯', 1) | replace("'", "") | replace('"', "")).split('¯\_(ツ)_/¯') -%}
 {%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
 {%- endfor -%}
 name: External Trigger Main
