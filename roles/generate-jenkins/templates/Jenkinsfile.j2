@@ -796,10 +796,13 @@ pipeline {
                   docker rmi \
                   ${DELETEIMAGE}:amd64-${META_TAG} \
                   ${DELETEIMAGE}:amd64-{{ release_tag }} \
+                  ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} \
                   ${DELETEIMAGE}:arm32v7-${META_TAG} \
                   ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
+                  ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
                   ${DELETEIMAGE}:arm64v8-${META_TAG} \
-                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} || :
+                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
+                  ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
                 done
                 docker rmi \
                 ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
