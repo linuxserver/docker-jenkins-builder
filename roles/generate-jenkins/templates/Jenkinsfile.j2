@@ -809,6 +809,22 @@ pipeline {
                 ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
              '''
 {% endif %}
+{% if "docker-baseimage" in github_project_name %}
+          sh '''#! /bin/bash
+                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
+                  docker rmi \
+                  ${DELETEIMAGE}:arm32v7-${META_TAG} \
+                  ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
+                  ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
+                  ${DELETEIMAGE}:arm64v8-${META_TAG} \
+                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
+                  ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
+                done
+                docker rmi \
+                ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
+                ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
+             '''
+{% endif %}
         }
       }
     }
