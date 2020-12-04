@@ -36,7 +36,7 @@
     <DonateImg>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/donate.png</DonateImg>
     <Network>{{ param_net if param_usage_include_net is sameas true else 'bridge' }}</Network>
     <Privileged>{{ "true" if privileged is sameas true else "false" }}</Privileged>
-    <Support>https://www.linuxserver.io/support</Support>
+    <Support>{{ lsio_github_url }}/{{ project_repo_name }}/issues/new/choose</Support>
 {# Set the Branches, if any #}
 {% if development_versions is defined and development_versions %}
 {% for item in development_versions_items %}
