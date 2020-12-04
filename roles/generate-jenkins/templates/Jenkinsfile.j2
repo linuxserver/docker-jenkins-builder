@@ -41,7 +41,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/greetings.yml ./.github/workflows/stale.yml{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %} ./.github/workflows/package_trigger_scheduler.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %} ./.github/workflows/external_trigger_scheduler.yml'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.md ./.github/ISSUE_TEMPLATE/issue.feature.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/greetings.yml ./.github/workflows/stale.yml{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %} ./.github/workflows/package_trigger_scheduler.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %} ./.github/workflows/external_trigger_scheduler.yml'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
@@ -341,7 +341,7 @@ pipeline {
         }
       }
     }
-{% if github_project_name == "docker-jenkins-builder" %}
+{% if project_repo_name == "docker-jenkins-builder" %}
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
@@ -391,10 +391,10 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-{% if github_project_name != "docker-jenkins-builder" %}
+{% if project_repo_name != "docker-jenkins-builder" %}
               docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
+              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
@@ -405,9 +405,12 @@ pipeline {
                 git checkout -f {{ ls_branch }}
                 cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
+                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
+                rm ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE.md
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 git add ${TEMPLATED_FILES}
+                git rm .github/ISSUE_TEMPLATE.md
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
@@ -790,7 +793,7 @@ pipeline {
                   done
                '''
           }
-{% if not github_project_name == "docker-jenkins-builder" and "docker-baseimage" not in github_project_name %}
+{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
                   docker rmi \
@@ -910,10 +913,10 @@ pipeline {
           sh '''#! /bin/bash
                 set -e
                 TEMPDIR=$(mktemp -d)
-{% if github_project_name != "docker-jenkins-builder" %}
+{% if project_repo_name != "docker-jenkins-builder" %}
                 docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
-                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %} 
+                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}
                 docker pull ghcr.io/linuxserver/lsiodev-readme-sync
                 docker run --rm=true \
                   -e DOCKERHUB_USERNAME=$DOCKERUSER \
@@ -922,7 +925,7 @@ pipeline {
                   -e DOCKER_REPOSITORY=${IMAGE} \
                   -e GIT_BRANCH=master \
                   -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
-                  ghcr.io/linuxserver/lsiodev-readme-sync bash -c 'node sync' 
+                  ghcr.io/linuxserver/lsiodev-readme-sync bash -c 'node sync'
                 rm -Rf ${TEMPDIR} '''
         }
       }

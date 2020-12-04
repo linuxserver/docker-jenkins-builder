@@ -1,0 +1,13 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord chat support
+    url: {{ lsio_discord_url }}
+    about: Realtime support / chat with the community and the team.
+
+  - name: Discourse discussion forum
+    url: {{ lsio_discourse_url }}
+    about: Post on our community forum.
+
+  - name: Documentation
+    url: {{ lsio_docs_url + "/images/" + project_repo_name if full_custom_readme is not defined else lsio_docs_url }}
+    about: Documentation - information about all of our containers.
