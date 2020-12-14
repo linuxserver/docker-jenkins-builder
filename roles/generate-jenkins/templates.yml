@@ -3,11 +3,13 @@
 templated_files:
  - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
  - { src: 'lite.j2', dest: 'README.lite' , readme: 'true' }
- - { src: 'DOCUMENTATION.j2', dest: "{{ github_project_name }}.md" , readme: 'true' }
+ - { src: 'DOCUMENTATION.j2', dest: "{{ project_repo_name }}.md" , readme: 'true' }
  - { src: 'Jenkinsfile.j2', dest: 'Jenkinsfile' }
  - { src: 'LICENSE.j2', dest: 'LICENSE' }
  - { src: 'FUNDING.j2', dest: '.github/FUNDING.yml' }
- - { src: 'ISSUE_TEMPLATE.j2', dest: '.github/ISSUE_TEMPLATE.md' }
+ - { src: 'ISSUE_TEMPLATE.bug.j2', dest: '.github/ISSUE_TEMPLATE/issue.bug.md' }
+ - { src: 'ISSUE_TEMPLATE.config.j2', dest: '.github/ISSUE_TEMPLATE/config.yml' }
+ - { src: 'ISSUE_TEMPLATE.feature.j2', dest: '.github/ISSUE_TEMPLATE/issue.feature.md' }
  - { src: 'PULL_REQUEST_TEMPLATE.j2', dest: '.github/PULL_REQUEST_TEMPLATE.md' }
  - { src: 'DONATE.j2', dest: 'root/donate.txt' , donate: 'true' }
  - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }

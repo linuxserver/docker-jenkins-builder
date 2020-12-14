@@ -26,16 +26,16 @@ Find us at:
 * [GitHub]({{ lsio_github_url }}) - {{ lsio_github_desc }}
 * [Open Collective]({{ lsio_opencollective_url }}) - {{ lsio_opencollective_desc }}
 
-# [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_lsio_github_repo_url }})
+# [{{ lsio_project_name_short }}/{{ project_name }}]({{ lsio_github_url }}/{{ project_repo_name }})
 
-[![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_lsio_github_repo_url }})
-[![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_lsio_github_repo_url }}/releases)
-[![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ project_lsio_github_repo_url }}/packages)
-[![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})](https://gitlab.com/Linuxserver.io/{{ github_project_name }}/container_registry)
+[![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ lsio_github_url }}/{{ project_repo_name }})
+[![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ lsio_github_url }}/{{ project_repo_name }}/releases)
+[![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ lsio_github_url }}/{{ project_repo_name }}/packages)
+[![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})]({{ lsio_gitlab_url }}/{{ project_repo_name }}/container_registry)
 [![MicroBadger Layers]({{ lsio_shieldsio_microbadger_layers }})]({{ lsio_microbadger_url }}/{{ project_name }} "{{ lsio_microbadger_desc }}")
-[![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ project_lsio_docker_hub_url }})
-[![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ project_lsio_docker_hub_url }})
-[![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ github_project_name }}/job/{{ ls_branch }}/)
+[![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ lsio_docker_hub_url }}/{{ project_name }})
+[![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ lsio_docker_hub_url }}/{{ project_name }})
+[![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/)
 {% for var in repo_vars %}
 {% if 'CI' in var and 'TRUE' in var.upper() and '_' not in var %}
 [![LSIO CI]({{ lsio_shieldsio_dynamic_ci }})]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/index.html)
@@ -81,7 +81,7 @@ This image provides various versions that are available via tags. `latest` tag u
 
 Here are some example snippets to help you get started creating a container.
 
-### docker-compose ([recommended](https://docs.linuxserver.io/general/docker-compose))
+### docker-compose ([recommended]({{ lsio_docs_url }}/general/docker-compose))
 
 Compatible with docker-compose v2 schemas.
 
@@ -440,12 +440,12 @@ You only need to set the PUID and PGID variables if you are mounting the /config
 ## Docker Mods
 [![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})]({{ lsio_mods_url }} "{{ lsio_mods_desc }}") [![Docker Universal Mods]({{ lsio_shieldsio_dynamic_universal_mods }})]({{ lsio_universal_mods_url }} "{{ lsio_universal_mods_desc }}")
 
-We publish various [Docker Mods](https://github.com/linuxserver/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) as well as universal mods that can be applied to any one of our images can be accessed via the dynamic badges above.
+We publish various [Docker Mods]({{ lsio_github_url }}/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) as well as universal mods that can be applied to any one of our images can be accessed via the dynamic badges above.
 
 {% if nginx_reverse_proxy_snippet_enabled %}
 ## Reverse Proxy Snippet
 
-This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure Web Application Gateway](https://github.com/linuxserver/docker-swag) container.
+This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure Web Application Gateway]({{ lsio_github_url }}/docker-swag) container.
 {{ nginx_reverse_proxy_block }}
 {% endif %}
 
@@ -488,7 +488,7 @@ Below are the instructions for updating containers:
   ```
 * You can also remove the old dangling images: `docker image prune`
 
-**Note:** We do not endorse the use of Watchtower as a solution to automated updates of existing Docker containers. In fact we generally discourage automated updates. However, this is a useful tool for one-time manual updates of containers where you have forgotten the original parameters. In the long term, we highly recommend using [Docker Compose](https://docs.linuxserver.io/general/docker-compose).
+**Note:** We do not endorse the use of Watchtower as a solution to automated updates of existing Docker containers. In fact we generally discourage automated updates. However, this is a useful tool for one-time manual updates of containers where you have forgotten the original parameters. In the long term, we highly recommend using [Docker Compose]({{ lsio_docs_url }}/general/docker-compose).
 
 ### Image Update Notifications - Diun (Docker Image Update Notifier)
 * We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.
@@ -497,8 +497,8 @@ Below are the instructions for updating containers:
 
 If you want to make local modifications to these images for development purposes or just to customize the logic:
 ```
-git clone {{ lsio_github_url }}/{{ github_project_name }}.git
-cd {{ github_project_name }}
+git clone {{ lsio_github_url }}/{{ project_repo_name }}.git
+cd {{ project_repo_name }}
 docker build \
   --no-cache \
   --pull \

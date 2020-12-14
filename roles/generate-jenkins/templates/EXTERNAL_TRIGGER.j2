@@ -117,18 +117,18 @@ jobs:
           if [ "${EXT_RELEASE}" == "${IMAGE_VERSION}" ]; then
             echo "**** Version ${EXT_RELEASE} already pushed, exiting ****"
             exit 0
-          elif [ $(curl -s https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.building') == "true" ]; then
+          elif [ $(curl -s {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.building') == "true" ]; then
             echo "**** New version ${EXT_RELEASE} found; but there already seems to be an active build on Jenkins; exiting ****"
             exit 0
 {% if external_trigger_delay_hours > 0 %}
-          elif [[ $(( $(date +%s%3N) - $(curl -s https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.timestamp')  )) -lt $(( {{ external_trigger_delay_hours }} * 3600000 )) ]]; then
+          elif [[ $(( $(date +%s%3N) - $(curl -s {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.timestamp')  )) -lt $(( {{ external_trigger_delay_hours }} * 3600000 )) ]]; then
             echo "**** New version ${EXT_RELEASE} found; but the last build was less than {{ external_trigger_delay_hours }} hours ago; skipping trigger ****"
             exit 0
 {% endif %}
           else
             echo "**** New version ${EXT_RELEASE} found; old version was ${IMAGE_VERSION}. Triggering new build ****"
             response=$(curl -iX POST \
-              https://ci.linuxserver.io/job/Docker-Pipeline-Builders/job/docker-{{ project_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=false \
+              {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=false \
               --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }} | grep -i location | sed "s|^[L|l]ocation: \(.*\)|\1|")
             echo "**** Jenkins job queue url: ${response%$'\r'} ****"
             echo "**** Sleeping 10 seconds until job starts ****"
