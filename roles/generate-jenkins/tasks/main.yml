@@ -32,7 +32,7 @@
     file: "/tmp/{{ item }}"
   loop: "{{  templated_vars  }}"
 
-- name: Inlcude template loop variables
+- name: include template loop variables
   include_vars:
     file: "/ansible/roles/generate-jenkins/templates.yml"
 
@@ -42,7 +42,7 @@
 - name: create destination dir for generated Jenkinsfile
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ github_project_name }}"
+    path: "jenkins/{{ project_repo_name }}"
     state: directory
     owner: "abc"
     group: "abc"
@@ -58,7 +58,7 @@
 - name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ github_project_name }}/.github"
+    path: "jenkins/{{ project_repo_name }}/.github"
     state: directory
     owner: "abc"
     group: "abc"
@@ -74,7 +74,23 @@
 - name: create destination dir for generated github workflow files
   when: lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ github_project_name }}/.github/workflows"
+    path: "jenkins/{{ project_repo_name }}/.github/workflows"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated github ISSUE_TEMPLATE files
+  when: lookup('env', 'LOCAL') == "true"
+  file:
+    path: "/tmp/.github/ISSUE_TEMPLATE"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated github ISSUE_TEMPLATE files
+  when: lookup('env', 'LOCAL') != "true"
+  file:
+    path: "jenkins/{{ project_repo_name }}/.github/ISSUE_TEMPLATE"
     state: directory
     owner: "abc"
     group: "abc"
@@ -94,14 +110,14 @@
     - lookup('env', 'LOCAL') != "true"
     - sponsor_links is defined
   file:
-    path: "jenkins/{{ github_project_name }}/root"
+    path: "jenkins/{{ project_repo_name }}/root"
     state: directory
     owner: "abc"
     group: "abc"
 
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
-  shell: "ln -s {{ github_project_name }} {{ project_name }}"
+  shell: "ln -s {{ project_repo_name }} {{ project_name }}"
   args:
     chdir: /ansible/jenkins
 
@@ -115,9 +131,11 @@
     - lookup('env', 'LOCAL') != "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.package_trigger is not defined
+    - item.external_trigger is not defined
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
     owner: "abc"
     group: "abc"
   delegate_to: localhost
@@ -128,6 +146,8 @@
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.package_trigger is not defined
+    - item.external_trigger is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
@@ -145,7 +165,7 @@
     - full_custom_readme is not defined
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
     owner: "abc"
     group: "abc"
   delegate_to: localhost
@@ -171,7 +191,7 @@
     - full_custom_readme is defined
   template:
     src: "../templates/{{ item.src }}-CUSTOM"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
     owner: "abc"
     group: "abc"
   delegate_to: localhost
@@ -199,7 +219,7 @@
     - sponsor_links is defined
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
     owner: "abc"
     group: "abc"
   delegate_to: localhost
@@ -210,6 +230,62 @@
     - lookup('env', 'LOCAL') == "true"
     - item.donate is defined
     - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# Package trigger templating
+
+- name: write package trigger
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.package_trigger is defined
+    - custom_package_trigger != true
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write package trigger local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.package_trigger is defined
+    - custom_package_trigger != true
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# External trigger templating
+
+- name: write external trigger
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.external_trigger is defined
+    - custom_external_trigger != true
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write external trigger local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.external_trigger is defined
+    - custom_external_trigger != true
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"

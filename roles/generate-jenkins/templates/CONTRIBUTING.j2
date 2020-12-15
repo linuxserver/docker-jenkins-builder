@@ -24,10 +24,10 @@
 ## Readme
 
 If you would like to change our readme, please __**do not**__ directly edit the readme, as it is auto-generated on each commit.
-Instead edit the [readme-vars.yml]({{ project_lsio_github_repo_url }}/edit/master/readme-vars.yml).
+Instead edit the [readme-vars.yml]({{ lsio_github_url }}/{{ project_repo_name }}/edit/master/readme-vars.yml).
 
 These variables are used in a template for our [Jenkins Builder]({{ lsio_github_url }}/docker-jenkins-builder) as part of an ansible play.
-Most of these variables are also carried over to [docs.linuxserver.io]({{ "https://docs.linuxserver.io/images/" + github_project_name if full_custom_readme is not defined else "https://docs.linuxserver.io" }})
+Most of these variables are also carried over to [docs.linuxserver.io]({{ lsio_docs_url + "/images/" + project_repo_name if full_custom_readme is not defined else lsio_docs_url }})
 
 ### Fixing typos or clarify the text in the readme
 
@@ -87,7 +87,7 @@ opt_param_volumes:
 
 ### Testing template changes
 
-After you make any changes to the templates, you can use our [Jenkins Builder]({{ lsio_github_url }}/docker-jenkins-builder) to have the files updated from the modified templates. Please use the command found under `Running Locally` [on this page](https://github.com/linuxserver/docker-jenkins-builder/blob/master/README.md) to generate them prior to submitting a PR.
+After you make any changes to the templates, you can use our [Jenkins Builder]({{ lsio_github_url }}/docker-jenkins-builder) to have the files updated from the modified templates. Please use the command found under `Running Locally` [on this page]({{ lsio_github_url }}/docker-jenkins-builder/blob/master/README.md) to generate them prior to submitting a PR.
 
 ## Dockerfiles
 
@@ -97,8 +97,8 @@ If you are proposing additional packages to be added, ensure that you added the 
 ### Testing your changes
 
 ```
-git clone {{ lsio_github_url }}/{{ github_project_name }}.git
-cd {{ github_project_name }}
+git clone {{ lsio_github_url }}/{{ project_repo_name }}.git
+cd {{ project_repo_name }}
 docker build \
   --no-cache \
   --pull \
@@ -114,7 +114,7 @@ Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64
 
 ## Update the chagelog
 
-If you are modifying the Dockerfiles or any of the startup scripts in [root]({{project_lsio_github_repo_url}}/tree/master/root), add an entry to the changelog
+If you are modifying the Dockerfiles or any of the startup scripts in [root]({{ lsio_github_url }}/{{ project_repo_name }}/tree/master/root), add an entry to the changelog
 
 ```yml
 changelogs:
