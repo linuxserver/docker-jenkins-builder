@@ -616,6 +616,15 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
+{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
+        sh '''#! /bin/bash
+              echo "Packages were updated. Cleaning up the image and exiting."
+              if [ "${MULTIARCH}" == "true" ]; then
+                docker rmi ${IMAGE}:amd64-${META_TAG}
+              else
+                docker rmi ${IMAGE}:${META_TAG}
+              fi'''
+{% endif %}
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
@@ -633,6 +642,15 @@ pipeline {
         }
       }
       steps {
+{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
+        sh '''#! /bin/bash
+              echo "There are no package updates. Cleaning up the image and exiting."
+              if [ "${MULTIARCH}" == "true" ]; then
+                docker rmi ${IMAGE}:amd64-${META_TAG}
+              else
+                docker rmi ${IMAGE}:${META_TAG}
+              fi'''
+{% endif %}
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
