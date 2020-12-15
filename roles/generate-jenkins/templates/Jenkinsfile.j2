@@ -816,7 +816,7 @@ pipeline {
                 ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
              '''
 {% endif %}
-{% if "docker-baseimage" in github_project_name %}
+{% if "docker-baseimage" in project_repo_name %}
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
                   docker rmi \
