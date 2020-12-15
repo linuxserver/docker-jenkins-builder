@@ -549,7 +549,7 @@ pipeline {
                '''
           }
           sh '''#! /bin/bash
-                for DELETEIMAGE in "${GITHUBIMAGE}" "{GITLABIMAGE}" "${IMAGE}"; do
+                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${IMAGE}"; do
                   docker rmi \
                   ${DELETEIMAGE}:${META_TAG} \
                   ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
