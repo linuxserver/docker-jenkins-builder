@@ -244,7 +244,10 @@
 - name: write Unraid template
   when:
     - lookup('env', 'LOCAL') != "true"
-    - item.donate is defined
+    - item.unraid_template is defined
+    - full_custom_readme is not defined
+    - '"baseimage" not in project_name'
+    - '"jenkins-builder" not in project_name'
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
@@ -257,6 +260,9 @@
   when:
     - lookup('env', 'LOCAL') == "true"
     - item.unraid_template is defined
+    - full_custom_readme is not defined
+    - '"baseimage" not in project_name'
+    - '"jenkins-builder" not in project_name'
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"

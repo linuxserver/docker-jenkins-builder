@@ -62,7 +62,7 @@
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/{{ project_name | lower }}.xml</TemplateURL>
-    <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/{{ project_name | lower }}.png</Icon>
+    <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
 {# Set required ports, gets the name from the name atribute if present, or "WebUI" if it is the first port #}
 {% if param_usage_include_ports | default(false) %}
 {% for item in param_ports %}
