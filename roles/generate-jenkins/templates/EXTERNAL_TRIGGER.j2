@@ -26,7 +26,7 @@ jobs:
           echo "**** Retrieving external version ****"
 {% endif %}
 {% if custom_version_command is defined %}
-          EXT_RELEASE=$({{ custom_version_command }})
+          EXT_RELEASE=$({{ custom_version_command|replace('\\\\','\\')  }})
 {% endif %}
 {% if external_type == "github_devel" %}
           EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "https://api.github.com/repos/{{ better_vars.EXT_USER }}/{{ better_vars.EXT_REPO }}/releases" | jq -r '.[0] | .tag_name')
