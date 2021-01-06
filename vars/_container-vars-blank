@@ -73,6 +73,10 @@ opt_cap_add_param: false
 opt_cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
 
+# Unraid templating
+# Disables the sync function on unraids side. On by default
+unraid_template_sync: true
+
 optional_block_1: false
 optional_block_1_items:
   - "```"
