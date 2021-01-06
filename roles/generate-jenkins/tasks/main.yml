@@ -244,6 +244,7 @@
 - name: write Unraid template
   when:
     - lookup('env', 'LOCAL') != "true"
+    - unraid_template is defined and unraid_template is not sameas false
     - item.unraid_template is defined
     - full_custom_readme is not defined
     - '"baseimage" not in project_name'
@@ -259,6 +260,7 @@
 - name: write Unraid template local
   when:
     - lookup('env', 'LOCAL') == "true"
+    - unraid_template is defined and unraid_template is not sameas false
     - item.unraid_template is defined
     - full_custom_readme is not defined
     - '"baseimage" not in project_name'

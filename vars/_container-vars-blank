@@ -76,6 +76,7 @@ opt_cap_add_param_vars:
 # Unraid templating
 # Disables the sync function on unraids side. On by default
 unraid_template_sync: true
+unraid_template: true
 
 optional_block_1: false
 optional_block_1_items:
