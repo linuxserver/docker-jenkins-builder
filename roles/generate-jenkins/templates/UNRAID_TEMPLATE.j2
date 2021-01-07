@@ -1,7 +1,7 @@
 {#- Create a real object from repo_vars -#}
 {%- set better_vars={} -%}
 {%- for i in repo_vars -%}
-{%- set i=(i | replace(" = ", "=", 1) | replace("'", "") | replace('"', "")).split('=') -%}
+{%- set i=(i | replace(' = ', '=', 1) | replace('=', '¯\_(ツ)_/¯', 1) | replace("'", "") | replace('"', "")).split('¯\_(ツ)_/¯') -%}
 {%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
 {%- endfor -%}
 {#- Create a real object from repo_vars -#}
@@ -27,7 +27,7 @@
 {%- endif -%}
 {#- Create ExtraParam for REQUIRED stuff-#}
 <?xml version="1.0"?>
-<!-- DO NOT CHANGE THIS FILE MANUALLY, IT IS AUTOMATICCLY GENERATED -->
+<!-- DO NOT CHANGE THIS FILE MANUALLY, IT IS AUTOMATICALLY GENERATED -->
 <Container version="2">
     <Name>{{ param_container_name | lower }}</Name>
     <Repository>ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}</Repository>
