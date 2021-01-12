@@ -251,7 +251,7 @@
     - '"jenkins-builder" not in project_name'
   template:
     src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
     owner: "abc"
     group: "abc"
   delegate_to: localhost
