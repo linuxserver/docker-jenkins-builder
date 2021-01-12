@@ -114,6 +114,24 @@
     owner: "abc"
     group: "abc"
 
+- name: create destination dir for generated external files
+  when:
+    - lookup('env', 'LOCAL') == "true"
+  file:
+    path: "/tmp/external"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated external files
+  when:
+    - lookup('env', 'LOCAL') != "true"
+  file:
+    path: "jenkins/{{ project_repo_name }}/external"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
 - name: Create symbolic link for legacy pathing
   when: lookup('env', 'LOCAL') != "true"
   shell: "ln -s {{ project_repo_name }} {{ project_name }}"
