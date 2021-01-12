@@ -1,5 +1,4 @@
 ---
-
 #######################
 #   Set UID and GID   #
 #######################
@@ -131,6 +130,7 @@
     - lookup('env', 'LOCAL') != "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.unraid_template is not defined
     - item.package_trigger is not defined
     - item.external_trigger is not defined
   template:
@@ -146,6 +146,7 @@
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.unraid_template is not defined
     - item.package_trigger is not defined
     - item.external_trigger is not defined
   template:
@@ -230,6 +231,40 @@
     - lookup('env', 'LOCAL') == "true"
     - item.donate is defined
     - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# Unraid template templating
+
+- name: write Unraid template
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - unraid_template
+    - item.unraid_template is defined
+    - full_custom_readme is not defined
+    - '"baseimage" not in project_name'
+    - '"jenkins-builder" not in project_name'
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ github_project_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write Unraid template local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - unraid_template
+    - item.unraid_template is defined
+    - full_custom_readme is not defined
+    - '"baseimage" not in project_name'
+    - '"jenkins-builder" not in project_name'
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
