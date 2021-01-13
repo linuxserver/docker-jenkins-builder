@@ -234,6 +234,7 @@ pipeline {
               set -e
               TEMPDIR=$(mktemp -d)
               docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH=master -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} 
+              # Stage 1 - Jenkinsfile update
               if [[ "$(md5sum Jenkinsfile | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/Jenkinsfile | awk '{ print $1 }')" ]]; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
@@ -250,6 +251,32 @@ pipeline {
               else
                 echo "Jenkinsfile is up to date."
               fi
+              # Stage 2 - Delete old templates
+              OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md"
+              for i in ${OLD_TEMPLATES}; do
+                if [[ -f "${i}" ]]; then
+                  TEMPLATES_TO_DELETE="${i} ${TEMPLATES_TO_DELETE}"
+                fi
+              done
+              if [[ -n "${TEMPLATES_TO_DELETE}" ]]; then
+                mkdir -p ${TEMPDIR}/repo
+                git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
+                cd ${TEMPDIR}/repo/${LS_REPO}
+                git checkout -f master
+                cd ${TEMPDIR}/docker-${CONTAINER_NAME}
+                for i in ${TEMPLATES_TO_DELETE}; do
+                  git rm "${i}"
+                done
+                git commit -m 'Bot Updating Templated Files'
+                git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
+                echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
+                echo "Deleting old templates"
+                rm -Rf ${TEMPDIR}
+                exit 0
+              else
+                echo "No templates to delete"
+              fi
+              # Stage 3 - Update templates
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
@@ -261,11 +288,9 @@ pipeline {
                 cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
-                rm -f ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE.md
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 git add ${TEMPLATED_FILES}
-                git rm .github/ISSUE_TEMPLATE.md || :
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
