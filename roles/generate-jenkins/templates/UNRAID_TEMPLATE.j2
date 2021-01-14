@@ -38,6 +38,7 @@
     <Network>{{ param_net if param_usage_include_net is sameas true else 'bridge' }}</Network>
     <Privileged>{{ "true" if privileged is sameas true else "false" }}</Privileged>
     <Support>{{ lsio_github_url }}/{{ project_repo_name }}/issues/new/choose</Support>
+    <Shell>bash</Shell>
 {# Set the Branches, if any #}
 {% if development_versions is defined and development_versions %}
 {% for item in development_versions_items %}
@@ -96,7 +97,7 @@
 {% endfor %}
 {% endif %}
 {#- Set optional volumes #}
-{% set skip_envs=["puid", "pgid", "tz"] %} {#- Drop envs that are either hardcoded, or automaticcly added by unraid #}
+{% set skip_envs=["puid", "pgid", "tz", "umask"] %} {#- Drop envs that are either hardcoded, or automaticcly added by unraid #}
 {#- Set required variables, gets the name from the name atribute #}
 {% if param_usage_include_env | default(false) %}
 {% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
@@ -113,8 +114,9 @@
 {% endfor %}
 {% endif %}
 {#- Set optional variables #}
-    <Config Name="PUID" Target="PUID" Default="99" Description="Container Variable: PUID" Type="Variable" Display="always" Required="false" Mask="false"/>
-    <Config Name="PGID" Target="PGID" Default="100" Description="Container Variable: PGID" Type="Variable" Display="always" Required="false" Mask="false"/>
+    <Config Name="PUID" Target="PUID" Default="99" Description="Container Variable: PUID" Type="Variable" Display="advanced" Required="true" Mask="false"/>
+    <Config Name="PGID" Target="PGID" Default="100" Description="Container Variable: PGID" Type="Variable" Display="advanced" Required="true" Mask="false"/>
+    <Config Name="UMASK" Target="UMASK" Default="022" Description="Container Variable: UMASK" Type="Variable" Display="advanced" Required="false" Mask="false"/>
 {#- Set required devices, gets the name from the name atribute #}
 {% if param_device_map | default(false) %}
 {% for item in param_devices %}
