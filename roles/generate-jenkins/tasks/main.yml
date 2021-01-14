@@ -118,7 +118,7 @@
   when:
     - lookup('env', 'LOCAL') == "true"
   file:
-    path: "/tmp/external"
+    path: "/tmp/.jenkins-external"
     state: directory
     owner: "abc"
     group: "abc"
@@ -127,7 +127,7 @@
   when:
     - lookup('env', 'LOCAL') != "true"
   file:
-    path: "jenkins/{{ project_repo_name }}/external"
+    path: "jenkins/{{ project_repo_name }}/.jenkins-external"
     state: directory
     owner: "abc"
     group: "abc"
