@@ -736,7 +736,7 @@ pipeline {
           }
           sh '''#! /bin/bash
                 set -e
-                docker pull ghcr.io/linuxserver/lsiodev-ci:latest
+                docker pull ghcr.io/linuxserver/ci:latest
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
@@ -761,7 +761,7 @@ pipeline {
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
                 -e DO_REGION="ams3" \
                 -e DO_BUCKET="lsio-ci" \
-                -t ghcr.io/linuxserver/lsiodev-ci:latest \
+                -t ghcr.io/linuxserver/ci:latest \
                 python /ci/ci.py'''
         }
       }
