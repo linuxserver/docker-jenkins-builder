@@ -141,8 +141,8 @@ pipeline {
       steps{
         script{
           env.EXT_RELEASE = sh(
-            script: '''curl -sL "${DIST_REPO}x86_64/APKINDEX.tar.gz" | tar -xz \
-                       && awk '/^P:'"${DIST_REPO_PACKAGES}"'$/,/V:/' APKINDEX | sed -n 2p | sed 's/^V://' ''',
+            script: '''curl -sL "${DIST_REPO}x86_64/APKINDEX.tar.gz" | tar -xz -C /tmp \
+                       && awk '/^P:'"${DIST_REPO_PACKAGES}"'$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://' ''',
             returnStdout: true).trim()
             env.RELEASE_LINK = 'alpine_repo'
         }
