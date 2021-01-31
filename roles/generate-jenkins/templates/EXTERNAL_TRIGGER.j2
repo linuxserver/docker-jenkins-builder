@@ -33,8 +33,8 @@ jobs:
 {% elif external_type == "github_stable" %}
           EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "https://api.github.com/repos/{{ better_vars.EXT_USER }}/{{ better_vars.EXT_REPO }}/releases/latest" | jq -r '. | .tag_name')
 {% elif external_type == "alpine_repo" %}
-          EXT_RELEASE=$(docker run --rm alpine:{{ better_vars.DIST_TAG }} sh -c 'apk update --quiet --repository '"{{ better_vars.DIST_REPO }}"'\
-            && apk info --repository '"{{ better_vars.DIST_REPO }}"' '"{{ better_vars.DIST_REPO_PACKAGES }}"' | md5sum | cut -c1-8')
+          EXT_RELEASE=$(curl -sL "{{ better_vars.DIST_TAG }}x86_64/APKINDEX.tar.gz" | tar -xz \
+            && awk '/^P:'"{{ better_vars.DIST_REPO_PACKAGES }}"'$/,/V:/' APKINDEX | sed -n 2p | sed 's/^V://')
 {% elif external_type == "custom_json" %}
 {% if 'api.github.com' in better_vars.JSON_URL  %}
           EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "{{ better_vars.JSON_URL }}" | jq -r ". | {{ better_vars.JSON_PATH }}")
