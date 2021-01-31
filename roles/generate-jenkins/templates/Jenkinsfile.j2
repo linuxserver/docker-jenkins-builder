@@ -142,8 +142,8 @@ pipeline {
         sh '''docker pull alpine:${DIST_TAG}'''
         script{
           env.EXT_RELEASE = sh(
-            script: '''docker run --rm alpine:${DIST_TAG} sh -c 'apk update --quiet --repository '"${DIST_REPO}"'\
-                       && apk info --repository '"${DIST_REPO}"' '"${DIST_REPO_PACKAGES}"' | md5sum | cut -c1-8' ''',
+            script: '''wget -c "${DIST_REPO}x86_64/APKINDEX.tar.gz" -O - | tar -xz \
+                       && awk '/^P:'"${DIST_REPO_PACKAGES}"'$/,/V:/' APKINDEX | sed -n 2p | sed 's/^V://' ''',
             returnStdout: true).trim()
             env.RELEASE_LINK = 'alpine_repo'
         }
@@ -906,7 +906,7 @@ pipeline {
 {% if github_project_name != "docker-jenkins-builder" %}
                 docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
-                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %} 
+                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if github_project_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}
                 docker pull ghcr.io/linuxserver/lsiodev-readme-sync
                 docker run --rm=true \
                   -e DOCKERHUB_USERNAME=$DOCKERUSER \
@@ -915,7 +915,7 @@ pipeline {
                   -e DOCKER_REPOSITORY=${IMAGE} \
                   -e GIT_BRANCH=master \
                   -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
-                  ghcr.io/linuxserver/lsiodev-readme-sync bash -c 'node sync' 
+                  ghcr.io/linuxserver/lsiodev-readme-sync bash -c 'node sync'
                 rm -Rf ${TEMPDIR} '''
         }
       }
