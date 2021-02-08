@@ -139,11 +139,10 @@ pipeline {
     // If this is an alpine repo change for external version determine an md5 from the version string
     stage("Set tag Alpine Repo"){
       steps{
-        sh '''docker pull alpine:${DIST_TAG}'''
         script{
           env.EXT_RELEASE = sh(
-            script: '''docker run --rm alpine:${DIST_TAG} sh -c 'apk update --quiet --repository '"${DIST_REPO}"'\
-                       && apk info --repository '"${DIST_REPO}"' '"${DIST_REPO_PACKAGES}"' | md5sum | cut -c1-8' ''',
+            script: '''curl -sL "${DIST_REPO}x86_64/APKINDEX.tar.gz" | tar -xz -C /tmp \
+                       && awk '/^P:'"${DIST_REPO_PACKAGES}"'$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://' ''',
             returnStdout: true).trim()
             env.RELEASE_LINK = 'alpine_repo'
         }
