@@ -280,7 +280,7 @@ pipeline {
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
-              if [[ "${CURRENTHASH}" != "${NEWHASH}" ]]; then
+              if [[ "${CURRENTHASH}" != "${NEWHASH}" ]] || ! grep -q '.jenkins-external' "${WORKSPACE}/.gitignore" 2>/dev/null; then
                 mkdir -p ${TEMPDIR}/repo
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
                 cd ${TEMPDIR}/repo/${LS_REPO}
@@ -290,6 +290,10 @@ pipeline {
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
+                if ! grep -q '.jenkins-external' .gitignore 2>/dev/null; then
+                  echo ".jenkins-external" >> .gitignore
+                  git add .gitignore
+                fi
                 git add ${TEMPLATED_FILES}
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
@@ -299,8 +303,8 @@ pipeline {
               fi
               mkdir -p ${TEMPDIR}/gitbook
               git clone https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/gitbook/docker-documentation
-              if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/gitbook/docker-documentation/images/
+              if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/gitbook/docker-documentation/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
+                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/gitbook/docker-documentation/images/
                 cd ${TEMPDIR}/gitbook/docker-documentation/
                 git add images/docker-${CONTAINER_NAME}.md
                 git commit -m 'Bot Updating Documentation'
@@ -525,7 +529,7 @@ pipeline {
           }
           sh '''#! /bin/bash
                 set -e
-                docker pull ghcr.io/linuxserver/lsiodev-ci:latest
+                docker pull ghcr.io/linuxserver/ci:latest
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
@@ -550,7 +554,7 @@ pipeline {
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
                 -e DO_REGION="ams3" \
                 -e DO_BUCKET="lsio-ci" \
-                -t ghcr.io/linuxserver/lsiodev-ci:latest \
+                -t ghcr.io/linuxserver/ci:latest \
                 python /ci/ci.py'''
         }
       }
@@ -716,7 +720,7 @@ pipeline {
                 set -e
                 TEMPDIR=$(mktemp -d)
                 docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} 
-                docker pull ghcr.io/linuxserver/lsiodev-readme-sync
+                docker pull ghcr.io/linuxserver/readme-sync
                 docker run --rm=true \
                   -e DOCKERHUB_USERNAME=$DOCKERUSER \
                   -e DOCKERHUB_PASSWORD=$DOCKERPASS \
@@ -724,7 +728,7 @@ pipeline {
                   -e DOCKER_REPOSITORY=${IMAGE} \
                   -e GIT_BRANCH=master \
                   -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
-                  ghcr.io/linuxserver/lsiodev-readme-sync bash -c 'node sync'
+                  ghcr.io/linuxserver/readme-sync bash -c 'node sync'
                 rm -Rf ${TEMPDIR} '''
         }
       }
