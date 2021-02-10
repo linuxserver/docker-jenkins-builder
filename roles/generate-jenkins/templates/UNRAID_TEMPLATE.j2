@@ -102,7 +102,7 @@
 {% if param_usage_include_env | default(false) %}
 {% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
 {% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
-    <Config Name="{{ item.name | e if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_value | e }}" Description="{{ item.desc | e if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
+    <Config Name="{{ item.name | e if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else item.env_value | e }}" Description="{{ item.desc | e if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
 {% endfor %}
 {% endif %}
 {#- Set required variables, gets the name from the name atribute #}
