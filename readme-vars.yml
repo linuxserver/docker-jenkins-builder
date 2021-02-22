@@ -13,17 +13,18 @@ full_custom_readme: |
   docker run --rm \
     -e CONTAINER_NAME=${CONTAINER_NAME} \
     -v ${TEMPDIR}:/ansible/jenkins \
-    linuxserver/jenkins-builder:latest
+    ghcr.io/linuxserver/jenkins-builder:latest
   ```
   **Running locally: **
 
   If you need to test functionality just navigate to the folder with the jenkins-vars.yml and run:
   ```
+  docker rmi ghcr.io/linuxserver/jenkins-builder:latest
   docker run --rm \
     -v $(pwd):/tmp \
     -e LOCAL=true \
     -e PUID=$(id -u) -e PGID=$(id -g) \
-    linuxserver/jenkins-builder:latest && \
+    ghcr.io/linuxserver/jenkins-builder:latest && \
   rm -rf .jenkins-external
   ```
   Newly generated files (including `README.md`, `Jenkinsfile`, issue templates, etc.) will overwrite the existing files in your current working directory.
