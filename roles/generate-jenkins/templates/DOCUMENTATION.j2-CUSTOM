@@ -1,4 +1,4 @@
 ---
 title: {{ project_name }}
 ---
-{{ full_custom_readme }}
+{{ full_custom_readme -}}
