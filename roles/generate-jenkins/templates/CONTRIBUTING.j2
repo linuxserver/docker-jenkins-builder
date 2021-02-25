@@ -96,7 +96,7 @@ If you are proposing additional packages to be added, ensure that you added the 
 
 ### Testing your changes
 
-```
+```bash
 git clone {{ project_github_repo_url }}.git
 cd {{ project_repo_name }}
 docker build \
@@ -106,7 +106,8 @@ docker build \
 ```
 
 The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`
-```
+
+```bash
 docker run --rm --privileged multiarch/qemu-user-static:register --reset
 ```
 
