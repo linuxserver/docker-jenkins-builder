@@ -25,6 +25,9 @@
 {%- endfor -%}
 {%- endif -%}
 {%- endif -%}
+{%- macro ca(str) -%}
+{{ str | replace("<", "") | replace(">", "") | replace("&", "and") | e }}
+{%- endmacro -%}
 {#- Create ExtraParam for REQUIRED stuff-#}
 <?xml version="1.0"?>
 <!-- DO NOT CHANGE THIS FILE MANUALLY, IT IS AUTOMATICALLY GENERATED -->
@@ -43,17 +46,17 @@
 {% if development_versions is defined and development_versions %}
 {% for item in development_versions_items %}
     <Branch>
-        <Tag>{{ item.tag | e }}</Tag>
-        <TagDescription>{{ item.desc | e }}</TagDescription>
+        <Tag>{{ ca(item.tag) }}</Tag>
+        <TagDescription>{{ ca(item.desc) }}</TagDescription>
 {% if item.extra is defined %} {#- Allow for branch-specific stuff #}
-        {{ item.extra | indent(8) | trim | e }}
+        {{ ca(item.extra) | indent(8) | trim }}
 {% endif %}
     </Branch>
 {% endfor %}
 {% endif %}
 {# Set the Branches, if any #}
     <Project>{{ project_url }}</Project>
-    <Overview>{{ project_blurb | trim | e }}</Overview>
+    <Overview>{{ ca(project_blurb) | trim }}</Overview>
 {# Set the ExtraParmas, if any #}
 {% if ExtraParam is defined and ExtraParam!=[] %}
     <ExtraParams>{{ ExtraParam | join(" ") }}</ExtraParams>
@@ -69,7 +72,7 @@
 {% if param_usage_include_ports | default(false) %}
 {% for item in param_ports %}
 {% set port, proto=item.internal_port.split('/') if "/" in item.internal_port else [item.internal_port, false] %} {#- Logic to get the protocol #}
-    <Config Name="{{ item.name | e if item.name is defined else "WebUI" if loop.first else "Port: " + port }}" Target="{{ port }}" Default="{{ item.external_port | e }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ item.port_desc | e if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "WebUI" if loop.first else "Port: " + port }}" Target="{{ port }}" Default="{{ ca(item.external_port) }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ ca(item.port_desc) if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set required ports, gets the name from the name atribute if present, or "WebUI" if it is the first port #}
@@ -77,7 +80,7 @@
 {% if opt_param_usage_include_ports | default(false) %}
 {% for item in opt_param_ports %}
 {% set port, proto=item.internal_port.split('/') if "/" in item.internal_port else [item.internal_port, false] %} {#- Logic to get the protocol #}
-    <Config Name="{{ item.name | e if item.name is defined else "Port: " + port }}" Target="{{ port }}" Default="{{ item.external_port | e }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ item.port_desc | e if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="false" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Port: " + port }}" Target="{{ port }}" Default="{{ ca(item.external_port) }}" Mode="{{ proto if proto else "tcp" }}" Description="{{ ca(item.port_desc) if item.port_desc is defined else "Container Port: " + port }}" Type="Port" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional ports #}
@@ -85,7 +88,7 @@
 {% if param_usage_include_vols | default(false) %}
 {% for item in param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ item.name | e if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ path | e }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ item.desc | e if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set required volumes, gets the name from the name atribute if present, or "Appdata" if it is the /config location #}
@@ -93,7 +96,7 @@
 {% if opt_param_usage_include_vols | default(false) %}
 {% for item in opt_param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ item.name | e if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ path | e }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ item.desc | e if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional volumes #}
@@ -102,7 +105,7 @@
 {% if param_usage_include_env | default(false) %}
 {% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
 {% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
-    <Config Name="{{ item.name | e if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else item.env_value | e }}" Description="{{ item.desc | e if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
 {% endfor %}
 {% endif %}
 {#- Set required variables, gets the name from the name atribute #}
@@ -110,7 +113,7 @@
 {% if opt_param_usage_include_env | default(false) %}
 {% for item in opt_param_env_vars if not item.env_var | lower is in skip_envs %}
 {% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
-    <Config Name="{{ item.name | e if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_value | e }}" Description="{{ item.desc | e if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask }}"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask }}"/>
 {% endfor %}
 {% endif %}
 {#- Set optional variables #}
@@ -120,14 +123,14 @@
 {# Set required devices, gets the name from the name atribute #}
 {% if param_device_map | default(false) %}
 {% for item in param_devices %}
-    <Config Name="{{ item.name | e if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ item.desc | e if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set required variables, gets the name from the name atribute #}
 {#- Set optional devices #}
 {% if opt_param_device_map | default(false) %}
 {% for item in opt_param_devices %}
-    <Config Name="{{ item.name | e if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ item.desc | e if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional devices #}
