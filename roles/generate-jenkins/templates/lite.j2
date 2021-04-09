@@ -1,3 +1,10 @@
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
+
+This image is deprecated. It will no longer receive automated updates.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ lsio_github_url }}/{{ project_repo_name }})
 
 This readme has been truncated from the full version found [HERE]({{ lsio_github_url }}/{{ project_repo_name }})

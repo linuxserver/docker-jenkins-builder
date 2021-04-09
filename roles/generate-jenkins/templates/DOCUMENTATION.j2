@@ -1,6 +1,13 @@
 ---
 title: {{ project_name }}
 ---
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
+
+This image is deprecated. It will no longer receive automated updates.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ lsio_github_url }}/{{ project_repo_name }})
 
 [![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ lsio_github_url }}/{{ project_repo_name }})

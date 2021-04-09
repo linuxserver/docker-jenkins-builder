@@ -3,6 +3,13 @@ name: Feature request
 about: Suggest an idea for this project
 
 ---
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
+
+This image is deprecated. It will no longer receive automated updates.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
 [linuxserverurl]: {{ lsio_full_url }}
 [![{{ lsio_project_name }}](https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver_medium.png)][linuxserverurl]
 
