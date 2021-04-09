@@ -491,7 +491,7 @@ pipeline {
 {% endif %}
                 if grep -wq "${CONTAINER_NAME}" ${TEMPDIR}/unraid/templates/unraid/ignore.list; then
                   echo "Image is on the ignore list, removing Unraid template"
-                  git rm unraid/${CONTAINER_NAME}.xml
+                  git rm unraid/${CONTAINER_NAME}.xml || :
                 else
                   cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml ${TEMPDIR}/unraid/templates/unraid/
                   git add unraid/${CONTAINER_NAME}.xml
