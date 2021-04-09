@@ -117,7 +117,7 @@
 - name: create destination dir for generated 99-deprecation
   when:
     - lookup('env', 'LOCAL') == "true"
-    - project_deprecation_status
+    - project_deprecation_status == "true"
   file:
     path: "/tmp/root/etc/cont-init.d"
     state: directory
@@ -127,7 +127,7 @@
 - name: create destination dir for generated 99-deprecation
   when:
     - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status
+    - project_deprecation_status == "true"
   file:
     path: "jenkins/{{ project_repo_name }}/root/etc/cont-init.d"
     state: directory
@@ -285,7 +285,7 @@
   when:
     - lookup('env', 'LOCAL') != "true"
     - item.deprecation is defined
-    - project_deprecation_status
+    - project_deprecation_status == "true"
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
@@ -298,7 +298,7 @@
   when:
     - lookup('env', 'LOCAL') == "true"
     - item.deprecation is defined
-    - project_deprecation_status
+    - project_deprecation_status == "true"
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
