@@ -451,7 +451,7 @@ pipeline {
                 cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
-                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d/
+                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 if ! grep -q '.jenkins-external' .gitignore 2>/dev/null; then
