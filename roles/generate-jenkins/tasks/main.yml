@@ -277,6 +277,34 @@
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
+# Deprecation init script templating
+
+- name: write deprecation init script
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.deprecation is defined
+    - project_deprecation_status
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write deprecation init script local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.deprecation is defined
+    - project_deprecation_status
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
 # Unraid template templating
 
 - name: write Unraid template
