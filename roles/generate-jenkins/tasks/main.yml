@@ -114,6 +114,26 @@
     owner: "abc"
     group: "abc"
 
+- name: create destination dir for generated 99-deprecation
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status
+  file:
+    path: "/tmp/root/etc/cont-init.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated 99-deprecation
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/cont-init.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
 - name: create destination dir for generated external files
   when:
     - lookup('env', 'LOCAL') == "true"
