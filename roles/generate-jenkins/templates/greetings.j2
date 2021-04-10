@@ -8,6 +8,6 @@ jobs:
     steps:
     - uses: actions/first-interaction@v1
       with:
-        issue-message: 'Thanks for opening your first issue here! Be sure to follow the [bug]({{ lsio_github_url }}/{{ project_repo_name }}/blob/{{ ls_branch }}/.github/ISSUE_TEMPLATE/issue.bug.md) or [feature]({{ lsio_github_url }}/{{ project_repo_name }}/blob/{{ ls_branch }}/.github/ISSUE_TEMPLATE/issue.feature.md) issue templates!'
-        pr-message: 'Thanks for opening this pull request! Be sure to follow the [pull request template]({{ lsio_github_url }}/{{ project_repo_name }}/blob/{{ ls_branch }}/.github/PULL_REQUEST_TEMPLATE.md)!'
+        issue-message: '{% if project_deprecation_status %}This image is deprecated. We will not offer support for this image and it will not be updated. The [README]({{ project_github_asset }}/README.md) may have additional information. {% endif %}Thanks for opening your first issue here! Be sure to follow the [bug]({{ project_github_asset }}/.github/ISSUE_TEMPLATE/issue.bug.md) or [feature]({{ project_github_asset }}/.github/ISSUE_TEMPLATE/issue.feature.md) issue templates!'
+        pr-message: '{% if project_deprecation_status %}This image is deprecated. We will not offer support for this image and it will not be updated. The [README]({{ project_github_asset }}/README.md) may have additional information. {% endif %}Thanks for opening this pull request! Be sure to follow the [pull request template]({{ project_github_asset }}/.github/PULL_REQUEST_TEMPLATE.md)!'
         repo-token: ${{ '{{' }} secrets.GITHUB_TOKEN {{ '}}' }}

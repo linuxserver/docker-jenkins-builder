@@ -1,3 +1,10 @@
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
+
+This image is deprecated. We will not offer support for this image and it will not be updated.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
 <!--- Provide a general summary of your changes in the Title above -->
 
 [linuxserverurl]: {{ lsio_full_url }}
@@ -21,7 +28,7 @@
 
 ------------------------------
 
- - [ ] I have read the [contributing]({{ lsio_github_url }}/{{ project_repo_name }}/blob/{{ ls_branch }}/.github/CONTRIBUTING.md) guideline and understand that I have made the correct modifications
+ - [ ] I have read the [contributing]({{ project_github_asset }}/.github/CONTRIBUTING.md) guideline and understand that I have made the correct modifications
 
 ------------------------------
 

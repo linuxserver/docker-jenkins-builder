@@ -7,6 +7,10 @@ project_logo: "http://www.logo.com/logo.png"
 project_blurb: "[{{ project_name_short|capitalize }}]({{ project_url }}) short description goes here."
 project_repo_name: "docker-{{ project_name }}"
 
+# deprecation information
+project_deprecation_status: false
+project_deprecation_message: ""
+
 project_blurb_optional_extras_enabled: false
 project_blurb_optional_extras: []
 

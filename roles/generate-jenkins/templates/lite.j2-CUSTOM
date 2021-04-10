@@ -1,1 +1,8 @@
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
+
+This image is deprecated. We will not offer support for this image and it will not be updated.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
 {{ full_custom_readme }}

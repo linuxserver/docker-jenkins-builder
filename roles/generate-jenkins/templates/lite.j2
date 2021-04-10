@@ -1,6 +1,13 @@
-# [{{ lsio_project_name_short }}/{{ project_name }}]({{ lsio_github_url }}/{{ project_repo_name }})
+{% if project_deprecation_status %}
+# DEPRECATION NOTICE
 
-This readme has been truncated from the full version found [HERE]({{ lsio_github_url }}/{{ project_repo_name }})
+This image is deprecated. We will not offer support for this image and it will not be updated.
+{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+
+{% endif %}
+# [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_github_repo_url }})
+
+This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
 
 {{ project_blurb }}
 
