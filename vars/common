@@ -3,7 +3,7 @@
 # URLs
 ######
 
-# site urls
+# organization variables
 lsio_project_name: "linuxserver.io"
 lsio_project_name_short: "linuxserver"
 lsio_short_url: "{{ lsio_project_name }}"
@@ -15,7 +15,6 @@ lsio_discourse_url: "https://discourse.{{ lsio_short_url }}"
 lsio_docker_hub_url: "https://hub.docker.com/r/{{ lsio_project_name_short }}"
 lsio_docs_url: "https://docs.{{ lsio_short_url }}"
 lsio_fleet_url: "https://fleet.{{ lsio_short_url }}"
-lsio_github_asset: "{{ lsio_github_url }}/{{ project_repo_name }}/blob/{{ ls_branch }}"
 lsio_github_url: "https://github.com/{{ lsio_project_name_short }}"
 lsio_gitlab_url: "https://gitlab.com/{{ lsio_project_name }}"
 lsio_irc_url: "https://irc.{{ lsio_short_url }}"
@@ -26,7 +25,10 @@ lsio_object_url: "https://ci-tests.{{ lsio_short_url }}"
 lsio_opencollective_url: "https://opencollective.com/{{ lsio_project_name_short }}"
 lsio_podcast_url: "https://anchor.fm/linuxserverio"
 
-# This goes in readme-vars in each individual repo
+# project defaults
+project_deprecation_status: false
+project_github_asset: "{{ project_github_repo_url }}/blob/{{ ls_branch }}"
+project_github_repo_url: "{{ lsio_github_url }}/{{ project_repo_name }}"
 project_repo_name: "docker-{{ project_name }}"
 
 # supported architectures
