@@ -350,9 +350,9 @@ pipeline {
         sh "docker build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.url={{ lsio_github_url }}/docker-{{ project_name }}/packages\" \
+          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
           --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-          --label \"org.opencontainers.image.source={{ lsio_github_url }}/docker-{{ project_name }}\" \
+          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
           --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
           --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
@@ -572,9 +572,9 @@ pipeline {
         sh "docker build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.url={{ lsio_github_url }}/docker-{{ project_name }}/packages\" \
+          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
           --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-          --label \"org.opencontainers.image.source={{ lsio_github_url }}/docker-{{ project_name }}\" \
+          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
           --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
           --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
@@ -598,9 +598,9 @@ pipeline {
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ lsio_github_url }}/docker-{{ project_name }}/packages\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
               --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ lsio_github_url }}/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
               --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
               --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
@@ -629,9 +629,9 @@ pipeline {
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ lsio_github_url }}/docker-{{ project_name }}/packages\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
               --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ lsio_github_url }}/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
               --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
               --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
@@ -667,9 +667,9 @@ pipeline {
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ lsio_github_url }}/docker-{{ project_name }}/packages\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
               --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ lsio_github_url }}/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
               --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
               --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
