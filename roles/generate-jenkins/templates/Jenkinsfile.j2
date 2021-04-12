@@ -584,6 +584,7 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+          --no-cache --pull -t ${IMAGE}:${META_TAG} \
           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
     }
