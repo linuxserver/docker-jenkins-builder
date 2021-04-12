@@ -5,4 +5,4 @@ This image is deprecated. We will not offer support for this image and it will n
 {% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
 
 {% endif %}
-{{ full_custom_readme }}
+{{ full_custom_readme -}}
