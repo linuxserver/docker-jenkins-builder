@@ -19,7 +19,7 @@ full_custom_readme: |
 
   If you need to test functionality just navigate to the folder with the jenkins-vars.yml and run:
   ```
-  docker rmi ghcr.io/linuxserver/jenkins-builder:latest && \
+  docker pull ghcr.io/linuxserver/jenkins-builder:latest && \
   docker run --rm \
     -v $(pwd):/tmp \
     -e LOCAL=true \

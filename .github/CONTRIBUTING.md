@@ -112,7 +112,7 @@ docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 Once registered you can define the dockerfile to use with `-f Dockerfile.aarch64`.
 
-## Update the chagelog
+## Update the changelog
 
 If you are modifying the Dockerfiles or any of the startup scripts in [root](https://github.com/linuxserver/docker-jenkins-builder/tree/master/root), add an entry to the changelog
 
