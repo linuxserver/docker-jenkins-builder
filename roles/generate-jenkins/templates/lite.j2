@@ -11,6 +11,13 @@ This readme has been truncated from the full version found [HERE]({{ project_git
 
 {{ project_blurb }}
 
+{% if app_setup_block_enabled %}
+
+## Application Setup
+
+{{ app_setup_block -}}
+{% endif %}
+
 ## Usage
 
 ```bash
@@ -115,9 +122,3 @@ docker run -d \
   --restart unless-stopped \
   {{ lsio_project_name_short }}/{{ project_name }}
 ```
-{% if app_setup_block_enabled %}
-
-## Application Setup
-
-{{ app_setup_block -}}
-{% endif %}
