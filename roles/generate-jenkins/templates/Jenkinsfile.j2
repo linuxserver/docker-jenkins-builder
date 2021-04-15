@@ -41,7 +41,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.md ./.github/ISSUE_TEMPLATE/issue.feature.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/greetings.yml ./.github/workflows/stale.yml{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %} ./.github/workflows/package_trigger_scheduler.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %} ./.github/workflows/external_trigger_scheduler.yml'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.md ./.github/ISSUE_TEMPLATE/issue.feature.md ./.github/PULL_REQUEST_TEMPLATE.md ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/stale.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %} ./root/etc/cont-init.d/99-deprecation{% endif %}'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
@@ -103,7 +103,7 @@ pipeline {
       steps{
         script{
           env.EXT_RELEASE = sh(
-            script: '''curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq -r '.[0] | .tag_name' ''',
+            script: '''curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq -r '.[0] | .tag_name' ''',
             returnStdout: true).trim()
         }
       }
@@ -122,7 +122,7 @@ pipeline {
      steps{
        script{
          env.EXT_RELEASE = sh(
-           script: '''curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq -r '. | .tag_name' ''',
+           script: '''curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq -r '. | .tag_name' ''',
            returnStdout: true).trim()
        }
      }
@@ -199,7 +199,7 @@ pipeline {
      steps{
        script{
          env.EXT_RELEASE = sh(
-           script: '''curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_GIT_BRANCH} | jq -r '. | .sha' | cut -c1-8 ''',
+           script: '''curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_GIT_BRANCH} | jq -r '. | .sha' | cut -c1-8 ''',
            returnStdout: true).trim()
        }
      }
@@ -347,7 +347,20 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker build --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
+        sh "docker build \
+          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+          --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+          --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+          --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+          --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+          --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
       }
     }
 {% endif %}
@@ -451,6 +464,9 @@ pipeline {
                 cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
+{% if project_deprecation_status %}
+                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+{% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
                 if ! grep -q '.jenkins-external' .gitignore 2>/dev/null; then
@@ -474,22 +490,30 @@ pipeline {
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git --all
               fi
 {% if "jenkins-builder" not in project_name and "baseimage" not in project_name and full_custom_readme is not defined and unraid_template == true %}
-              mkdir -p ${TEMPDIR}/unraid 
+              mkdir -p ${TEMPDIR}/unraid
               git clone https://github.com/linuxserver/docker-templates.git ${TEMPDIR}/unraid/docker-templates
               git clone https://github.com/linuxserver/templates.git ${TEMPDIR}/unraid/templates
-              if [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME}-icon.png ]]; then
-                sed -i "s|master/linuxserver.io/img/linuxserver-ls-logo.png|master/linuxserver.io/img/${CONTAINER_NAME}-icon.png|" ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml
+              if [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME}-logo.png ]]; then
+                sed -i "s|master/linuxserver.io/img/linuxserver-ls-logo.png|master/linuxserver.io/img/${CONTAINER_NAME}-logo.png|" ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml
               fi
               if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/unraid/templates/unraid/${CONTAINER_NAME}.xml) || ("$(md5sum ${TEMPDIR}/unraid/templates/unraid/${CONTAINER_NAME}.xml | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml | awk '{ print $1 }')") ]]; then
+                cd ${TEMPDIR}/unraid/templates/
+{% if project_deprecation_status %}
+                if ! grep -wq "${CONTAINER_NAME}" ${TEMPDIR}/unraid/templates/unraid/ignore.list; then
+                  echo "${CONTAINER_NAME}" >> ${TEMPDIR}/unraid/templates/unraid/ignore.list
+                  git add unraid/templates/unraid/ignore.list
+                fi
+{% endif %}
                 if grep -wq "${CONTAINER_NAME}" ${TEMPDIR}/unraid/templates/unraid/ignore.list; then
-                  echo "Image is on the ignore list, skipping Unraid template upload"
+                  echo "Image is on the ignore list, removing Unraid template"
+                  git rm unraid/${CONTAINER_NAME}.xml || :
+                  git commit -m 'Bot Removing Deprecated Unraid Template' || :
                 else
                   cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml ${TEMPDIR}/unraid/templates/unraid/
-                  cd ${TEMPDIR}/unraid/templates/
                   git add unraid/${CONTAINER_NAME}.xml
                   git commit -m 'Bot Updating Unraid Template'
-                  git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/templates.git --all
                 fi
+                git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/templates.git --all
               fi
 {% endif %}
               rm -Rf ${TEMPDIR}'''
@@ -547,8 +571,21 @@ pipeline {
       }
       steps {
         echo "Running on node: ${NODE_NAME}"
-        sh "docker build --no-cache --pull -t ${IMAGE}:${META_TAG} \
-        --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh "docker build \
+          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+          --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+          --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+          --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+          --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+          --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+          --no-cache --pull -t ${IMAGE}:${META_TAG} \
+          --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
@@ -561,8 +598,21 @@ pipeline {
         stage('Build X86') {
           steps {
             echo "Running on node: ${NODE_NAME}"
-            sh "docker build --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} \
-            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh "docker build \
+              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} \
+              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
         }
         stage('Build ARMHF') {
@@ -579,8 +629,21 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
-            sh "docker build --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
-                         --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh "docker build \
+              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+              --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
+              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -604,8 +667,21 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
-            sh "docker build --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
-                         --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh "docker build \
+              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
+              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -940,9 +1016,9 @@ pipeline {
               echo "Updating to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% endif %}
 {% if external_type == "github_devel" %}
-              curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq '.[0] |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq '.[0] |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "github_stable" %}
-              curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "alpine_repo" %}
               echo "Updating external repo packages to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% elif external_type == "custom_json" %}
@@ -952,7 +1028,7 @@ pipeline {
 {% elif external_type == "external_blob" %}
               echo "External Release file changed at ${EXT_BLOB}" > releasebody.json
 {% elif external_type == "github_commit" %}
-              curl -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_GIT_BRANCH} | jq '. | .commit.message' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_RELEASE_CLEAN} | jq '.commit.message' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "gitlab_commit" %}
               curl -s https://gitlab.com/api/v4/projects/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq '. | .title' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
 {% elif external_type == "npm_version" %}
@@ -966,31 +1042,31 @@ pipeline {
                      "target_commitish": "{{ ls_branch }}",\
                      "name": "'${META_TAG}'",\
 {% if custom_version_command is defined %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Remote Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Remote Changes:**\\n\\n' > start
 {% endif %}
 {% if external_type == "github_devel" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
 {% elif external_type == "github_stable" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
 {% elif external_type == "alpine_repo" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Repo Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Repo Changes:**\\n\\n' > start
 {% elif external_type == "custom_json" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Remote Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Remote Changes:**\\n\\n' > start
 {% elif external_type == "deb_repo" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Repo Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Repo Changes:**\\n\\n' > start
 {% elif external_type == "external_blob" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Remote Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Remote Changes:**\\n\\n' > start
 {% elif external_type == "github_commit" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**'${EXT_REPO}' Changes:**\\n\\n' > start
 {% elif external_type == "gitlab_commit" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**'${EXT_GITLAB_PROJ}' Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**'${EXT_GITLAB_PROJ}' Changes:**\\n\\n' > start
 {% elif external_type == "npm_version" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**NPM Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**NPM Changes:**\\n\\n' > start
 {% elif external_type == "os" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**OS Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**OS Changes:**\\n\\n' > start
 {% elif external_type == "pip_version" %}
                      "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**PIP Changes:**\\n\\n' > start
-{% elif external_type == "custom" %}                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**Custom Changes:**\\n\\n' > start{% endif %}
+{% elif external_type == "custom" %}                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Custom Changes:**\\n\\n' > start{% endif %}
               printf '","draft": false,"prerelease": {% if release_type == "stable" %}false{% elif release_type == "prerelease" %}true{% endif %}}' >> releasebody.json
               paste -d'\\0' start releasebody.json > releasebody.json.done
               curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done'''
@@ -1017,7 +1093,8 @@ pipeline {
 {% if project_repo_name != "docker-jenkins-builder" %}
                 docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
-                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %} 
+                docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH="${BRANCH_NAME}" -v ${TEMPDIR}:/ansible/jenkins {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}
+
                 docker pull ghcr.io/linuxserver/readme-sync
                 docker run --rm=true \
                   -e DOCKERHUB_USERNAME=$DOCKERUSER \

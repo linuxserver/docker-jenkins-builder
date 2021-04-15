@@ -1,7 +1,7 @@
 {#- Create a real object from repo_vars -#}
 {%- set better_vars={} -%}
 {%- for i in repo_vars -%}
-{%- set i=(i | replace(' = ', '=', 1) | replace('=', '¯\_(ツ)_/¯', 1) | replace("'", "") | replace('"', "")).split('¯\_(ツ)_/¯') -%}
+{%- set i=(i | replace(' = ', '=', 1) | replace('=', '¯\_(ツ)_/¯', 1) | replace("'", "")).split('¯\_(ツ)_/¯') -%}
 {%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
 {%- endfor -%}
 {#- Create a real object from repo_vars -#}
@@ -27,7 +27,9 @@ jobs:
           echo "**** External trigger running off of {{ ls_branch }} branch. To disable this trigger, set a Github secret named \"PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\". ****"
           echo "**** Retrieving external version ****"
 {% endif %}
-{% if custom_version_command is defined %}
+{% if custom_version_command is defined and 'api.github.com' in custom_version_command %}
+          EXT_RELEASE=$({{ custom_version_command|replace('\\\\','\\')|replace('curl', 'curl -u ${{ secrets.CR_USER }}:${{ secrets.CR_PAT }}')  }})
+{% elif custom_version_command is defined %}
           EXT_RELEASE=$({{ custom_version_command|replace('\\\\','\\')  }})
 {% endif %}
 {% if external_type == "github_devel" %}
@@ -39,9 +41,9 @@ jobs:
             && awk '/^P:'"{{ better_vars.DIST_REPO_PACKAGES }}"'$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://')
 {% elif external_type == "custom_json" %}
 {% if 'api.github.com' in better_vars.JSON_URL  %}
-          EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "{{ better_vars.JSON_URL }}" | jq -r ". | {{ better_vars.JSON_PATH }}")
+          EXT_RELEASE=$(curl -u "${{ '{{' }} secrets.CR_USER {{ '}}' }}:${{ '{{' }} secrets.CR_PAT {{ '}}' }}" -sX GET "{{ better_vars.JSON_URL }}" | jq -r '. | {{ better_vars.JSON_PATH }}')
 {% else %}
-          EXT_RELEASE=$(curl -s "{{ better_vars.JSON_URL }}" | jq -r ". | {{ better_vars.JSON_PATH }}")
+          EXT_RELEASE=$(curl -s "{{ better_vars.JSON_URL }}" | jq -r '. | {{ better_vars.JSON_PATH }}')
 {% endif %}
 {% elif external_type == "deb_repo" %}
           EXT_RELEASE=$(docker run --rm "{{ better_vars.DIST_IMAGE }}":"{{ better_vars.DIST_TAG }}" bash -c \
@@ -71,7 +73,7 @@ jobs:
           if [ -z "${EXT_RELEASE}" ] || [ "${EXT_RELEASE}" == "null" ]; then
             echo "**** Can't retrieve external version, exiting ****"
             FAILURE_REASON="Can't retrieve external version for {{ project_name }} branch {{ ls_branch }}"
-            GHA_TRIGGER_URL="{{ lsio_github_url }}/{{ project_repo_name }}/actions/runs/${{ '{{' }} github.run_id {{ '}}' }}"
+            GHA_TRIGGER_URL="{{ project_github_repo_url }}/actions/runs/${{ '{{' }} github.run_id {{ '}}' }}"
             curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://cdn.discordapp.com/avatars/354986384542662657/df91181b3f1cf0ef1592fbe18e0962d7.png","embeds": [{"color": 16711680,
               "description": "**Trigger Failed** \n**Reason:** '"${FAILURE_REASON}"' \n**Trigger URL:** '"${GHA_TRIGGER_URL}"' \n"}],
               "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}

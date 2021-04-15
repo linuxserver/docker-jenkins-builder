@@ -114,6 +114,26 @@
     owner: "abc"
     group: "abc"
 
+- name: create destination dir for generated 99-deprecation
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+  file:
+    path: "/tmp/root/etc/cont-init.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: create destination dir for generated 99-deprecation
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/cont-init.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
 - name: create destination dir for generated external files
   when:
     - lookup('env', 'LOCAL') == "true"
@@ -148,6 +168,7 @@
     - lookup('env', 'LOCAL') != "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.deprecation is not defined
     - item.unraid_template is not defined
     - item.package_trigger is not defined
     - item.external_trigger is not defined
@@ -164,6 +185,7 @@
     - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
+    - item.deprecation is not defined
     - item.unraid_template is not defined
     - item.package_trigger is not defined
     - item.external_trigger is not defined
@@ -249,6 +271,34 @@
     - lookup('env', 'LOCAL') == "true"
     - item.donate is defined
     - sponsor_links is defined
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+# Deprecation init script templating
+
+- name: write deprecation init script
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.deprecation is defined
+    - project_deprecation_status == true
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write deprecation init script local
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.deprecation is defined
+    - project_deprecation_status == true
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
