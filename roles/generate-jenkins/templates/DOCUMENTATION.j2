@@ -27,7 +27,7 @@ This image is deprecated. We will not offer support for this image and it will n
 {% endif %}
 {% endfor %}
 
-{{ project_blurb -}}
+{{ project_blurb | trim }}
 {% if project_blurb_optional_extras_enabled %}
 
 {% for item in project_blurb_optional_extras %}
@@ -64,7 +64,7 @@ This image provides various versions that are available via tags. `latest` tag u
 
 ## Application Setup
 
-{{ app_setup_block -}}
+{{ app_setup_block | trim }}
 {% endif %}
 
 ## Usage
@@ -428,7 +428,7 @@ Keep in mind umask is not chmod it subtracts from permissions based on it's valu
 
 ## Optional Parameters
 
-{{ optional_parameters -}}
+{{ optional_parameters | trim }}
 {% endif %}
 {% if common_param_env_vars_enabled %}
 
