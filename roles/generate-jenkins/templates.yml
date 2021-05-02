@@ -21,3 +21,4 @@ templated_files:
  - { src: 'EXTERNAL_TRIGGER.j2', dest: '.github/workflows/external_trigger.yml', external_trigger: 'true' }
  - { src: 'EXTERNAL_TRIGGER_SCHEDULER.j2', dest: '.github/workflows/external_trigger_scheduler.yml' }
  - { src: '99-deprecation.j2', dest: 'root/etc/cont-init.d/99-deprecation', deprecation: 'true' }
+ - { src: '.editorconfig.j2', dest: '.editorconfig' }
