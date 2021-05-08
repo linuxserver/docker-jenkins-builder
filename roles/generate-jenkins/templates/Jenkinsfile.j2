@@ -1065,7 +1065,7 @@ pipeline {
 {% elif external_type == "os" %}
                      "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**OS Changes:**\\n\\n' > start
 {% elif external_type == "pip_version" %}
-                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n**PIP Changes:**\\n\\n' > start
+                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**PIP Changes:**\\n\\n' > start
 {% elif external_type == "custom" %}                     "body": "**LinuxServer Changes:**\\n\\n'${LS_RELEASE_NOTES}'\\n\\n**Custom Changes:**\\n\\n' > start{% endif %}
               printf '","draft": false,"prerelease": {% if release_type == "stable" %}false{% elif release_type == "prerelease" %}true{% endif %}}' >> releasebody.json
               paste -d'\\0' start releasebody.json > releasebody.json.done
