@@ -439,7 +439,6 @@ pipeline {
                 git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
                 cd ${TEMPDIR}/repo/${LS_REPO}
                 git checkout -f {{ ls_branch }}
-                cd ${TEMPDIR}/docker-${CONTAINER_NAME}
                 for i in ${TEMPLATES_TO_DELETE}; do
                   git rm "${i}"
                 done
