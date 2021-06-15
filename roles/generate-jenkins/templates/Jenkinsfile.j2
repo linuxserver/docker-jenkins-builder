@@ -501,7 +501,7 @@ pipeline {
 {% if project_deprecation_status %}
                 if ! grep -wq "${CONTAINER_NAME}" ${TEMPDIR}/unraid/templates/unraid/ignore.list; then
                   echo "${CONTAINER_NAME}" >> ${TEMPDIR}/unraid/templates/unraid/ignore.list
-                  git add unraid/templates/unraid/ignore.list
+                  git add unraid/ignore.list
                 fi
 {% endif %}
                 if grep -wq "${CONTAINER_NAME}" ${TEMPDIR}/unraid/templates/unraid/ignore.list; then
