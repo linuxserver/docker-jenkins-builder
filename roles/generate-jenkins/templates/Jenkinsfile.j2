@@ -465,6 +465,8 @@ pipeline {
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
 {% if project_deprecation_status %}
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+                git rm ${TEMPDIR}/repo/${LS_REPO}/.github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler}.yml || :
+                git commit -m 'Bot Removing Triggers From Deprecated Image' || :
 {% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
