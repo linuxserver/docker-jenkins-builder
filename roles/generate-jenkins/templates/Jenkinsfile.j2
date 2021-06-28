@@ -720,7 +720,6 @@ pipeline {
                   apt list -qq --installed | sed "s#/.*now ##g" | cut -d" " -f1 > /tmp/package_versions.txt && \
                   sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
                   chmod 777 /tmp/package_versions.txt'
-              fi
               elif [ "${DIST_IMAGE}" == "fedora" ]; then
                 docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
                   rpm -qa > /tmp/package_versions.txt && \
