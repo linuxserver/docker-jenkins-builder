@@ -468,14 +468,14 @@ pipeline {
 {% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
-{% if project_deprecation_status %}
-                git rm ${TEMPDIR}/repo/${LS_REPO}/.github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler}.yml || :
-{% endif %}
                 if ! grep -q '.jenkins-external' .gitignore 2>/dev/null; then
                   echo ".jenkins-external" >> .gitignore
                   git add .gitignore
                 fi
                 git add ${TEMPLATED_FILES}
+{% if project_deprecation_status %}
+                git rm ${TEMPDIR}/repo/${LS_REPO}/.github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler}.yml || :
+{% endif %}
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
