@@ -7,10 +7,10 @@ LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DA
 LABEL maintainer="homer, thelamer"
 
 RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --upgrade \
-   ansible \
-   bash 
+  echo "**** install build packages ****" && \
+  apk add --no-cache --upgrade \
+    ansible \
+    bash 
 
 COPY . /ansible
 
