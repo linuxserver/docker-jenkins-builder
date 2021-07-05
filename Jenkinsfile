@@ -24,7 +24,7 @@ pipeline {
     DEV_DOCKERHUB_IMAGE='lsiodev/jenkins-builder'
     PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
     DIST_IMAGE='alpine'
-    MULTIARCH='false'
+    MULTIARCH='true'
     CI='true'
     CI_WEB='true'
     CI_PORT='8000'
