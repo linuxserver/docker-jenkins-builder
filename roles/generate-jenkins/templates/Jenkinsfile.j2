@@ -626,6 +626,8 @@ pipeline {
           agent {
 {% if use_qemu is defined %}
             label 'X86-64-MULTI'
+{% elif armhf_native %}
+            label 'ARMHF-NATIVE'
 {% else %}
             label 'ARMHF'
 {% endif %}
