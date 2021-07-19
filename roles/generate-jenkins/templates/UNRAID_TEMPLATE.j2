@@ -26,11 +26,16 @@
 {%- endif -%}
 {%- endif -%}
 {%- macro ca(str) -%}
-{{ str | replace("<", "") | replace(">", "") | replace("&", "and") | e }}
+{{ str | replace("<", "") | replace(">", "") | replace("[", "") | replace("]", "") | replace("&", "and") | e }}
+{%- endmacro -%}
+{%- macro readme_date(str) -%}
+{%- set _date = (str | replace(":","")).split(".") -%}
+{{ "20" + _date[2] + "-" + _date[1] + "-" + _date[0] }}
 {%- endmacro -%}
 {#- Create ExtraParam for REQUIRED stuff-#}
 <?xml version="1.0"?>
 <!-- DO NOT CHANGE THIS FILE MANUALLY, IT IS AUTOMATICALLY GENERATED -->
+<!-- GENERATED FROM {{ project_github_asset }}/readme-vars.yml -->
 <Container version="2">
     <Name>{{ param_container_name | lower }}</Name>
     <Repository>ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}</Repository>
@@ -42,6 +47,7 @@
     <Privileged>{{ "true" if privileged is sameas true else "false" }}</Privileged>
     <Support>{{ project_github_repo_url }}/issues/new/choose</Support>
     <Shell>bash</Shell>
+    <GitHub>{{ project_github_repo_url }}{{ "#application-setup" if app_setup_block_enabled is defined and app_setup_block_enabled }}</GitHub>
 {# Set the Branches, if any #}
 {% if development_versions is defined and development_versions %}
 {% for item in development_versions_items %}
@@ -68,6 +74,20 @@
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
+{% if unraid_requirement is defined and unraid_requirement %}
+    <Requires>{{ unraid_requirement }}</Requires>
+{% endif %}
+{# Create changelog #}
+{% if changelogs is defined and changelogs %}
+    <Date>{{ readme_date(changelogs |map(attribute='date') | first) }}</Date>
+    <Changes>
+{% for item in changelogs %}
+### {{ readme_date( item.date ) }}
+- {{ ca(item.desc) }}
+
+{% endfor %}
+    </Changes>
+{% endif %}
 {# Set required ports, gets the name from the name atribute if present, or "WebUI" if it is the first port #}
 {% if param_usage_include_ports | default(false) %}
 {% for item in param_ports %}
@@ -104,7 +124,7 @@
 {#- Set required variables, gets the name from the name atribute #}
 {% if param_usage_include_env | default(false) %}
 {% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
-{% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
+{% set mask="true" if ("token" or "pass" or "key") is in item.env_var | lower else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
     <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
 {% endfor %}
 {% endif %}
@@ -112,7 +132,7 @@
 {#- Set optional variables #}
 {% if opt_param_usage_include_env | default(false) %}
 {% for item in opt_param_env_vars if not item.env_var | lower is in skip_envs %}
-{% set mask="true" if item.env_var | lower is in ["token", "pass", "token", "key"] else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
+{% set mask="true" if ("token" or "pass" or "key") is in item.env_var | lower else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
     <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask }}"/>
 {% endfor %}
 {% endif %}
