@@ -14,7 +14,7 @@ echo '
 ******************************************************
 {% if project_deprecation_message is defined %}
 
-{{ project_deprecation_message }}
+{{ project_deprecation_message | regex_replace('\'','\\\'') }}
 
 ******************************************************
 ******************************************************{% endif %}'

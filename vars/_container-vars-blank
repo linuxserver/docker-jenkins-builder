@@ -82,6 +82,7 @@ opt_cap_add_param_vars:
 # Disables the sync function on unraids side. On by default
 unraid_template_sync: true
 unraid_template: true
+unraid_requirement: false # If not false, value is read as a string
 
 optional_block_1: false
 optional_block_1_items:
