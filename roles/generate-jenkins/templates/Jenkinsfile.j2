@@ -273,17 +273,17 @@ pipeline {
             script: '''echo ${EXT_RELEASE} | sed 's/[~,%@+;:/]//g' ''',
             returnStdout: true).trim()
 
-          env.SEMVAR = (new Date()).format('YYYY.MM.dd')
-          semvar = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)\.(\d+)$/
-          if (semvar.find()) {
-            env.SEMVAR = "${semvar[0][1]}.${semvar[0][2]}.${semvar[0][3]}"
+          env.SEMVER = (new Date()).format('YYYY.MM.dd')
+          semver = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)\.(\d+)$/
+          if (semver.find()) {
+            env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
           } else {
-            semvar_modified = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)(?:\.(\d+))?(.*)$/
-            if (semvar.semvar_modified()) {
-              if (semvar[0][3]) {
-                env.SEMVAR = "${semvar[0][1]}.${semvar[0][2]}.${semvar[0][3]}"
-              } else if (!semvar[0][3] && !semvar[0][4]) {
-                env.SEMVAR = "${semvar[0][1]}.${semvar[0][2]}.${(new Date()).format('YYYYMMdd')}"
+            semver_modified = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)(?:\.(\d+))?(.*)$/
+            if (semver.semver_modified()) {
+              if (semver[0][3]) {
+                env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
+              } else if (!semver[0][3] && !semver[0][4]) {
+                env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${(new Date()).format('YYYYMMdd')}"
               }
             }
           }
@@ -906,11 +906,11 @@ pipeline {
                     docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
                     docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:{{ release_tag }}
                     docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${EXT_RELEASE_TAG}
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVAR}
+                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
                     docker push ${PUSHIMAGE}:{{ release_tag }}
                     docker push ${PUSHIMAGE}:${META_TAG}
                     docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
-                    docker push ${PUSHIMAGE}:${SEMVAR}
+                    docker push ${PUSHIMAGE}:${SEMVER}
                   done
                '''
           }
@@ -962,9 +962,9 @@ pipeline {
                     docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
                     docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
                     docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVAR}
-                    docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${SEMVAR}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVAR}
+                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
+                    docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
                     docker push ${MANIFESTIMAGE}:arm32v7-${META_TAG}
                     docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
@@ -974,9 +974,9 @@ pipeline {
                     docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
                     docker push ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
                     docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-${SEMVAR}
-                    docker push ${MANIFESTIMAGE}:arm32v7-${SEMVAR}
-                    docker push ${MANIFESTIMAGE}:arm64v8-${SEMVAR}
+                    docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
+                    docker push ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+                    docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }} || :
                     docker manifest create ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
                     docker manifest annotate ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} --os linux --arch arm
@@ -989,10 +989,10 @@ pipeline {
                     docker manifest create ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} --os linux --arch arm
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} --os linux --arch arm64 --variant v8
-                    docker manifest push --purge ${MANIFESTIMAGE}:${SEMVAR} || :
-                    docker manifest create ${MANIFESTIMAGE}:${SEMVAR} ${MANIFESTIMAGE}:amd64-${SEMVAR} ${MANIFESTIMAGE}:arm32v7-${SEMVAR} ${MANIFESTIMAGE}:arm64v8-${SEMVAR}
-                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVAR} ${MANIFESTIMAGE}:arm32v7-${SEMVAR} --os linux --arch arm
-                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVAR} ${MANIFESTIMAGE}:arm64v8-${SEMVAR} --os linux --arch arm64 --variant v8
+                    docker manifest push --purge ${MANIFESTIMAGE}:${SEMVER} || :
+                    docker manifest create ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} --os linux --arch arm
+                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }}
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG}{{ ' ' }}
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG}{{ ' ' }}
