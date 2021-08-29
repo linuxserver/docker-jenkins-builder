@@ -32,6 +32,9 @@
 {%- set _date = (str | replace(":","")).split(".") -%}
 {{ "20" + _date[2] + "-" + _date[1] + "-" + _date[0] }}
 {%- endmacro -%}
+{%- macro mask(str) -%}
+{{ "true" if ["token", "pass" ,"key"]|select("in", str|lower) else "false" }}
+{%- endmacro -%}
 {#- Create ExtraParam for REQUIRED stuff-#}
 <?xml version="1.0"?>
 <!-- DO NOT CHANGE THIS FILE MANUALLY, IT IS AUTOMATICALLY GENERATED -->
@@ -124,16 +127,14 @@
 {#- Set required variables, gets the name from the name atribute #}
 {% if param_usage_include_env | default(false) %}
 {% for item in param_env_vars if not item.env_var | lower is in skip_envs %}
-{% set mask="true" if ("token" or "pass" or "key") is in item.env_var | lower else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
-    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask }}"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ item.env_options | join('|') if item.env_options is defined else ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="true" Mask="{{ mask(item.env_var) }}"/>
 {% endfor %}
 {% endif %}
 {#- Set required variables, gets the name from the name atribute #}
 {#- Set optional variables #}
 {% if opt_param_usage_include_env | default(false) %}
 {% for item in opt_param_env_vars if not item.env_var | lower is in skip_envs %}
-{% set mask="true" if ("token" or "pass" or "key") is in item.env_var | lower else item.mask if item.mask is defined else "false" %} {#- Crude logic to determine if the env should be masked #}
-    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask }}"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.env_var }}" Target="{{ item.env_var }}" Default="{{ ca(item.env_value) }}" Description="{{ ca(item.desc) if item.desc is defined else "Variable: " + path }}" Type="Variable" Display="always" Required="false" Mask="{{ mask(item.env_var) }}"/>
 {% endfor %}
 {% endif %}
 {#- Set optional variables #}
