@@ -919,7 +919,8 @@ pipeline {
                   docker rmi \
                   ${DELETEIMAGE}:${META_TAG} \
                   ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
-                  ${DELETEIMAGE}:{{ release_tag }} || :
+                  ${DELETEIMAGE}:{{ release_tag }} \
+                  ${DELETEIMAGE}:${SEMVER} || :
                 done
              '''
         }
