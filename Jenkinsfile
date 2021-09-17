@@ -114,6 +114,21 @@ pipeline {
           env.EXT_RELEASE_CLEAN = sh(
             script: '''echo ${EXT_RELEASE} | sed 's/[~,%@+;:/]//g' ''',
             returnStdout: true).trim()
+
+          env.SEMVER = (new Date()).format('YYYY.MM.dd')
+          semver = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)\.(\d+)$/
+          if (semver.find()) {
+            env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
+          } else {
+            semver_modified = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)(?:\.(\d+))?(.*)$/
+            if (semver.semver_modified()) {
+              if (semver[0][3]) {
+                env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
+              } else if (!semver[0][3] && !semver[0][4]) {
+                env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${(new Date()).format('YYYYMMdd')}"
+              }
+            }
+          }
         }
       }
     }
@@ -373,7 +388,7 @@ pipeline {
     stage('Build-Single') {
       when {
         expression {
-          env.MULTIARCH == 'false' || params.PACKAGE_CHECK == 'true' 
+          env.MULTIARCH == 'false' || params.PACKAGE_CHECK == 'true'
         }
         environment name: 'EXIT_STATUS', value: ''
       }
@@ -665,9 +680,11 @@ pipeline {
                     docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
                     docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:latest
                     docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${EXT_RELEASE_TAG}
+                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
                     docker push ${PUSHIMAGE}:latest
                     docker push ${PUSHIMAGE}:${META_TAG}
                     docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
+                    docker push ${PUSHIMAGE}:${SEMVER}
                   done
                '''
           }
@@ -676,7 +693,8 @@ pipeline {
                   docker rmi \
                   ${DELETEIMAGE}:${META_TAG} \
                   ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
-                  ${DELETEIMAGE}:latest || :
+                  ${DELETEIMAGE}:latest \
+                  ${DELETEIMAGE}:${SEMVER} || :
                 done
              '''
         }
@@ -719,6 +737,9 @@ pipeline {
                     docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
                     docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
                     docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
+                    docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
                     docker push ${MANIFESTIMAGE}:arm32v7-${META_TAG}
                     docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
@@ -728,6 +749,9 @@ pipeline {
                     docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
                     docker push ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
                     docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                    docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
+                    docker push ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+                    docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     docker manifest push --purge ${MANIFESTIMAGE}:latest || :
                     docker manifest create ${MANIFESTIMAGE}:latest ${MANIFESTIMAGE}:amd64-latest ${MANIFESTIMAGE}:arm32v7-latest ${MANIFESTIMAGE}:arm64v8-latest
                     docker manifest annotate ${MANIFESTIMAGE}:latest ${MANIFESTIMAGE}:arm32v7-latest --os linux --arch arm
@@ -740,6 +764,10 @@ pipeline {
                     docker manifest create ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} --os linux --arch arm
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} --os linux --arch arm64 --variant v8
+                    docker manifest push --purge ${MANIFESTIMAGE}:${SEMVER} || :
+                    docker manifest create ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} --os linux --arch arm
+                    docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:latest
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} 
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} 
