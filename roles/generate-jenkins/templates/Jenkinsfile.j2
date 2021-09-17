@@ -16,6 +16,7 @@ pipeline {
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
     GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
+    SCARF_TOKEN=credentials('scarf_api_key')
 {% for repo_var in repo_vars %}
     {{ repo_var }}
 {% endfor %}
@@ -560,6 +561,43 @@ pipeline {
              "merge_requests_access_level":"disabled",\
              "repository_access_level":"enabled",\
              "visibility":"public"}' '''
+      }{{ ' ' }}
+    }
+    /* #######################
+           Scarf.sh package registry
+       ####################### */
+    // Add package to Scarf.sh and set permissions
+    stage("Scarf.sh package registry"){
+      when {
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps{
+        sh '''#! /bin/bash
+              set -e
+              PACKAGE_UUID=$(curl -sX GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/packages | jq -r '.[] | select(.name=="{{ lsio_project_name_short }}/{{ project_name }}") | .uuid')
+              if [ -z "${PACKAGE_UUID}" ]; then
+                echo "Adding package to Scarf.sh"
+                curl -sX POST https://scarf.sh/api/v1/packages \
+                  -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                  -d '{"name":"{{ lsio_project_name_short }}/{{ project_name }}",\
+                       "shortDescription":"example description",\
+                       "libraryType":"docker",\
+                       "website":"{{ project_github_repo_url }}",\
+                       "backendUrl":"https://ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}",\
+                       "publicUrl":"https://lscr.io/{{ lsio_project_name_short }}/{{ project_name }}"}'
+                PACKAGE_UUID=$(curl -sX GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/packages | jq -r '.[] | select(.name=="{{ lsio_project_name_short }}/{{ project_name }}") | .uuid')
+              fi
+              echo "Setting permissions on Scarf.sh"
+              curl -sX POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
+                -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                -d '[{"userQuery":"Spad","permissionLevel":"admin"},\
+                     {"userQuery":"roxedus","permissionLevel":"admin"},\
+                     {"userQuery":"nemchik","permissionLevel":"admin"},\
+                     {"userQuery":"driz","permissionLevel":"admin"},\
+                     {"userQuery":"aptalca","permissionLevel":"admin"},\
+                     {"userQuery":"saarg","permissionLevel":"admin"},\
+                     {"userQuery":"Stark","permissionLevel":"admin"}]'
+           '''
       }{{ ' ' }}
     }
     /* ###############
