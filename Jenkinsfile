@@ -116,12 +116,16 @@ pipeline {
             returnStdout: true).trim()
 
           env.SEMVER = (new Date()).format('YYYY.MM.dd')
-          semver = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)\.(\d+)$/
+          println("SEMVER: ${env.SEMVER}")
+          def semver = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)\.(\d+)$/
           if (semver.find()) {
             env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
+            println("SEMVER: Found proper semver: ${SEMVER}")
           } else {
-            semver_modified = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)(?:\.(\d+))?(.*)$/
-            if (semver.semver_modified()) {
+            println("Unable to find proper semver. Attempting modified semver.")
+            semver = env.EXT_RELEASE_CLEAN =~ /(\d+)\.(\d+)(?:\.(\d+))?(.*)$/
+            if (semver.find()) {
+              println("Found modified semver")
               if (semver[0][3]) {
                 env.SEMVER = "${semver[0][1]}.${semver[0][2]}.${semver[0][3]}"
               } else if (!semver[0][3] && !semver[0][4]) {
