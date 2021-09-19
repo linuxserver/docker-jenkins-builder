@@ -773,6 +773,7 @@ pipeline {
                     docker manifest push --purge ${MANIFESTIMAGE}:latest
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} 
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} 
+                    docker manifest push --purge ${MANIFESTIMAGE}:${SEMVER} 
                   done
                '''
           }
