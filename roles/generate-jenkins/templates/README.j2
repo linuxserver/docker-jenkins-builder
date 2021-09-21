@@ -126,6 +126,19 @@ services:
       - {{ item.cap_add_var }} #optional
 {% endfor %}
 {% endif %}
+{% if security_opt_param or opt_security_opt_param %}
+    security_opt:
+{% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+      - {{ item.compose_var }}
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+      - {{ item.compose_var }} #optional
+{% endfor %}
+{% endif %}
 {% if param_usage_include_net is sameas true %}
     network_mode: {{ param_net }}
 {% elif param_usage_include_net == 'optional' %}
@@ -248,6 +261,16 @@ docker run -d \
 {% if opt_cap_add_param %}
 {% for item in opt_cap_add_param_vars %}
   --cap-add={{ item.cap_add_var }} `#optional` \
+{% endfor %}
+{% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+  --security-opt={{ item.run_var }} \
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+  --security-opt {{ item.run_var }} `#optional` \
 {% endfor %}
 {% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
@@ -395,6 +418,16 @@ Container images are configured using parameters passed at runtime (such as thos
 {% if opt_custom_params is defined %}
 {% for item in opt_custom_params %}
 | `--{{ item.name }}=` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+| `--security-opt {{ item.run_security_opt_var }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+| `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
 
