@@ -19,6 +19,10 @@ cap_add_param: false
 cap_add_param_vars: []
 opt_cap_add_param: false
 opt_cap_add_param_vars: []
+security_opt_param: false
+security_opt_param_vars: []
+opt_security_opt_param: false
+opt_security_opt_param_vars: []
 param_usage_include_hostname: false
 param_hostname: ""
 param_usage_include_env: false

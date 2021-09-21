@@ -60,6 +60,9 @@ param_devices:
 cap_add_param: false
 cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
+security_opt_param: false
+security_opt_param_vars:
+  - { run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "Disabled syscall filtering" }
 
 # optional container parameters
 opt_param_usage_include_env: false
@@ -77,6 +80,9 @@ opt_param_devices:
 opt_cap_add_param: false
 opt_cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
+security_opt_param: false
+security_opt_param_vars:
+  - { run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "Disabled syscall filtering" }
 
 # Unraid templating
 # Disables the sync function on unraids side. On by default
