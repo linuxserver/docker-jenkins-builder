@@ -390,11 +390,13 @@ pipeline {
                        "backendUrl":"https://ghcr.io/linuxserver/jenkins-builder",\
                        "publicUrl":"https://lscr.io/linuxserver/jenkins-builder"}' \
                   | jq -r .uuid)
+              else
                 echo "Package already exists on Scarf.sh"
               fi
               echo "Setting permissions on Scarf.sh for package ${PACKAGE_UUID}"
-              curl -iX POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
+              curl -X POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
                 -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                -H "Content-Type: application/json" \
                 -d '[{"userQuery":"Spad","permissionLevel":"admin"},\
                      {"userQuery":"roxedus","permissionLevel":"admin"},\
                      {"userQuery":"nemchik","permissionLevel":"admin"},\
