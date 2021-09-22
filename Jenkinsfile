@@ -16,6 +16,7 @@ pipeline {
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
     GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
+    SCARF_TOKEN=credentials('scarf_api_key')
     BUILD_VERSION_ARG='BUILDER_VERSION'
     LS_USER='linuxserver'
     LS_REPO='docker-jenkins-builder'
@@ -381,6 +382,47 @@ pipeline {
              "merge_requests_access_level":"disabled",\
              "repository_access_level":"enabled",\
              "visibility":"public"}' '''
+      } 
+    }
+    /* #######################
+           Scarf.sh package registry
+       ####################### */
+    // Add package to Scarf.sh and set permissions
+    stage("Scarf.sh package registry"){
+      when {
+        branch "master"
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps{
+        sh '''#! /bin/bash
+              set -e
+              PACKAGE_UUID=$(curl -X GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/packages | jq -r '.[] | select(.name=="linuxserver/jenkins-builder") | .uuid')
+              if [ -z "${PACKAGE_UUID}" ]; then
+                echo "Adding package to Scarf.sh"
+                PACKAGE_UUID=$(curl -sX POST https://scarf.sh/api/v1/packages \
+                  -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                  -d '{"name":"linuxserver/jenkins-builder",\
+                       "shortDescription":"example description",\
+                       "libraryType":"docker",\
+                       "website":"https://github.com/linuxserver/docker-jenkins-builder",\
+                       "backendUrl":"https://ghcr.io/linuxserver/jenkins-builder",\
+                       "publicUrl":"https://lscr.io/linuxserver/jenkins-builder"}' \
+                  | jq -r .uuid)
+              else
+                echo "Package already exists on Scarf.sh"
+              fi
+              echo "Setting permissions on Scarf.sh for package ${PACKAGE_UUID}"
+              curl -X POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
+                -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                -H "Content-Type: application/json" \
+                -d '[{"userQuery":"Spad","permissionLevel":"admin"},\
+                     {"userQuery":"roxedus","permissionLevel":"admin"},\
+                     {"userQuery":"nemchik","permissionLevel":"admin"},\
+                     {"userQuery":"driz","permissionLevel":"admin"},\
+                     {"userQuery":"aptalca","permissionLevel":"admin"},\
+                     {"userQuery":"saarg","permissionLevel":"admin"},\
+                     {"userQuery":"Stark","permissionLevel":"admin"}]'
+           '''
       } 
     }
     /* ###############
