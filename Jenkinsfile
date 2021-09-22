@@ -401,6 +401,7 @@ pipeline {
                 echo "Adding package to Scarf.sh"
                 PACKAGE_UUID=$(curl -sX POST https://scarf.sh/api/v1/packages \
                   -H "Authorization: Bearer ${SCARF_TOKEN}" \
+                  -H "Content-Type: application/json" \
                   -d '{"name":"linuxserver/jenkins-builder",\
                        "shortDescription":"example description",\
                        "libraryType":"docker",\
