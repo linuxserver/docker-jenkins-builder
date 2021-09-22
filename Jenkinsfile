@@ -378,7 +378,7 @@ pipeline {
       steps{
         sh '''#! /bin/bash
               set -e
-              PACKAGE_UUID=$(curl -sX GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/packages | jq -r '.[] | select(.name=="linuxserver/jenkins-builder") | .uuid')
+              PACKAGE_UUID=$(curl -X GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/packages | jq -r '.[] | select(.name=="linuxserver/jenkins-builder") | .uuid')
               if [ -z "${PACKAGE_UUID}" ]; then
                 echo "Adding package to Scarf.sh"
                 PACKAGE_UUID=$(curl -sX POST https://scarf.sh/api/v1/packages \
@@ -390,9 +390,10 @@ pipeline {
                        "backendUrl":"https://ghcr.io/linuxserver/jenkins-builder",\
                        "publicUrl":"https://lscr.io/linuxserver/jenkins-builder"}' \
                   | jq -r .uuid)
+                echo "Package already exists on Scarf.sh"
               fi
-              echo "Setting permissions on Scarf.sh"
-              curl -sX POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
+              echo "Setting permissions on Scarf.sh for package ${PACKAGE_UUID}"
+              curl -iX POST https://scarf.sh/api/v1/packages/${PACKAGE_UUID}/permissions \
                 -H "Authorization: Bearer ${SCARF_TOKEN}" \
                 -d '[{"userQuery":"Spad","permissionLevel":"admin"},\
                      {"userQuery":"roxedus","permissionLevel":"admin"},\
