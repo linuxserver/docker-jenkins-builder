@@ -373,7 +373,6 @@ pipeline {
     // Add package to Scarf.sh and set permissions
     stage("Scarf.sh package registry"){
       when {
-        branch "master"
         environment name: 'EXIT_STATUS', value: ''
       }
       steps{

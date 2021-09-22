@@ -569,7 +569,6 @@ pipeline {
     // Add package to Scarf.sh and set permissions
     stage("Scarf.sh package registry"){
       when {
-        branch "{{ ls_branch }}"
         environment name: 'EXIT_STATUS', value: ''
       }
       steps{
