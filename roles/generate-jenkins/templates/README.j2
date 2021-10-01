@@ -40,6 +40,7 @@ This image is deprecated. We will not offer support for this image and it will n
 [![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_github_repo_url }}/releases)
 [![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ project_github_repo_url }}/packages)
 [![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})]({{ lsio_gitlab_url }}/{{ project_repo_name }}/container_registry)
+[![Quay.io]({{ lsio_shieldsio_static_quay }})](https://quay.io/repository/linuxserver.io/{{ project_name }})
 [![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ lsio_docker_hub_url }}/{{ project_name }})
 [![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ lsio_docker_hub_url }}/{{ project_name }})
 [![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/)
@@ -62,7 +63,7 @@ This image is deprecated. We will not offer support for this image and it will n
 
 {{ "Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. " if available_architectures | length > 1  else "" }}We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
@@ -101,7 +102,7 @@ Here are some example snippets to help you get started creating a container.
 version: "2.1"
 services:
   {{ project_name }}:
-    image: ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -124,6 +125,19 @@ services:
 {% if opt_cap_add_param %}
 {% for item in opt_cap_add_param_vars %}
       - {{ item.cap_add_var }} #optional
+{% endfor %}
+{% endif %}
+{% if security_opt_param or opt_security_opt_param %}
+    security_opt:
+{% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+      - {{ item.compose_var }}
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+      - {{ item.compose_var }} #optional
 {% endfor %}
 {% endif %}
 {% if param_usage_include_net is sameas true %}
@@ -250,6 +264,16 @@ docker run -d \
   --cap-add={{ item.cap_add_var }} `#optional` \
 {% endfor %}
 {% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+  --security-opt={{ item.run_var }} \
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+  --security-opt {{ item.run_var }} `#optional` \
+{% endfor %}
+{% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
 {% for item in common_param_env_vars %}
   -e {{ item.env_var }}={{ item.env_value }} \
@@ -322,7 +346,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
 ```
 
 {% if optional_block_1 %}
@@ -397,6 +421,16 @@ Container images are configured using parameters passed at runtime (such as thos
 | `--{{ item.name }}=` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+| `--security-opt {{ item.run_security_opt_var }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+| `--security-opt {{ item.run_var }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
 
 ## Environment variables from files (Docker secrets)
 
@@ -460,7 +494,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 
 ## Updating Info
 
@@ -478,7 +512,7 @@ Below are the instructions for updating containers:
 
 ### Via Docker Run
 
-* Update the image: `docker pull ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+* Update the image: `docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
 * Stop the running container: `docker stop {{ project_name }}`
 * Delete the container: `docker rm {{ project_name }}`
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
@@ -513,7 +547,7 @@ cd {{ project_repo_name }}
 docker build \
   --no-cache \
   --pull \
-  -t ghcr.io/{{ lsio_project_name_short }}/{{ project_name }}:latest .
+  -t lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:latest .
 ```
 
 The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`

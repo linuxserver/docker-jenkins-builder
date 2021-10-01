@@ -48,6 +48,16 @@ docker run -d \
   --cap-add={{ item.cap_add_var }} `#optional` \
 {% endfor %}
 {% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+  --security-opt={{ item.run_var }} \
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+  --security-opt {{ item.run_var }} `#optional` \
+{% endfor %}
+{% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
 {% for item in common_param_env_vars %}
   -e {{ item.env_var }}={{ item.env_value }} \
