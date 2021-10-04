@@ -51,12 +51,17 @@
     <Support>{{ project_github_repo_url }}/issues/new/choose</Support>
     <Shell>bash</Shell>
     <GitHub>{{ project_github_repo_url }}{{ "#application-setup" if app_setup_block_enabled is defined and app_setup_block_enabled }}</GitHub>
-{# Set the Branches, if any #}
+    <ReadMe>{{ project_github_repo_url }}{{ "#readme" }}</ReadMe>
+{# Set the Branches, if any Config items is overwritten. TODO: handle config items #}
 {% if development_versions is defined and development_versions %}
 {% for item in development_versions_items %}
     <Branch>
         <Tag>{{ ca(item.tag) }}</Tag>
         <TagDescription>{{ ca(item.desc) }}</TagDescription>
+{% if item.tag != "latest" %}
+        <ReadMe>{{ project_github_repo_url }}{{ "/tree/" + item.tag + "#readme" }}</ReadMe>
+        <GitHub>{{ project_github_repo_url }}{{ ("/tree/" + item.tag + "#application-setup") if app_setup_block_enabled is defined and app_setup_block_enabled }}</GitHub>
+{% endif %}
 {% if item.extra is defined %} {#- Allow for branch-specific stuff #}
         {{ ca(item.extra) | indent(8) | trim }}
 {% endif %}
