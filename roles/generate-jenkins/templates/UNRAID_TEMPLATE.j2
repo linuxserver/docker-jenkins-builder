@@ -156,7 +156,7 @@
 {#- Set optional devices #}
 {% if opt_param_device_map | default(false) %}
 {% for item in opt_param_devices %}
-    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional devices #}
