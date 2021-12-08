@@ -71,6 +71,7 @@ opt_param_env_vars:
 opt_param_usage_include_vols: false
 opt_param_volumes:
   - { vol_path: "/config", vol_host_path: "</path/to/appdata/config>", desc: "Configuration files.", name: "Config" }
+  - { vol_path: "/lib/modules", vol_host_path: "/lib/modules", desc: "Volume that commonly has the same path on host aswell as in the container.", name: "Modules", default: true }
 opt_param_usage_include_ports: false
 opt_param_ports:
   - { external_port: "80", internal_port: "80", port_desc: "Application WebUI", name: "WebUI" }

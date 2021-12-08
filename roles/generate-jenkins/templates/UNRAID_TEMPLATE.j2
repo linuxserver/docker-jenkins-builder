@@ -116,7 +116,7 @@
 {% if param_usage_include_vols | default(false) %}
 {% for item in param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="{{ ca(item.vol_host_path) if item.default is defined and item.default is sameas true }}" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set required volumes, gets the name from the name atribute if present, or "Appdata" if it is the /config location #}
@@ -124,7 +124,7 @@
 {% if opt_param_usage_include_vols | default(false) %}
 {% for item in opt_param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="{{ ca(item.vol_host_path) if item.default is defined and item.default is sameas true }}" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional volumes #}
