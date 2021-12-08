@@ -80,7 +80,7 @@
     <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]</WebUI>
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
-    <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
+    <TemplateURL>{{ "None" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
 {% if unraid_requirement is defined and unraid_requirement %}
     <Requires>{{ unraid_requirement }}</Requires>
