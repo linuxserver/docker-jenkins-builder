@@ -80,7 +80,7 @@
     <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]</WebUI>
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
-    <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
+    <TemplateURL>{{ "None" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
 {% if unraid_requirement is defined and unraid_requirement %}
     <Requires>{{ unraid_requirement }}</Requires>
@@ -116,7 +116,7 @@
 {% if param_usage_include_vols | default(false) %}
 {% for item in param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="{{ ca(item.vol_host_path) if item.default is defined and item.default is sameas true }}" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="{{ "advanced" if path == "/config" else "always" }}" Required="true" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set required volumes, gets the name from the name atribute if present, or "Appdata" if it is the /config location #}
@@ -124,7 +124,7 @@
 {% if opt_param_usage_include_vols | default(false) %}
 {% for item in opt_param_volumes %}
 {% set path, mode=item.vol_path.split(':') if ":" in item.vol_path else [item.vol_path, false] %} {#- Logic to get the mode #}
-    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else "Appdata" if path == "/config" else "Path: " + path }}" Target="{{ ca(path) }}" Default="{{ ca(item.vol_host_path) if item.default is defined and item.default is sameas true }}" Mode="{{ mode if mode else "rw" }}" Description="{{ ca(item.desc) if item.desc is defined else "Path: " + path }}" Type="Path" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional volumes #}
@@ -156,7 +156,7 @@
 {#- Set optional devices #}
 {% if opt_param_device_map | default(false) %}
 {% for item in opt_param_devices %}
-    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="true" Mask="false"/>
+    <Config Name="{{ ca(item.name) if item.name is defined else item.device_path }}" Default="{{ item.device_path }}" Description="{{ ca(item.desc) if item.desc is defined else "Device: " + path }}" Type="Device" Display="always" Required="false" Mask="false"/>
 {% endfor %}
 {% endif %}
 {#- Set optional devices #}
