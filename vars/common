@@ -30,6 +30,7 @@ project_deprecation_status: false
 project_github_asset: "{{ project_github_repo_url }}/blob/{{ ls_branch }}"
 project_github_repo_url: "{{ lsio_github_url }}/{{ project_repo_name }}"
 project_repo_name: "docker-{{ project_name }}"
+project_scarfio_url: "https://scarf.sh/gateway/{{ lsio_project_name_short }}-ci/docker/{{ lsio_project_name_short }}%2F{{ project_name }}"
 
 # supported architectures
 arch_x86_64: "x86-64"
@@ -60,8 +61,10 @@ lsio_badge_logo_color: "ffffff"
 lsio_badge_style: "for-the-badge"
 lsio_badge_url_parameters: "color={{ lsio_badge_color }}&labelColor={{ lsio_badge_label_color }}&logoColor={{ lsio_badge_logo_color }}&style={{ lsio_badge_style }}"
 lsio_badge_url_parameters_ci: "labelColor={{ lsio_badge_label_color }}&logoColor={{ lsio_badge_logo_color }}&style={{ lsio_badge_style }}"
+lsio_badge_url_parameters_scarfio: "color={{ lsio_badge_color }}&label-color={{ lsio_badge_label_color }}&logo-color={{ lsio_badge_logo_color }}&style={{ lsio_badge_style }}"
 
 # badges
+lsio_scarfio_pulls: "https://scarf.sh/installs-badge/{{ lsio_project_name_short }}-ci/{{ lsio_project_name_short }}%2F{{ project_name }}?{{ lsio_badge_url_parameters_scarfio }}&package-type=docker"
 lsio_shieldsio_discord: "https://img.shields.io/discord/354974912613449730.svg?{{ lsio_badge_url_parameters }}&label=Discord&logo=discord"
 lsio_shieldsio_discourse_topics: "https://img.shields.io/discourse/https/discourse.{{ lsio_short_url }}/topics.svg?{{ lsio_badge_url_parameters }}&logo=discourse"
 lsio_shieldsio_docker_pulls: "https://img.shields.io/docker/pulls/{{ lsio_project_name_short }}/{{ project_name }}.svg?{{ lsio_badge_url_parameters }}&label=pulls&logo=docker"
