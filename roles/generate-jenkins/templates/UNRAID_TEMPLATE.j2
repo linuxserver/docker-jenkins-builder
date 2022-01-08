@@ -54,7 +54,7 @@
     <ReadMe>{{ project_github_repo_url }}{{ "#readme" }}</ReadMe>
 {# Set the Branches, if any Config items is overwritten. TODO: handle config items #}
 {% if development_versions is defined and development_versions %}
-{% for item in development_versions_items %}
+{% for item in development_versions_items if not "deprecate" in item.desc.lower() %}
     <Branch>
         <Tag>{{ ca(item.tag) }}</Tag>
         <TagDescription>{{ ca(item.desc) }}</TagDescription>
