@@ -53,7 +53,7 @@
     <GitHub>{{ project_github_repo_url }}{{ "#application-setup" if app_setup_block_enabled is defined and app_setup_block_enabled }}</GitHub>
     <ReadMe>{{ project_github_repo_url }}{{ "#readme" }}</ReadMe>
 {# Set the Branches, if any Config items is overwritten. TODO: handle config items #}
-{% if development_versions is defined and development_versions %}
+{% if development_versions is defined and development_versions is sameas true %}
 {% for item in development_versions_items if not "deprecate" in item.desc.lower() %}
     <Branch>
         <Tag>{{ ca(item.tag) }}</Tag>
@@ -82,7 +82,7 @@
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
-{% if unraid_requirement is defined and unraid_requirement %}
+{% if unraid_requirement is defined and unraid_requirement != "" %}
     <Requires>{{ unraid_requirement }}</Requires>
 {% endif %}
 {# Create changelog #}
