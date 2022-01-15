@@ -7,7 +7,7 @@
 {#- Create a real object from repo_vars -#}
 {#- Create ExtraParam for REQUIRED stuff-#}
 {%- set ExtraParam=[] -%}
-{%- set x=ExtraParam.append(param_hostname) if param_usage_include_hostname is sameas true -%}
+{%- set x=ExtraParam.append("--hostname=" + param_hostname) if param_usage_include_hostname is sameas true -%}
 {%- if cap_add_param is defined -%}
 {%- for item in cap_add_param_vars -%}
 {%- set x=ExtraParam.append("--cap-add=" + item.cap_add_var) -%}
@@ -54,7 +54,7 @@
     <ReadMe>{{ project_github_repo_url }}{{ "#readme" }}</ReadMe>
 {# Set the Branches, if any Config items is overwritten. TODO: handle config items #}
 {% if development_versions is defined and development_versions %}
-{% for item in development_versions_items %}
+{% for item in development_versions_items if not "deprecate" in item.desc.lower() %}
     <Branch>
         <Tag>{{ ca(item.tag) }}</Tag>
         <TagDescription>{{ ca(item.desc) }}</TagDescription>
@@ -76,7 +76,7 @@
     <ExtraParams>{{ ExtraParam | join(" ") }}</ExtraParams>
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
-{% if better_vars.get("CI_WEB") and better_vars.get("CI") == "true" %}
+{% if better_vars.get("CI_WEB") == "true" and better_vars.get("CI") == "true" %}
     <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]</WebUI>
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
