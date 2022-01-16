@@ -80,7 +80,7 @@ This image provides various versions that are available via tags. Please read th
 
 | Tag | Available | Description |
 | :----: | :----: |--- |
-| latest | {{ '✅ | Latest releases of ' + project_name if 'latest' in (development_versions_items | map(attribute="tag") ) else '❌ |' }} |
+| latest | {{ '✅ | Latest releases of ' + project_name if 'latest' in (development_versions_items | map(attribute="tag") ) or not development_versions_items|length else '❌ |' }} |
 {% for item in development_versions_items %}
 {% if item.tag != 'latest' %}
 | {{ item.tag }} | ✅ | {{ item.desc }} |
