@@ -62,29 +62,31 @@ This image is deprecated. We will not offer support for this image and it will n
 
 ## Supported Architectures
 
-{{ "Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. " if available_architectures | length > 1  else "" }}We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
+We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
 Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
-| Architecture | Tag |
-| :----: | --- |
-{% for item in available_architectures %}
-| {{ item.arch }} | {{ item.tag }} |
-{% endfor %}
-{% if development_versions %}
+| Architecture | Available | Tag |
+| :----: | :----: | ---- |
+| x86-64 | {{ '✅ | amd64-latest' if 'x86-64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| arm64 | {{ '✅ | arm64v8-latest' if 'arm64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| armhf| {{ '✅ | arm32v7-latest' if 'armhf' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
 
 ## Version Tags
 
-This image provides various versions that are available via tags. `latest` tag usually provides the latest stable version. Others are considered under development and caution must be exercised when using them.
+This image provides various versions that are available via tags. Please read the descriptions carefully and exercise caution when using unstable or development tags.
 
-| Tag | Description |
-| :----: | --- |
+| Tag | Available | Description |
+| :----: | :----: |--- |
+| latest | {{ '✅ | Latest releases of ' + project_name if 'latest' in (development_versions_items | map(attribute="tag") ) else '❌ |' }} |
 {% for item in development_versions_items %}
-| {{ item.tag }} | {{ item.desc }} |
-{% endfor %}
+{% if item.tag != 'latest' %}
+| {{ item.tag }} | ✅ | {{ item.desc }} |
 {% endif %}
+{% endfor %}
+
 {% if app_setup_block_enabled %}
 
 ## Application Setup
