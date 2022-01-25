@@ -77,7 +77,7 @@
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
 {% if better_vars.get("CI_WEB") == "true" and better_vars.get("CI") == "true" %}
-    <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]</WebUI>
+    <WebUI>{{ "https" if better_vars.get("CI_SSL") == "true" else "http" }}://[IP]:[PORT:{{ better_vars.get("CI_PORT") }}]{{ better_vars.get("CI_WEBPATH") }}</WebUI>
 {% endif %}
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
