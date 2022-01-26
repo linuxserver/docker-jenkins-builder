@@ -5,7 +5,7 @@
 {%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
 {%- endfor -%}
 {#- Create a real object from repo_vars -#}
-name: External Trigger Main
+name: External Trigger {{ ls_branch }}
 
 on:
   workflow_dispatch:
