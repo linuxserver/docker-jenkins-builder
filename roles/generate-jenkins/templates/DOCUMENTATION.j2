@@ -46,9 +46,9 @@ The architectures supported by this image are:
 
 | Architecture | Available | Tag |
 | :----: | :----: | ---- |
-| x86-64 | {{ '✅ | amd64-<version tag>' if 'x86-64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
-| arm64 | {{ '✅ | arm64v8-<version tag>' if 'arm64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
-| armhf| {{ '✅ | arm32v7-<version tag>' if 'armhf' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| x86-64 | {{ '✅ | amd64-\<version tag\>' if 'x86-64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| arm64 | {{ '✅ | arm64v8-\<version tag\>' if 'arm64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| armhf| {{ '✅ | arm32v7-\<version tag\>' if 'armhf' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
 
 {% if development_versions %}
 ## Version Tags
