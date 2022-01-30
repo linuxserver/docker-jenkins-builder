@@ -41,7 +41,7 @@ This image is deprecated. We will not offer support for this image and it will n
 
 We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
@@ -83,7 +83,7 @@ To help you get started creating a container from this image you can either use 
 version: "2.1"
 services:
   {{ project_name }}:
-    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -327,7 +327,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
 ```
 
 {% if optional_block_1 %}
@@ -504,7 +504,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * Container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * Image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
 
 ## Versions
 

@@ -65,7 +65,7 @@ This image is deprecated. We will not offer support for this image and it will n
 
 We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
@@ -107,7 +107,7 @@ Here are some example snippets to help you get started creating a container.
 version: "2.1"
 services:
   {{ project_name }}:
-    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
@@ -351,7 +351,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
 ```
 
 {% if optional_block_1 %}
@@ -499,7 +499,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
 
 ## Updating Info
 
@@ -517,7 +517,7 @@ Below are the instructions for updating containers:
 
 ### Via Docker Run
 
-* Update the image: `docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+* Update the image: `docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
 * Stop the running container: `docker stop {{ project_name }}`
 * Delete the container: `docker rm {{ project_name }}`
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
@@ -552,7 +552,7 @@ cd {{ project_repo_name }}
 docker build \
   --no-cache \
   --pull \
-  -t lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:latest .
+  -t lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }} .
 ```
 
 The ARM variants can be built on x86_64 hardware using `multiarch/qemu-user-static`
