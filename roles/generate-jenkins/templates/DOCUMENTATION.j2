@@ -439,6 +439,14 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% endfor %}
 {% endif %}
 {% endif %}
+{% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
+
+### Portainer notice
+
+{{ '{% hint style="warning" %}' }}
+This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed trough Portainer.
+{{ "{% endhint %}" }}
+{% endif %}
 
 ## Environment variables from files (Docker secrets)
 
