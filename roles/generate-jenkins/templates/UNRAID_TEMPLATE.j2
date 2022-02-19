@@ -50,6 +50,9 @@
     <Privileged>{{ "true" if privileged is sameas true else "false" }}</Privileged>
     <Support>{{ project_github_repo_url }}/issues/new/choose</Support>
     <Shell>bash</Shell>
+{% if project_deprecation_status %}
+    <Deprecated>true</Deprecated>
+{% endif %}
     <GitHub>{{ project_github_repo_url }}{{ "#application-setup" if app_setup_block_enabled is defined and app_setup_block_enabled }}</GitHub>
     <ReadMe>{{ project_github_repo_url }}{{ "#readme" }}</ReadMe>
 {# Set the Branches, if any Config items is overwritten. TODO: handle config items #}
