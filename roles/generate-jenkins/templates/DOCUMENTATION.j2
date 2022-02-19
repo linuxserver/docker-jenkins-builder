@@ -70,6 +70,13 @@ This image provides various versions that are available via tags. Please read th
 ## Application Setup
 
 {{ app_setup_block | trim }}
+{% if ["CI_SSL='true'", "CI_SSL= 'true'" ,"CI_SSL = 'true'"]|select("in", repo_vars) %}
+
+### Strict reverse proxies
+
+This image uses a self-signed certificate by default. This naturally means the scheme is `https`.
+If you are using a reverse proxy which validates certificates, you need to [disable this check for the container](https://docs.linuxserver.io/faq#strict-proxy).
+{% endif %}
 {% endif %}
 
 ## Usage
@@ -442,6 +449,14 @@ Docker images are configured using parameters passed at runtime (such as those a
 | `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
+{% endif %}
+{% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
+
+### Portainer notice
+
+{{ '{% hint style="warning" %}' }}
+This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed through Portainer.
+{{ "{% endhint %}" }}
 {% endif %}
 
 ## Environment variables from files (Docker secrets)

@@ -436,6 +436,12 @@ Container images are configured using parameters passed at runtime (such as thos
 | `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
+{% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
+
+### Portainer notice
+
+This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed through Portainer.
+{% endif %}
 
 ## Environment variables from files (Docker secrets)
 
