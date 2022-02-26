@@ -1,11 +1,13 @@
 ---
-  - hosts: localhost
-    vars_files:
-      - vars/common
-    pre_tasks:
-      - set_fact:
-          container_name: "{{ lookup('env', 'CONTAINER_NAME' ) | ternary (lookup('env', 'CONTAINER_NAME' ), omit) }}"
-      - set_fact:
-          github_branch: "{{ lookup('env', 'GITHUB_BRANCH' ) | ternary (lookup('env', 'GITHUB_BRANCH' ), omit) }}"
-    roles:
-        - { role: roles/generate-jenkins }
+- hosts: localhost
+  vars_files:
+    - vars/common
+  pre_tasks:
+    - name: Set container_name
+      set_fact:
+        container_name: "{{ lookup('env', 'CONTAINER_NAME' ) | default(omit) }}"
+    - name: Set github_branch
+      set_fact:
+        github_branch: "{{ lookup('env', 'GITHUB_BRANCH' ) | default(omit) }}"
+  roles:
+    - { role: roles/generate-jenkins }
