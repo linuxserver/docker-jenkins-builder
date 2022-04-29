@@ -1,3 +1,4 @@
+{%- set has_latest= true if (development_versions == true and 'latest' in (development_versions_items | map(attribute="tag"))) or (development_versions == false) else false -%}
 ---
 title: {{ project_name }}
 ---
@@ -15,7 +16,7 @@ This image is deprecated. We will not offer support for this image and it will n
 
 [![Scarf.io pulls]({{ lsio_scarfio_pulls }})]({{ project_scarfio_url }})
 [![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_github_repo_url }})
-[![GitHub Release]({{ lsio_shieldsio_github_release }})]({{ project_github_repo_url }}/releases)
+[![GitHub Release]({{ lsio_shieldsio_github_release }}{{ "&include_prereleases" if has_latest == false }})]({{ project_github_repo_url }}/releases)
 [![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ project_github_repo_url }}/packages)
 [![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})]({{ lsio_gitlab_url }}/{{ project_repo_name }}/container_registry)
 [![Quay.io]({{ lsio_shieldsio_static_quay }})](https://quay.io/repository/linuxserver.io/{{ project_name }})
@@ -38,34 +39,44 @@ This image is deprecated. We will not offer support for this image and it will n
 
 ## Supported Architectures
 
-{{ "Our images support multiple architectures such as `x86-64`, `arm64` and `armhf`. " if available_architectures | length > 1  else "" }}We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
+We utilise the docker manifest for multi-platform awareness. More information is available from docker [here](https://github.com/docker/distribution/blob/master/docs/spec/manifest-v2-2.md#manifest-list) and our announcement [here]({{ lsio_blog_url }}/2019/02/21/the-lsio-pipeline-project/).
 
-Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
+Simply pulling `lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}` should retrieve the correct image for your arch, but you can also pull specific arch images via tags.
 
 The architectures supported by this image are:
 
-| Architecture | Tag |
-| :----: | --- |
-{% for item in available_architectures %}
-| {{ item.arch }} | {{ item.tag }} |
-{% endfor %}
-{% if development_versions %}
+| Architecture | Available | Tag |
+| :----: | :----: | ---- |
+| x86-64 | {{ '✅ | amd64-\<version tag\>' if 'x86-64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| arm64 | {{ '✅ | arm64v8-\<version tag\>' if 'arm64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
+| armhf| {{ '✅ | arm32v7-\<version tag\>' if 'armhf' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
 
+{% if development_versions %}
 ## Version Tags
 
-This image provides various versions that are available via tags. `latest` tag usually provides the latest stable version. Others are considered under development and caution must be exercised when using them.
+This image provides various versions that are available via tags. Please read the descriptions carefully and exercise caution when using unstable or development tags.
 
-| Tag | Description |
-| :----: | --- |
+| Tag | Available | Description |
+| :----: | :----: |--- |
+| latest | {{ '✅ | ' + development_versions_items[(development_versions_items | map(attribute="tag")) == "latest"].desc if has_latest == true else '❌ |' }} |
 {% for item in development_versions_items %}
-| {{ item.tag }} | {{ item.desc }} |
+{% if item.tag != 'latest' %}
+| {{ item.tag }} | ✅ | {{ item.desc }} |
+{% endif %}
 {% endfor %}
+
 {% endif %}
 {% if app_setup_block_enabled %}
-
 ## Application Setup
 
 {{ app_setup_block | trim }}
+{% if ["CI_SSL='true'", "CI_SSL= 'true'" ,"CI_SSL = 'true'"]|select("in", repo_vars) %}
+
+### Strict reverse proxies
+
+This image uses a self-signed certificate by default. This naturally means the scheme is `https`.
+If you are using a reverse proxy which validates certificates, you need to [disable this check for the container](https://docs.linuxserver.io/faq#strict-proxy).
+{% endif %}
 {% endif %}
 
 ## Usage
@@ -79,12 +90,17 @@ To help you get started creating a container from this image you can either use 
 version: "2.1"
 services:
   {{ project_name }}:
-    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
     container_name: {{ project_name }}
 {% if param_usage_include_hostname is sameas true %}
     hostname: {{ param_hostname }}
 {% elif param_usage_include_hostname == 'optional' %}
     hostname: {{ param_hostname }} #optional
+{% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+    mac_address: {{ param_mac_address }}
+{% elif param_usage_include_mac_address == 'optional' %}
+    mac_address: {{ param_mac_address }} #optional
 {% endif %}
 {% if privileged is sameas true %}
     privileged: true
@@ -221,6 +237,11 @@ docker run -d \
 {% elif param_usage_include_hostname == 'optional' %}
   --hostname={{ param_hostname }} `#optional` \
 {% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+  --mac-address={{ param_mac_address }} \
+{% elif param_usage_include_mac_address == 'optional' %}
+  --mac-address={{ param_mac_address }} `#optional` \
+{% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
 {% elif param_usage_include_net == 'optional' %}
@@ -323,7 +344,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
 ```
 
 {% if optional_block_1 %}
@@ -409,7 +430,7 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or security_opt_param is defined or opt_security_opt_param is defined %}
+{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or param_usage_include_mac_address or security_opt_param is defined or opt_security_opt_param is defined %}
 
 #### Miscellaneous Options
 
@@ -417,6 +438,9 @@ Docker images are configured using parameters passed at runtime (such as those a
 | :-----:   | --- |
 {% if param_usage_include_hostname %}
 | `--hostname=` | {{ param_hostname_desc }} |
+{% endif %}
+{% if param_usage_include_mac_address %}
+| `--mac-address=` | {{ param_mac_address_desc }} |
 {% endif %}
 {% if custom_params is defined %}
 {% for item in custom_params %}
@@ -438,6 +462,14 @@ Docker images are configured using parameters passed at runtime (such as those a
 | `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
+{% endif %}
+{% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
+
+### Portainer notice
+
+{{ '{% hint style="warning" %}' }}
+This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed through Portainer.
+{{ "{% endhint %}" }}
 {% endif %}
 
 ## Environment variables from files (Docker secrets)
@@ -500,7 +532,7 @@ This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure We
 * Container version number
   * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
 * Image version number
-  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}`
+  * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
 
 ## Versions
 
