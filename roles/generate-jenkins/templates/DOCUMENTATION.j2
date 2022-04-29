@@ -97,6 +97,11 @@ services:
 {% elif param_usage_include_hostname == 'optional' %}
     hostname: {{ param_hostname }} #optional
 {% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+    mac_address: {{ param_mac_address }}
+{% elif param_usage_include_mac_address == 'optional' %}
+    mac_address: {{ param_mac_address }} #optional
+{% endif %}
 {% if privileged is sameas true %}
     privileged: true
 {% elif privileged == 'optional' %}
@@ -231,6 +236,11 @@ docker run -d \
   --hostname={{ param_hostname }} \
 {% elif param_usage_include_hostname == 'optional' %}
   --hostname={{ param_hostname }} `#optional` \
+{% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+  --mac-address={{ param_mac_address }} \
+{% elif param_usage_include_mac_address == 'optional' %}
+  --mac-address={{ param_mac_address }} `#optional` \
 {% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
@@ -420,7 +430,7 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or security_opt_param is defined or opt_security_opt_param is defined %}
+{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or param_usage_include_mac_address or security_opt_param is defined or opt_security_opt_param is defined %}
 
 #### Miscellaneous Options
 
@@ -428,6 +438,9 @@ Docker images are configured using parameters passed at runtime (such as those a
 | :-----:   | --- |
 {% if param_usage_include_hostname %}
 | `--hostname=` | {{ param_hostname_desc }} |
+{% endif %}
+{% if param_usage_include_mac_address %}
+| `--mac-address=` | {{ param_mac_address_desc }} |
 {% endif %}
 {% if custom_params is defined %}
 {% for item in custom_params %}

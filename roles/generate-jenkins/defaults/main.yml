@@ -25,6 +25,8 @@ opt_security_opt_param: false
 opt_security_opt_param_vars: []
 param_usage_include_hostname: false
 param_hostname: ""
+param_usage_include_mac_address: false
+param_mac_address: ""
 param_usage_include_env: false
 param_env_vars: []
 opt_param_usage_include_env: false
