@@ -8,6 +8,7 @@
 {#- Create ExtraParam for REQUIRED stuff-#}
 {%- set ExtraParam=[] -%}
 {%- set x=ExtraParam.append("--hostname=" + param_hostname) if param_usage_include_hostname is sameas true -%}
+{%- set x=ExtraParam.append("--mac-address=" + param_mac_address) if param_usage_include_mac_address is sameas true -%}
 {%- if cap_add_param is defined -%}
 {%- for item in cap_add_param_vars -%}
 {%- set x=ExtraParam.append("--cap-add=" + item.cap_add_var) -%}

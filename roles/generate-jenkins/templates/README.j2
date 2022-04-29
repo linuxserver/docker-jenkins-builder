@@ -114,6 +114,11 @@ services:
 {% elif param_usage_include_hostname == 'optional' %}
     hostname: {{ param_hostname }} #optional
 {% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+    mac_address: {{ param_mac_address }}
+{% elif param_usage_include_mac_address == 'optional' %}
+    mac_address: {{ param_mac_address }} #optional
+{% endif %}
 {% if privileged is sameas true %}
     privileged: true
 {% elif privileged == 'optional' %}
@@ -249,6 +254,11 @@ docker run -d \
 {% elif param_usage_include_hostname == 'optional' %}
   --hostname={{ param_hostname }} `#optional` \
 {% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+  --mac-address={{ param_mac_address }} \
+{% elif param_usage_include_mac_address == 'optional' %}
+  --mac-address={{ param_mac_address }} `#optional` \
+{% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
 {% elif param_usage_include_net == 'optional' %}
@@ -367,6 +377,9 @@ Container images are configured using parameters passed at runtime (such as thos
 | :----: | --- |
 {% if param_usage_include_hostname %}
 | `--hostname=` | {{ param_hostname_desc }} |
+{% endif %}
+{% if param_usage_include_mac_address %}
+| `--mac-address=` | {{ param_mac_address_desc }} |
 {% endif %}
 {% if param_usage_include_net %}
 | `--net={{ param_net }}` | {{ param_net_desc }} |
