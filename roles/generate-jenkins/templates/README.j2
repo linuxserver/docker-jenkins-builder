@@ -95,8 +95,26 @@ This image provides various versions that are available via tags. Please read th
 
 {{ app_setup_block | trim }}
 
-{% block app_setup_block %}
-{% endblock %}
+{% if readme_seccomp is defined and readme_seccomp %}
+{% include "README_SECCOMP.j2" %}
+
+
+{% endif %}
+{% if readme_keyboard is defined and readme_keyboard %}
+{% include "README_KEYBOARD.j2" %}
+
+
+{% endif %}
+{% if readme_hwaccel is defined and readme_hwaccel %}
+{% include "README_HWACCEL.j2" %}
+
+
+{% endif %}
+{% if readme_media is defined and readme_media %}
+{% include "README_MEDIA.j2" %}
+
+
+{% endif %}
 {% endif %}
 ## Usage
 
