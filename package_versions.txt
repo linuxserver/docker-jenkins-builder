@@ -36,7 +36,7 @@ procps-3.3.17-r0
 py3-asn1-0.4.8-r1
 py3-asn1crypto-1.4.0-r1
 py3-bcrypt-3.2.0-r4
-py3-cffi-1.14.5-r2
+py3-cffi-1.14.5-r4
 py3-cparser-2.20-r1
 py3-cryptography-3.3.2-r3
 py3-idna-3.3-r0
@@ -49,7 +49,7 @@ py3-pynacl-1.4.0-r2
 py3-resolvelib-0.5.2-r1
 py3-six-1.16.0-r0
 py3-yaml-5.4.1.1-r1
-python3-3.9.7-r4
+python3-3.9.13-r1
 readline-8.1.1-r0
 s6-ipcserver-2.11.0.0-r0
 scanelf-1.3.3-r0
