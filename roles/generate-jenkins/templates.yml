@@ -22,3 +22,4 @@ templated_files:
   - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
   - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
   - { src: 'UNRAID_TEMPLATE.j2', dest: ".jenkins-external/{{ project_name | lower }}.xml" , unraid_template: 'true' }
+  - { src: 'workflow_invalid_helper.j2', dest: ".github/workflows/invalid_helper.yml" }
