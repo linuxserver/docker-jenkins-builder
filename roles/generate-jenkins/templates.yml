@@ -10,9 +10,9 @@ templated_files:
   - { src: 'EXTERNAL_TRIGGER.j2', dest: '.github/workflows/external_trigger.yml', external_trigger: 'true' }
   - { src: 'FUNDING.j2', dest: '.github/FUNDING.yml' }
   - { src: 'greetings.j2', dest: '.github/workflows/greetings.yml' }
-  - { src: 'ISSUE_TEMPLATE.bug.j2', dest: '.github/ISSUE_TEMPLATE/issue.bug.md' }
+  - { src: 'ISSUE_TEMPLATE.bug.j2', dest: '.github/ISSUE_TEMPLATE/issue.bug.yml' }
   - { src: 'ISSUE_TEMPLATE.config.j2', dest: '.github/ISSUE_TEMPLATE/config.yml' }
-  - { src: 'ISSUE_TEMPLATE.feature.j2', dest: '.github/ISSUE_TEMPLATE/issue.feature.md' }
+  - { src: 'ISSUE_TEMPLATE.feature.j2', dest: '.github/ISSUE_TEMPLATE/issue.feature.yml' }
   - { src: 'Jenkinsfile.j2', dest: 'Jenkinsfile' }
   - { src: 'LICENSE.j2', dest: 'LICENSE' }
   - { src: 'lite.j2', dest: '.jenkins-external/README.lite' , readme: 'true' }
