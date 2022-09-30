@@ -691,7 +691,7 @@ pipeline {
                 -e DO_REGION="ams3" \
                 -e DO_BUCKET="lsio-ci" \
                 -t ghcr.io/linuxserver/ci:latest \
-                python /ci/ci.py'''
+                python3 test_build.py'''
         }
       }
     }
