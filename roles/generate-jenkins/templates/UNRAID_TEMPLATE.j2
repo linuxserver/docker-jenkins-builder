@@ -26,6 +26,11 @@
 {%- endfor -%}
 {%- endif -%}
 {%- endif -%}
+{%- if security_opt_param is defined -%}
+{%- for item in security_opt_param_vars -%}
+{%- set x=ExtraParam.append("--security-opt " + item.run_var) -%}
+{%- endfor -%}
+{%- endif -%}
 {%- macro ca(str) -%}
 {{ str | replace("<", "") | replace(">", "") | replace("[", "") | replace("]", "") | replace("&", "and") | e }}
 {%- endmacro -%}
