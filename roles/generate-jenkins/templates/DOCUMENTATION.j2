@@ -159,7 +159,7 @@ services:
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
-{% for item in param_env_vars %}
+{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
 {% if ' ' in item.env_value %}
       - "{{ item.env_var }}={{ item.env_value }}"
 {% else %}
@@ -306,7 +306,7 @@ docker run -d \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
-{% for item in param_env_vars %}
+{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
 {% if ' ' in item.env_value %}
   -e {{ item.env_var }}="{{ item.env_value }}" \
 {% else %}
@@ -421,7 +421,7 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
-{% for item in param_env_vars %}
+{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
 | `{{ item.env_var }}={{ item.env_value }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}

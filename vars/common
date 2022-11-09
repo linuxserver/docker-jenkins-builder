@@ -98,3 +98,4 @@ common_container_param_config_description: ""
 common_param_env_vars:
   - { env_var: "PUID", env_value: "1000", desc: "for UserID - see below for explanation" }
   - { env_var: "PGID", env_value: "1000", desc: "for GroupID - see below for explanation" }
+  - { env_var: "TZ", env_value: "Etc/UTC", desc: "specify a timezone to use, see this [list](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List)." }
