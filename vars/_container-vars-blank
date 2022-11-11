@@ -104,6 +104,12 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
+# application setup snippets
+readme_hwaccel: false
+readme_keyboard: false
+readme_media: false
+readme_seccomp: false
+
 app_setup_nginx_reverse_proxy_snippet: false
 app_setup_nginx_reverse_proxy_block: ""
 # changelog
