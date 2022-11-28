@@ -47,12 +47,6 @@ body:
       render: markdown
     validations:
       required: false
-  - type: dropdown
-    attributes:
-      label: CPU architecture
-      options:
-    validations:
-      required: true
   - type: textarea
     attributes:
       label: Docker creation
