@@ -59,7 +59,7 @@ body:
       render: markdown
     validations:
       required: false
-{% if available_architectures is defined %}
+{% if available_architectures is defined and available_architectures !=[] %}
   - type: dropdown
     attributes:
       label: CPU architecture
