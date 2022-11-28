@@ -59,6 +59,7 @@ body:
       render: markdown
     validations:
       required: false
+{% if available_architectures is defined %}
   - type: dropdown
     attributes:
       label: CPU architecture
@@ -68,6 +69,7 @@ body:
 {% endfor %}
     validations:
       required: true
+{% endif %}
   - type: textarea
     attributes:
       label: Docker creation
