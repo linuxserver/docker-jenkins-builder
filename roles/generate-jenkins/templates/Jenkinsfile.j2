@@ -52,7 +52,7 @@ pipeline {
         script{
           env.LS_TAG_NUMBER = sh(
             script: '''#! /bin/bash
-                       tagsha=$(git rev-list -n 1 ${LS_RELEASE} 2>/dev/null)
+                       tagsha=$(git rev-list -n 1 {% if release_tag != "latest" %}{{ release_tag }}-{% endif %}${LS_RELEASE} 2>/dev/null)
                        if [ "${tagsha}" == "${COMMIT_SHA}" ]; then
                          echo ${LS_RELEASE_NUMBER}
                        elif [ -z "${GIT_COMMIT}" ]; then
