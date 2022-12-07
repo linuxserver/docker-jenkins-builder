@@ -143,21 +143,37 @@ services:
 {% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}"
+{% else %}
       - {{ item.env_var }}={{ item.env_value }}
+{% endif %}
 {% endfor %}
 {% elif common_param_env_vars_enabled == 'optional' %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}" #optional
+{% else %}
       - {{ item.env_var }}={{ item.env_value }} #optional
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
 {% for item in param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}"
+{% else %}
       - {{ item.env_var }}={{ item.env_value }}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_env %}
 {% for item in opt_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}" #optional
+{% else %}
       - {{ item.env_var }}={{ item.env_value }} #optional
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_vols or opt_param_usage_include_vols %}
@@ -274,21 +290,37 @@ docker run -d \
 {% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} \
+{% endif %}
 {% endfor %}
 {% elif common_param_env_vars_enabled == 'optional' %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
 {% for item in param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} \
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_env %}
 {% for item in opt_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_ports %}
