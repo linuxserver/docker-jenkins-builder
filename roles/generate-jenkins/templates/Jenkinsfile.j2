@@ -313,7 +313,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + {% if build_armhf %}'|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           }
@@ -336,7 +336,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lsiodev-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + {% if build_armhf %}'|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           }
@@ -359,7 +359,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lspipepr-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + {% if build_armhf %}'|arm32v7-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
           }
@@ -682,6 +682,7 @@ pipeline {
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
         }
+{% if build_armhf %}
         stage('Build ARMHF') {
           agent {
 {% if use_qemu is defined %}
@@ -722,6 +723,7 @@ pipeline {
                   ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :'''
           }
         }
+{% endif %}
         stage('Build ARM64') {
           agent {
 {% if use_qemu is defined %}
@@ -895,9 +897,13 @@ pipeline {
                 set -e
                 docker pull ghcr.io/linuxserver/ci:latest
                 if [ "${MULTIARCH}" == "true" ]; then
+{% if build_armhf %}
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
+{% endif %}
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+{% if build_armhf %}
                   docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm32v7-${META_TAG}
+{% endif %}
                   docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                 fi
                 docker run --rm \
@@ -1013,56 +1019,74 @@ pipeline {
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                   if [ "${CI}" == "false" ]; then
+{% if build_armhf %}
                     docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}
-                    docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm32v7-${META_TAG}
+{% endif %}
+                    docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                   fi
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                     docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker tag ${IMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG}
-                    docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
                     docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-{{ release_tag }}
-                    docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
                     docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
+{% if build_armhf %}
+                    docker tag ${IMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG}
+                    docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
                     docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
+{% endif %}
+                    docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
                     docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
+{% if build_armhf %}
                       docker tag ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+{% endif %}
                       docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     fi
                     docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:arm32v7-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-{{ release_tag }}
-                    docker push ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
-                    docker push ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
                     docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
+                    docker push ${MANIFESTIMAGE}:amd64-{{ release_tag }}
+{% if build_armhf %}
+                    docker push ${MANIFESTIMAGE}:arm32v7-${META_TAG}
+                    docker push ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
                     docker push ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG}
+{% endif %}
+                    docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+                    docker push ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
                     docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
+{% if build_armhf %}
                       docker push ${MANIFESTIMAGE}:arm32v7-${SEMVER}
+{% endif %}
                       docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                     fi
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }} || :
-                    docker manifest create ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
+                    docker manifest create ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} {% if build_armhf %}${MANIFESTIMAGE}:arm32v7-{{ release_tag }} {% endif %}${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
+{% if build_armhf %}
                     docker manifest annotate ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} --os linux --arch arm
+{% endif %}
                     docker manifest annotate ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG} || :
-                    docker manifest create ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+                    docker manifest create ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} {% if build_armhf %}${MANIFESTIMAGE}:arm32v7-${META_TAG} {% endif %}${MANIFESTIMAGE}:arm64v8-${META_TAG}
+{% if build_armhf %}
                     docker manifest annotate ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:arm32v7-${META_TAG} --os linux --arch arm
+{% endif %}
                     docker manifest annotate ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG} --os linux --arch arm64 --variant v8
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} || :
-                    docker manifest create ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                    docker manifest create ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} {% if build_armhf %}${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} {% endif %}${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+{% if build_armhf %}
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm32v7-${EXT_RELEASE_TAG} --os linux --arch arm
+{% endif %}
                     docker manifest annotate ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} --os linux --arch arm64 --variant v8
                     if [ -n "${SEMVER}" ]; then
                       docker manifest push --purge ${MANIFESTIMAGE}:${SEMVER} || :
-                      docker manifest create ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                      docker manifest create ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} {% if build_armhf %}${MANIFESTIMAGE}:arm32v7-${SEMVER} {% endif %}${MANIFESTIMAGE}:arm64v8-${SEMVER}
+{% if build_armhf %}
                       docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm32v7-${SEMVER} --os linux --arch arm
+{% endif %}
                       docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
                     fi
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }}
@@ -1081,21 +1105,27 @@ pipeline {
                   ${DELETEIMAGE}:amd64-${META_TAG} \
                   ${DELETEIMAGE}:amd64-{{ release_tag }} \
                   ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} \
+{% if build_armhf %}
                   ${DELETEIMAGE}:arm32v7-${META_TAG} \
                   ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
                   ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
+{% endif %}
                   ${DELETEIMAGE}:arm64v8-${META_TAG} \
                   ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
                   ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
                   if [ -n "${SEMVER}" ]; then
                     docker rmi \
                     ${DELETEIMAGE}:amd64-${SEMVER} \
+{% if build_armhf %}
                     ${DELETEIMAGE}:arm32v7-${SEMVER} \
+{% endif %}
                     ${DELETEIMAGE}:arm64v8-${SEMVER} || :
                   fi
                 done
                 docker rmi \
+{% if build_armhf %}
                 ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
+{% endif %}
                 ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
              '''
 {% endif %}
@@ -1103,20 +1133,26 @@ pipeline {
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
                   docker rmi \
+{% if build_armhf %}
                   ${DELETEIMAGE}:arm32v7-${META_TAG} \
                   ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
                   ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
+{% endif %}
                   ${DELETEIMAGE}:arm64v8-${META_TAG} \
                   ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
                   ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
                   if [ -n "${SEMVER}" ]; then
                     docker rmi \
+{% if build_armhf %}
                     ${DELETEIMAGE}:arm32v7-${SEMVER} \
+{% endif %}
                     ${DELETEIMAGE}:arm64v8-${SEMVER} || :
                   fi
                 done
                 docker rmi \
+{% if build_armhf %}
                 ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
+{% endif %}
                 ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
              '''
 {% endif %}
