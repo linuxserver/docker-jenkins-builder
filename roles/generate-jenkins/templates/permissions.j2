@@ -6,6 +6,4 @@ on:
       - '**/finish'
 jobs:
   permission_check:
-    runs-on: ubuntu-latest
     uses: linuxserver/github-workflows/.github/workflows/init-svc-executable-permissions.yml@v1
-    secrets: inherit
