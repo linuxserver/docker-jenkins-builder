@@ -45,8 +45,6 @@ opt_param_device_map: false
 opt_param_devices: []
 app_setup_block_enabled: false
 app_setup_block: ""
-nginx_reverse_proxy_snippet_enabled: false
-nginx_reverse_proxy_block: ""
 optional_block_1: false
 changelogs: []
 custom_external_trigger: ""
