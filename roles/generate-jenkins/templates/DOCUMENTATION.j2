@@ -240,6 +240,11 @@ services:
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
+{% if external_database_snippet_enabled %}
+
+# This application requires an external database to be run separately.
+{{ external_database_compose_block }}
+{% endif %}
 
 ```
 
@@ -377,6 +382,12 @@ docker run -d \
 {% endif %}
   --restart unless-stopped \
   lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+{% if external_database_snippet_enabled %}
+
+# This application requires an external database to be run separately.
+{{ external_database_cli_block }}
+{% endif %}
+
 ```
 
 {% if optional_block_1 %}

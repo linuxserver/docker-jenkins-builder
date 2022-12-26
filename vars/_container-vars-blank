@@ -107,6 +107,11 @@ app_setup_block: ""
 nginx_reverse_proxy_snippet_enabled: false
 nginx_reverse_proxy_block: ""
 
+external_database_snippet_enabled: false
+external_database_cli_block: ""
+external_database_compose_block: ""
+external_database_unraid_block: ""
+
 # changelog
 changelogs:
   - { date: "09.12.17:", desc: "changes description" }

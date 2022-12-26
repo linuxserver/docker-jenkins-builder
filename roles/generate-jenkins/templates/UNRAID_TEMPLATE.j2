@@ -91,8 +91,14 @@
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
-{% if unraid_requirement is defined and unraid_requirement != "" %}
-    <Requires>{{ unraid_requirement }}</Requires>
+{% if (unraid_requirement is defined and unraid_requirement != "") or (external_database_snippet_enabled) %}
+    <Requires>
+        {{ unraid_requirement }}
+        {% if external_database_snippet_enabled %}
+        This application requires an external database to be run separately.
+        {{ external_database_unraid_block }}
+        {% endif %}
+    </Requires>
 {% endif %}
 {# Create changelog #}
 {% if changelogs is defined and changelogs %}
