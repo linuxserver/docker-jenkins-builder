@@ -84,8 +84,8 @@ opt_param_devices:
 opt_cap_add_param: false
 opt_cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
-security_opt_param: false
-security_opt_param_vars:
+opt_security_opt_param: false
+opt_security_opt_param_vars:
   - { run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "Disabled syscall filtering" }
 
 # Unraid templating
