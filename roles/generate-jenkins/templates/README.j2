@@ -257,6 +257,11 @@ services:
 {% endfor %}
 {% endif %}
     restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
+{% if external_application_snippet_enabled %}
+
+# This container requires an external application to be run separately to be run separately.
+{{ external_application_compose_block }}
+{% endif %}
 
 ```
 
@@ -394,6 +399,12 @@ docker run -d \
 {% endif %}
   --restart unless-stopped \
   lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+{% if external_application_snippet_enabled %}
+
+# This container requires an external application to be run separately.
+{{ external_application_cli_block }}
+{% endif %}
+
 ```
 
 {% if optional_block_1 %}
@@ -535,13 +546,6 @@ You only need to set the PUID and PGID variables if you are mounting the /config
 [![Docker Mods]({{ lsio_shieldsio_dynamic_mods }})]({{ lsio_mods_url }} "{{ lsio_mods_desc }}") [![Docker Universal Mods]({{ lsio_shieldsio_dynamic_universal_mods }})]({{ lsio_universal_mods_url }} "{{ lsio_universal_mods_desc }}")
 
 We publish various [Docker Mods]({{ lsio_github_url }}/docker-mods) to enable additional functionality within the containers. The list of Mods available for this image (if any) as well as universal mods that can be applied to any one of our images can be accessed via the dynamic badges above.
-{% if nginx_reverse_proxy_snippet_enabled %}
-
-## Reverse Proxy Snippet
-
-This snippet has been tested with {{ lsio_project_name|capitalize}}'s [Secure Web Application Gateway]({{ lsio_github_url }}/docker-swag) container.
-{{ nginx_reverse_proxy_block }}
-{% endif %}
 
 ## Support Info
 
