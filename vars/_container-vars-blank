@@ -104,6 +104,11 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
+external_application_snippet_enabled: false
+external_application_cli_block: ""
+external_application_compose_block: ""
+external_application_unraid_block: ""
+
 # changelog
 changelogs:
   - { date: "09.12.17:", desc: "changes description" }
