@@ -4,18 +4,6 @@ description: Create a report to help us improve
 title: "[BUG] <title>"
 labels: [Bug]
 body:
-{% if project_deprecation_status %}
-  - type: markdown
-    attributes:
-      value: |
-        # DEPRECATION NOTICE
-
-        This image is deprecated. We will not offer support for this image and it will not be updated.
-{% if project_deprecation_message is defined %}
-
-        {{ project_deprecation_message | indent(8) | trim }}
-{% endif %}
-{% else %}
   - type: checkboxes
     attributes:
       label: Is there an existing issue for this?
@@ -59,17 +47,6 @@ body:
       render: markdown
     validations:
       required: false
-{% if available_architectures is defined and available_architectures !=[] %}
-  - type: dropdown
-    attributes:
-      label: CPU architecture
-      options:
-{% for arch in (available_architectures | map(attribute="arch")) %}
-        - {{ arch }}
-{% endfor %}
-    validations:
-      required: true
-{% endif %}
   - type: textarea
     attributes:
       label: Docker creation
@@ -82,11 +59,10 @@ body:
   - type: textarea
     attributes:
       description: |
-        Provide a full docker log, output of "docker logs {{ lsio_project_name }}"
+        Provide a full docker log, output of "docker logs linuxserver.io"
       label: Container logs
       placeholder: |
-        Output of `docker logs {{ lsio_project_name }}`
+        Output of `docker logs linuxserver.io`
       render: bash
     validations:
       required: true
-{% endif %}

@@ -4,18 +4,6 @@ description: Suggest an idea for this project
 title: "[FEAT] <title>"
 labels: [enhancement]
 body:
-{% if project_deprecation_status %}
-  - type: markdown
-    attributes:
-      value: |
-        # DEPRECATION NOTICE
-
-        This image is deprecated. We will not offer support for this image and it will not be updated.
-{% if project_deprecation_message is defined %}
-
-        {{ project_deprecation_message | indent(8) | trim }}
-{% endif %}
-{% else %}
   - type: checkboxes
     attributes:
       label: Is this a new feature request?
@@ -41,4 +29,3 @@ body:
       description: Do you have a potential code change in mind?
     validations:
       required: false
-{% endif %}
