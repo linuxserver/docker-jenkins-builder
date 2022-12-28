@@ -110,8 +110,10 @@ readme_keyboard: false
 readme_media: false
 readme_seccomp: false
 
-app_setup_nginx_reverse_proxy_snippet: false
-app_setup_nginx_reverse_proxy_block: ""
+external_application_snippet_enabled: false
+external_application_cli_block: ""
+external_application_compose_block: ""
+external_application_unraid_block: ""
 # changelog
 
 changelogs:

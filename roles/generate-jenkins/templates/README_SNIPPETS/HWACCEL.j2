@@ -11,7 +11,7 @@ To leverage hardware acceleration you will need to mount /dev/dri video device i
 ```
 
 We will automatically ensure the abc user inside of the container has the proper permissions to access this device.
-{% if 'alpine' not in (changelogs | map(attribute="desc") | lower ) %}
+{% if 'alpine' not in (repo_vars | lower ) %}
 
 #### Nvidia
 
