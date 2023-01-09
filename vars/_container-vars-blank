@@ -104,6 +104,12 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
+# application setup snippets
+readme_hwaccel: false
+readme_keyboard: false
+readme_media: false
+readme_seccomp: false
+
 external_application_snippet_enabled: false
 external_application_cli_block: ""
 external_application_compose_block: ""
