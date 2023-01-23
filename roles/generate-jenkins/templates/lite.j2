@@ -74,6 +74,8 @@ docker run -d \
 {% else %}
       - {{ item.env_var }}={{ item.env_value }}
 {% endif %}
+{% endfor %}
+{% endif %}
 {% if opt_param_usage_include_env %}
 {% for item in opt_param_env_vars %}
   -e {{ item.env_var }}={{ item.env_value }} `#optional` \
