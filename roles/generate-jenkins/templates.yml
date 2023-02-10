@@ -23,3 +23,4 @@ templated_files:
   - { src: 'stale.j2', dest: '.github/workflows/stale.yml' }
   - { src: 'UNRAID_TEMPLATE.j2', dest: ".jenkins-external/{{ project_name | lower }}.xml" , unraid_template: 'true' }
   - { src: 'CALL_WORKFLOW_INVALID_HELPER.j2', dest: ".github/workflows/call_invalid_helper.yml" }
+  - { src: 'permissions.j2', dest: '.github/workflows/permissions.yml' }

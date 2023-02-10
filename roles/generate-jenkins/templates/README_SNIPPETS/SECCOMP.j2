@@ -1,0 +1,3 @@
+### Seccomp
+
+Modern GUI desktop apps (including some flavors of terminals) have issues with the latest Docker and syscall compatibility, you can use Docker with the `--security-opt seccomp=unconfined` setting to allow these syscalls or try [podman](https://podman.io/) as they have updated their codebase to support them
