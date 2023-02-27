@@ -1,4 +1,6 @@
-FROM ghcr.io/linuxserver/baseimage-alpine:3.15
+# syntax=docker/dockerfile:1
+
+FROM ghcr.io/linuxserver/baseimage-alpine:3.17
 
 # set version label
 ARG BUILD_DATE
@@ -9,8 +11,7 @@ LABEL maintainer="homer, thelamer"
 RUN \
   echo "**** install build packages ****" && \
   apk add --no-cache --upgrade \
-    ansible \
-    bash
+    ansible
 
 COPY . /ansible
 
