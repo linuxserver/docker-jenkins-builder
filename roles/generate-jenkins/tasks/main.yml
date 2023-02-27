@@ -9,7 +9,7 @@
     name: abc
     non_unique: yes
     uid: "{{ lookup('env', 'PUID') | int }}"
-- name: set UID
+- name: set GID
   when: lookup('env', 'PGID')
   group:
     name: abc
