@@ -635,6 +635,9 @@ pipeline {
       }
       steps {
         echo "Running on node: ${NODE_NAME}"
+{% if "docker-baseimage" not in project_repo_name %}
+        sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
+{% endif %}
         sh "docker build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
@@ -665,6 +668,9 @@ pipeline {
         stage('Build X86') {
           steps {
             echo "Running on node: ${NODE_NAME}"
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
+{% endif %}
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
@@ -699,6 +705,9 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.armhf"
+{% endif %}
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
@@ -738,6 +747,9 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
+{% endif %}
             sh "docker build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
