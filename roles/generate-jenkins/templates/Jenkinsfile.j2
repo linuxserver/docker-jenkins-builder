@@ -818,7 +818,7 @@ pipeline {
                 echo "false" > /tmp/packages-${COMMIT_SHA}-${BUILD_NUMBER}
                 echo "Package tag is same as previous continue with build process"
               fi
-              rm -Rf ${TEMPDIR}'''
+              rm -Rf ${TEMPDIR} ${TEMPFILE}'''
         script{
           env.PACKAGE_UPDATED = sh(
             script: '''cat /tmp/packages-${COMMIT_SHA}-${BUILD_NUMBER}''',
