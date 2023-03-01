@@ -574,12 +574,12 @@ pipeline {
               else
                 LOCAL_CONTAINER=${IMAGE}:${META_TAG}
               fi
+              touch ${TEMPDIR}/package_versions.txt
               docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
                 -v ${TEMPDIR}:/tmp \
                 ghcr.io/anchore/syft:latest \
                 ${LOCAL_CONTAINER} -o table=/tmp/package_versions.txt
-              chmod 777 ${TEMPDIR}/package_versions.txt
               NEW_PACKAGE_TAG=$(md5sum ${TEMPDIR}/package_versions.txt | cut -c1-8 )
               echo "Package tag sha from current packages in buit container is ${NEW_PACKAGE_TAG} comparing to old ${PACKAGE_TAG} from github"
               if [ "${NEW_PACKAGE_TAG}" != "${PACKAGE_TAG}" ]; then
