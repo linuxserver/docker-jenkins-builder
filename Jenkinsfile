@@ -569,6 +569,7 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
+              TEMPFILE=$(mktemp)
               if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
                 LOCAL_CONTAINER=${IMAGE}:amd64-${META_TAG}
               else
@@ -576,10 +577,10 @@ pipeline {
               fi
               docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
-                -v /tmp/syft:/tmp/syft \
+                -v ${TEMPFILE}:${TEMPFILE} \
                 ghcr.io/anchore/syft:latest \
-                ${LOCAL_CONTAINER} -o table=/tmp/syft/package_versions.txt
-              cp /tmp/syft/package_versions.txt ${TEMPDIR}/package_versions.txt
+                ${LOCAL_CONTAINER} -o table=${TEMPFILE}
+              cp ${TEMPFILE} ${TEMPDIR}/package_versions.txt
               chmod 777 ${TEMPDIR}/package_versions.txt
               NEW_PACKAGE_TAG=$(md5sum ${TEMPDIR}/package_versions.txt | cut -c1-8 )
               echo "Package tag sha from current packages in buit container is ${NEW_PACKAGE_TAG} comparing to old ${PACKAGE_TAG} from github"
