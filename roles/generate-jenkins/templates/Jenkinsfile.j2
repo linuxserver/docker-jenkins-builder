@@ -42,7 +42,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE .editorconfig ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.yml ./.github/ISSUE_TEMPLATE/issue.feature.yml ./.github/PULL_REQUEST_TEMPLATE.md{% if project_deprecation_status != true %} ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/stale.yml ./.github/workflows/call_invalid_helper.yml ./.github/workflows/permissions.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %} ./root/etc/cont-init.d/99-deprecation{% endif %}'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE .editorconfig ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.yml ./.github/ISSUE_TEMPLATE/issue.feature.yml ./.github/PULL_REQUEST_TEMPLATE.md{% if project_deprecation_status != true %} ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/stale.yml ./.github/workflows/call_invalid_helper.yml ./.github/workflows/permissions.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %}{% if (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir) %} ./root/etc/s6-overlay/s6-rc.d/init-deprecate/run ./root/etc/s6-overlay/s6-rc.d/init-deprecate/up ./root/etc/s6-overlay/s6-rc.d/init-deprecate/type ./root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-adduser ./root/etc/s6-overlay/s6-rc.d/init-os-end/dependencies.d/init-deprecate ./root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate{% else %} ./root/etc/cont-init.d/99-deprecation{% endif %}{% endif %}'
         }
         script{
           env.LS_RELEASE_NUMBER = sh(
@@ -492,7 +492,14 @@ pipeline {
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
 {% if project_deprecation_status %}
-                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+                if [[ -d "${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d" ]]; then
+                  mkdir -p \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-os-end/dependencies.d \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/user/contents.d
+                else
+                  mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+                fi
 {% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
@@ -1285,6 +1292,26 @@ pipeline {
         -d '{"body": "I am a bot, here are the test results for this PR: \\n'${CI_URL}' \\n'${SHELLCHECK_URL}'"}' '''
       }
     }
+{% if project_deprecation_status %}
+    stage('Deprecate/Disable Future Builds') {
+      when {
+        branch "{{ ls_branch }}"
+        environment name: 'CHANGE_ID', value: ''
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        TEMPDIR=$(mktemp -d)
+        mkdir -p ${TEMPDIR}/repo
+        git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
+        cd ${TEMPDIR}/repo/${LS_REPO}
+        git checkout -f {{ ls_branch }}
+        git rm Jenkinsfile
+        git commit -m 'Disabling future builds'
+        git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
+        rm -Rf ${TEMPDIR}
+      }
+    }
+{% endif %}
   }
   /* ######################
      Send status to Discord
