@@ -456,7 +456,10 @@ pipeline {
                 echo "Jenkinsfile is up to date."
               fi
               # Stage 2 - Delete old templates
-              OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md\n.github/ISSUE_TEMPLATE/issue.bug.md\n.github/ISSUE_TEMPLATE/issue.feature.md"
+              OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md .github/ISSUE_TEMPLATE/issue.bug.md .github/ISSUE_TEMPLATE/issue.feature.md"
+{% if project_deprecation_status %}
+              OLD_TEMPLATES="${OLD_TEMPLATES} $(echo .github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler,stale}.yml)"
+{% endif %}
               for i in ${OLD_TEMPLATES}; do
                 if [[ -f "${i}" ]]; then
                   TEMPLATES_TO_DELETE="${i} ${TEMPLATES_TO_DELETE}"
@@ -473,7 +476,7 @@ pipeline {
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
-                echo "Deleting old templates"
+                echo "Deleting old and deprecated templates"
                 rm -Rf ${TEMPDIR}
                 exit 0
               else
@@ -508,9 +511,6 @@ pipeline {
                   git add .gitignore
                 fi
                 git add ${TEMPLATED_FILES}
-{% if project_deprecation_status %}
-                git rm ${TEMPDIR}/repo/${LS_REPO}/.github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler}.yml || :
-{% endif %}
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
