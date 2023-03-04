@@ -414,7 +414,7 @@ pipeline {
                   ghcr.io/linuxserver/baseimage-alpine:3.17 bash -c "\
                     apk add --no-cache py3-pip && \
                     pip install s3cmd && \
-                    s3cmd put --acl-public -m text/xml /mnt/shellcheck-result.xml s3://ci.linuxserver.io/${IMAGE}/${META_TAG}/shellcheck-result.xml" || :'''
+                    s3cmd put --no-preserve --acl-public -m text/xml /mnt/shellcheck-result.xml s3://ci.linuxserver.io/${IMAGE}/${META_TAG}/shellcheck-result.xml" || :'''
         }
       }
     }
