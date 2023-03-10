@@ -114,10 +114,30 @@
     owner: "abc"
     group: "abc"
 
+- name: detect whether image is v2 or v3
+  when:
+    - lookup('env', 'LOCAL') == "true"
+  stat:
+    path: "/tmp/root/etc/s6-overlay"
+  register: s6v3image
+
+- name: detect whether image is v2 or v3
+  when:
+    - lookup('env', 'LOCAL') != "true"
+  stat:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay"
+  register: s6v3imageremote
+
+- name: Print a debug message
+  debug:
+    msg: "S6v3 image detected"
+  when: (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+
 - name: create destination dir for generated 99-deprecation
   when:
     - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
+    - s6v3image.stat.isdir is not defined and s6v3imageremote.stat.isdir is not defined
   file:
     path: "/tmp/root/etc/cont-init.d"
     state: directory
@@ -128,9 +148,204 @@
   when:
     - lookup('env', 'LOCAL') != "true"
     - project_deprecation_status == true
+    - s6v3image.stat.isdir is not defined and s6v3imageremote.stat.isdir is not defined
   file:
     path: "jenkins/{{ project_repo_name }}/root/etc/cont-init.d"
     state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create dir for init-services/dependencies.d
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-services/dependencies.d/init-deprecate
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create dir for init-deprecate/dependencies.d
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-deprecate/dependencies.d/init-config-end
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-deprecate/type
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - populate file for init-deprecate/type
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  copy:
+    dest: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
+    content: |
+      oneshot
+
+- name: v3 deprecate - create file for init-deprecate/up
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - populate file for init-deprecate/up
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  copy:
+    dest: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
+    content: |
+      /etc/s6-overlay/s6-rc.d/init-deprecate/run
+
+- name: v3 deprecate - create file for user/contents.d/init-deprecate
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "/tmp/root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create dir for init-services/dependencies.d
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-services/dependencies.d/init-deprecate
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create dir for init-deprecate/dependencies.d
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d"
+    state: directory
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-deprecate/dependencies.d/init-config-end
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - create file for init-deprecate/type
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - populate file for init-deprecate/type
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  copy:
+    dest: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
+    content: |
+      oneshot
+
+- name: v3 deprecate - create file for init-deprecate/up
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
+    state: touch
+    owner: "abc"
+    group: "abc"
+
+- name: v3 deprecate - populate file for init-deprecate/up
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  copy:
+    dest: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
+    content: |
+      /etc/s6-overlay/s6-rc.d/init-deprecate/run
+
+- name: v3 deprecate - create file for user/contents.d/init-deprecate
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  file:
+    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate"
+    state: touch
     owner: "abc"
     group: "abc"
 
@@ -281,11 +496,42 @@
 
 # Deprecation init script templating
 
-- name: write deprecation init script
+- name: write deprecation init script v3
   when:
     - lookup('env', 'LOCAL') != "true"
-    - item.deprecation is defined
+    - item.deprecation is defined and item.deprecation == "v3"
     - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+    mode: 0755
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write deprecation init script local v3
+  when:
+    - lookup('env', 'LOCAL') == "true"
+    - item.deprecation is defined and item.deprecation == "v3"
+    - project_deprecation_status == true
+    - (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir)
+  template:
+    src: "../templates/{{ item.src }}"
+    dest: "/tmp/{{ item.dest }}"
+    owner: "abc"
+    group: "abc"
+    mode: 0755
+  delegate_to: localhost
+  loop: "{{  templated_files  }}"
+
+- name: write deprecation init script v2
+  when:
+    - lookup('env', 'LOCAL') != "true"
+    - item.deprecation is defined and item.deprecation == "v2"
+    - project_deprecation_status == true
+    - s6v3image.stat.isdir is not defined and s6v3imageremote.stat.isdir is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
@@ -294,11 +540,12 @@
   delegate_to: localhost
   loop: "{{  templated_files  }}"
 
-- name: write deprecation init script local
+- name: write deprecation init script local v2
   when:
     - lookup('env', 'LOCAL') == "true"
-    - item.deprecation is defined
+    - item.deprecation is defined and item.deprecation == "v2"
     - project_deprecation_status == true
+    - s6v3image.stat.isdir is not defined and s6v3imageremote.stat.isdir is not defined
   template:
     src: "../templates/{{ item.src }}"
     dest: "/tmp/{{ item.dest }}"
