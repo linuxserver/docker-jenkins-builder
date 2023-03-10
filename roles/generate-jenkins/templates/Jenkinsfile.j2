@@ -407,17 +407,14 @@ pipeline {
           }
           sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-shellcheck/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
-                set -e
-                docker pull ghcr.io/linuxserver/lsiodev-spaces-file-upload:latest
                 docker run --rm \
-                -e DESTINATION=\"${IMAGE}/${META_TAG}/shellcheck-result.xml\" \
-                -e FILE_NAME="shellcheck-result.xml" \
-                -e MIMETYPE="text/xml" \
-                -v ${WORKSPACE}:/mnt \
-                -e SECRET_KEY=\"${S3_SECRET}\" \
-                -e ACCESS_KEY=\"${S3_KEY}\" \
-                -t ghcr.io/linuxserver/lsiodev-spaces-file-upload:latest \
-                python /upload.py'''
+                  -v ${WORKSPACE}:/mnt \
+                  -e AWS_ACCESS_KEY_ID=\"${S3_KEY}\" \
+                  -e AWS_SECRET_ACCESS_KEY=\"${S3_SECRET}\" \
+                  ghcr.io/linuxserver/baseimage-alpine:3.17 bash -c "\
+                    apk add --no-cache py3-pip && \
+                    pip install s3cmd && \
+                    s3cmd put --no-preserve --acl-public -m text/xml /mnt/shellcheck-result.xml s3://ci.linuxserver.io/${IMAGE}/${META_TAG}/shellcheck-result.xml" || :'''
         }
       }
     }
