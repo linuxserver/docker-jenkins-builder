@@ -28,7 +28,7 @@ pipeline {
         script{
           env.EXIT_STATUS = ''
           env.LS_RELEASE = sh(
-            script: '''docker run --rm ghcr.io/linuxserver/alexeiled-skopeo sh -c 'skopeo inspect docker://docker.io/'${DOCKERHUB_IMAGE}':{{ release_tag }} 2>/dev/null' | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
+            script: '''docker run --rm ghcr.io/linuxserver/alexeiled-skopeo sh -c 'skopeo inspect docker://docker.io/linuxserver/'${CONTAINER_NAME}':{{ release_tag }} 2>/dev/null' | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
             script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
@@ -40,7 +40,7 @@ pipeline {
             script: '''git rev-parse HEAD''',
             returnStdout: true).trim()
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
-          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
+          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/linuxserver/' + env.CONTAINER_NAME + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
           env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE .editorconfig ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.yml ./.github/ISSUE_TEMPLATE/issue.feature.yml ./.github/PULL_REQUEST_TEMPLATE.md{% if project_deprecation_status != true %} ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/stale.yml ./.github/workflows/call_invalid_helper.yml ./.github/workflows/permissions.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %}{% if (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir) %} ./root/etc/s6-overlay/s6-rc.d/init-deprecate/run ./root/etc/s6-overlay/s6-rc.d/init-deprecate/up ./root/etc/s6-overlay/s6-rc.d/init-deprecate/type ./root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end ./root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate ./root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate{% else %} ./root/etc/cont-init.d/99-deprecation{% endif %}{% endif %}'
         }
@@ -308,7 +308,7 @@ pipeline {
       }
       steps {
         script{
-          env.IMAGE = env.DOCKERHUB_IMAGE
+          env.IMAGE = env.LS_USER + '/' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/' + env.CONTAINER_NAME
@@ -331,7 +331,7 @@ pipeline {
       }
       steps {
         script{
-          env.IMAGE = env.DEV_DOCKERHUB_IMAGE
+          env.IMAGE = env.LS_USER + '/lsiodev-' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/lsiodev-' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lsiodev-' + env.CONTAINER_NAME
@@ -343,7 +343,7 @@ pipeline {
           env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           env.META_TAG = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           env.EXT_RELEASE_TAG = '{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}version-' + env.EXT_RELEASE_CLEAN
-          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DEV_DOCKERHUB_IMAGE + '/tags/'
+          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/linuxserver/lsiodev-' + env.CONTAINER_NAME + '/tags/'
         }
       }
     }
@@ -354,7 +354,7 @@ pipeline {
       }
       steps {
         script{
-          env.IMAGE = env.PR_DOCKERHUB_IMAGE
+          env.IMAGE = env.LS_USER + '/lspipepr-' + env.CONTAINER_NAME
           env.GITHUBIMAGE = 'ghcr.io/' + env.LS_USER + '/lspipepr-' + env.CONTAINER_NAME
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lspipepr-' + env.CONTAINER_NAME
@@ -367,7 +367,7 @@ pipeline {
           env.META_TAG = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-pr-' + env.PULL_REQUEST
           env.EXT_RELEASE_TAG = '{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}version-' + env.EXT_RELEASE_CLEAN
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/pull/' + env.PULL_REQUEST
-          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.PR_DOCKERHUB_IMAGE + '/tags/'
+          env.DOCKERHUB_LINK = 'https://hub.docker.com/r/linuxserver/lspipepr-' + env.CONTAINER_NAME + '/tags/'
         }
       }
     }
