@@ -7,7 +7,7 @@ This image is deprecated. We will not offer support for this image and it will n
 {% endif %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_github_repo_url }})
 
-This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
+# This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
 
 {{ project_blurb }}
 
@@ -68,8 +68,12 @@ docker run -d \
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
-{% for item in param_env_vars %}
-  -e {{ item.env_var }}={{ item.env_value }} \
+{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}"
+{% else %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_env %}

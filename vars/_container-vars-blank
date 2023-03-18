@@ -84,8 +84,8 @@ opt_param_devices:
 opt_cap_add_param: false
 opt_cap_add_param_vars:
   - { cap_add_var: "NET_ADMIN" }
-security_opt_param: false
-security_opt_param_vars:
+opt_security_opt_param: false
+opt_security_opt_param_vars:
   - { run_var: "seccomp=unconfined", compose_var: "seccomp:unconfined", desc: "Disabled syscall filtering" }
 
 # Unraid templating
@@ -104,9 +104,17 @@ optional_block_1_items:
 app_setup_block_enabled: false
 app_setup_block: ""
 
-app_setup_nginx_reverse_proxy_snippet: false
-app_setup_nginx_reverse_proxy_block: ""
-# changelog
+# application setup snippets
+readme_hwaccel: false
+readme_keyboard: false
+readme_media: false
+readme_seccomp: false
 
+external_application_snippet_enabled: false
+external_application_cli_block: ""
+external_application_compose_block: ""
+external_application_unraid_block: ""
+
+# changelog
 changelogs:
   - { date: "09.12.17:", desc: "changes description" }

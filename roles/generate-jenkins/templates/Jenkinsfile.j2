@@ -375,7 +375,7 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker build \
+        sh "docker buildx build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
           --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -388,7 +388,7 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} ."
+          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
       }
     }
 {% endif %}
@@ -407,17 +407,14 @@ pipeline {
           }
           sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-shellcheck/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
-                set -e
-                docker pull ghcr.io/linuxserver/lsiodev-spaces-file-upload:latest
                 docker run --rm \
-                -e DESTINATION=\"${IMAGE}/${META_TAG}/shellcheck-result.xml\" \
-                -e FILE_NAME="shellcheck-result.xml" \
-                -e MIMETYPE="text/xml" \
-                -v ${WORKSPACE}:/mnt \
-                -e SECRET_KEY=\"${S3_SECRET}\" \
-                -e ACCESS_KEY=\"${S3_KEY}\" \
-                -t ghcr.io/linuxserver/lsiodev-spaces-file-upload:latest \
-                python /upload.py'''
+                  -v ${WORKSPACE}:/mnt \
+                  -e AWS_ACCESS_KEY_ID=\"${S3_KEY}\" \
+                  -e AWS_SECRET_ACCESS_KEY=\"${S3_SECRET}\" \
+                  ghcr.io/linuxserver/baseimage-alpine:3.17 bash -c "\
+                    apk add --no-cache py3-pip && \
+                    pip install s3cmd && \
+                    s3cmd put --no-preserve --acl-public -m text/xml /mnt/shellcheck-result.xml s3://ci.linuxserver.io/${IMAGE}/${META_TAG}/shellcheck-result.xml" || :'''
         }
       }
     }
@@ -458,7 +455,7 @@ pipeline {
               # Stage 2 - Delete old templates
               OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md .github/ISSUE_TEMPLATE/issue.bug.md .github/ISSUE_TEMPLATE/issue.feature.md .github/workflows/stale.yml"
 {% if project_deprecation_status %}
-              OLD_TEMPLATES="${OLD_TEMPLATES} $(echo .github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler,call_invalid_helper}.yml)"
+              OLD_TEMPLATES="${OLD_TEMPLATES} $(echo .github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler,call_issues_cron}.yml)"
 {% endif %}
               for i in ${OLD_TEMPLATES}; do
                 if [[ -f "${i}" ]]; then
@@ -476,7 +473,7 @@ pipeline {
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
-                echo "Deleting old templates"
+                echo "Deleting old and deprecated templates"
                 rm -Rf ${TEMPDIR}
                 exit 0
               else
@@ -495,7 +492,14 @@ pipeline {
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
 {% if project_deprecation_status %}
-                mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+                if [[ -d "${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d" ]]; then
+                  mkdir -p \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d \
+                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/user/contents.d
+                else
+                  mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
+                fi
 {% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cd ${TEMPDIR}/repo/${LS_REPO}/
@@ -504,9 +508,6 @@ pipeline {
                   git add .gitignore
                 fi
                 git add ${TEMPLATED_FILES}
-{% if project_deprecation_status %}
-                git rm ${TEMPDIR}/repo/${LS_REPO}/.github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler}.yml || :
-{% endif %}
                 git commit -m 'Bot Updating Templated Files'
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
                 echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
@@ -638,7 +639,10 @@ pipeline {
       }
       steps {
         echo "Running on node: ${NODE_NAME}"
-        sh "docker build \
+{% if "docker-baseimage" not in project_repo_name %}
+        sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
+{% endif %}
+        sh "docker buildx build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
           --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -651,7 +655,7 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} \
+          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
       }
     }
@@ -668,7 +672,10 @@ pipeline {
         stage('Build X86') {
           steps {
             echo "Running on node: ${NODE_NAME}"
-            sh "docker build \
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
+{% endif %}
+            sh "docker buildx build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
               --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -681,7 +688,7 @@ pipeline {
               --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
               --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} \
+              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
           }
         }
@@ -702,7 +709,10 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
-            sh "docker build \
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.armhf"
+{% endif %}
+            sh "docker buildx build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
               --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -715,7 +725,7 @@ pipeline {
               --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
               --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} \
+              --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} --platform=linux/arm/v7 \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
@@ -741,7 +751,10 @@ pipeline {
             sh '''#! /bin/bash
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
-            sh "docker build \
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
+{% endif %}
+            sh "docker buildx build \
               --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
               --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
               --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -754,7 +767,7 @@ pipeline {
               --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
               --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} \
+              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
@@ -784,26 +797,12 @@ pipeline {
               else
                 LOCAL_CONTAINER=${IMAGE}:${META_TAG}
               fi
-              if [ "${DIST_IMAGE}" == "alpine" ]; then
-                docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  apk info -v > /tmp/package_versions.txt && \
-                  sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
-                  chmod 777 /tmp/package_versions.txt'
-              elif [ "${DIST_IMAGE}" == "ubuntu" ]; then
-                docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  apt list -qq --installed | sed "s#/.*now ##g" | cut -d" " -f1 > /tmp/package_versions.txt && \
-                  sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
-                  chmod 777 /tmp/package_versions.txt'
-              elif [ "${DIST_IMAGE}" == "fedora" ]; then
-                docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  rpm -qa > /tmp/package_versions.txt && \
-                  sort -o /tmp/package_versions.txt  /tmp/package_versions.txt && \
-                  chmod 777 /tmp/package_versions.txt'
-              elif [ "${DIST_IMAGE}" == "arch" ]; then
-                docker run --rm --entrypoint '/bin/sh' -v ${TEMPDIR}:/tmp ${LOCAL_CONTAINER} -c '\
-                  pacman -Q > /tmp/package_versions.txt && \
-                  chmod 777 /tmp/package_versions.txt'
-              fi
+              touch ${TEMPDIR}/package_versions.txt
+              docker run --rm \
+                -v /var/run/docker.sock:/var/run/docker.sock:ro \
+                -v ${TEMPDIR}:/tmp \
+                ghcr.io/anchore/syft:latest \
+                ${LOCAL_CONTAINER} -o table=/tmp/package_versions.txt
               NEW_PACKAGE_TAG=$(md5sum ${TEMPDIR}/package_versions.txt | cut -c1-8 )
               echo "Package tag sha from current packages in buit container is ${NEW_PACKAGE_TAG} comparing to old ${PACKAGE_TAG} from github"
               if [ "${NEW_PACKAGE_TAG}" != "${PACKAGE_TAG}" ]; then
@@ -921,7 +920,7 @@ pipeline {
                 -e BASE=\"${DIST_IMAGE}\" \
                 -e SECRET_KEY=\"${S3_SECRET}\" \
                 -e ACCESS_KEY=\"${S3_KEY}\" \
-                -e DOCKER_ENV=\"${CI_DOCKERENV}\" \
+                -e DOCKER_ENV=\"{% if "docker-baseimage" in project_repo_name %}LSIO_FIRST_PARTY=true|{% endif %}${CI_DOCKERENV}\" \
                 -e WEB_SCREENSHOT=\"${CI_WEB}\" \
                 -e WEB_AUTH=\"${CI_AUTH}\" \
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
@@ -1290,6 +1289,26 @@ pipeline {
         -d '{"body": "I am a bot, here are the test results for this PR: \\n'${CI_URL}' \\n'${SHELLCHECK_URL}'"}' '''
       }
     }
+{% if project_deprecation_status %}
+    stage('Deprecate/Disable Future Builds') {
+      when {
+        branch "{{ ls_branch }}"
+        environment name: 'CHANGE_ID', value: ''
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        TEMPDIR=$(mktemp -d)
+        mkdir -p ${TEMPDIR}/repo
+        git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
+        cd ${TEMPDIR}/repo/${LS_REPO}
+        git checkout -f {{ ls_branch }}
+        git rm Jenkinsfile
+        git commit -m 'Disabling future builds'
+        git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
+        rm -Rf ${TEMPDIR}
+      }
+    }
+{% endif %}
   }
   /* ######################
      Send status to Discord
