@@ -21,6 +21,6 @@ templated_files:
   - { src: 'PULL_REQUEST_TEMPLATE.j2', dest: '.github/PULL_REQUEST_TEMPLATE.md' }
   - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
   - { src: 'UNRAID_TEMPLATE.j2', dest: '.jenkins-external/{{ project_name | lower }}.xml' , unraid_template: 'true' }
-  - { src: 'CALL_WORKFLOW_INVALID_HELPER.j2', dest: '.github/workflows/call_invalid_helper.yml' }
+  - { src: 'CALL_ISSUE_PR_TRACKER.j2', dest: '.github/workflows/call_issue_pr_tracker.yml' }
   - { src: 'permissions.j2', dest: '.github/workflows/permissions.yml' }
   - { src: 'CALL_WORKFLOW_ISSUES_CRON.j2', dest: '.github/workflows/call_issues_cron.yml' }
