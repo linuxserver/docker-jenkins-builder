@@ -2,7 +2,7 @@ name: Package Trigger Scheduler
 
 on:
   schedule:
-    - cron:  '{{ ('docker-' + project_name + '-minute')|hash('sha512')|regex_replace('[^0-9]+','')|truncate(2,True,'')|replace('6','0')|replace('7','1')|replace('8','3')|replace('9','5') }} {{ ('docker-' + project_name + '-hour')|hash('sha512')|truncate(1,True,'')|replace('a','10')|replace('b','11')|replace('c','12')|replace('d','13')|replace('e','14')|replace('f','15') }} * * {{ ('docker-' + project_name + '-day')|hash('sha512')|regex_replace('[^0-9]+','')|truncate(1,True,'')|replace('7','0')|replace('8','2')|replace('9','4') }}'
+    - cron:  '{{ 60 | random(seed=(project_name + '-minute')) }} {{ 24 | random(seed=(project_name + '-hour')) }} * * {{ 7 | random(seed=(project_name + '-day')) }}'
   workflow_dispatch:
 
 jobs:
