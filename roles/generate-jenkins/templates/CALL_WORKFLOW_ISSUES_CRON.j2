@@ -1,7 +1,8 @@
 name: Mark stale issues and pull requests
 on:
   schedule:
-  - cron: "30 1 * * *"
+    - cron:  '{{ 60 | random(seed=('docker-' + project_name + '-minute')) }} {{ 24 | random(seed=('docker-' + project_name + '-hour')) }} * * *'
+  workflow_dispatch:
 
 jobs:
   stale:
