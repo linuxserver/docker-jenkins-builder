@@ -17,14 +17,11 @@ jobs:
         run: |
           echo "**** Branches found: ****"
           git for-each-ref --format='%(refname:short)' refs/remotes
-          echo "**** Pulling the yq docker image ****"
-          docker pull ghcr.io/linuxserver/yq
           for br in $(git for-each-ref --format='%(refname:short)' refs/remotes)
           do
             br=$(echo "$br" | sed 's|origin/||g')
             echo "**** Evaluating branch ${br} ****"
-            ls_branch=$(curl -sX GET https://raw.githubusercontent.com/linuxserver/{{ project_repo_name }}/${br}/jenkins-vars.yml \
-              | docker run --rm -i --entrypoint yq ghcr.io/linuxserver/yq -r .ls_branch)
+            ls_branch=$(curl -sX GET https://raw.githubusercontent.com/linuxserver/{{ project_repo_name }}/${br}/jenkins-vars.yml | yq -r '.ls_branch')
             if [ "${br}" == "${ls_branch}" ]; then
               echo "**** Branch ${br} appears to be live; checking workflow. ****"
               if curl -sfX GET https://raw.githubusercontent.com/linuxserver/{{ project_repo_name }}/${br}/.github/workflows/package_trigger.yml > /dev/null 2>&1; then
