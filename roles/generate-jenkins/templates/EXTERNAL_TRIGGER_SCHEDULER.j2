@@ -28,6 +28,7 @@ jobs:
               echo "**** Branch ${br} appears to be live and trigger is not os; checking workflow. ****"
               if curl -sfX GET https://raw.githubusercontent.com/linuxserver/{{ project_repo_name }}/${br}/.github/workflows/external_trigger.yml > /dev/null 2>&1; then
                 echo "**** Workflow exists. Triggering external trigger workflow for branch ${br} ****."
+                echo "Triggering external trigger workflow for branch ${br}" >> $GITHUB_STEP_SUMMARY
                 curl -iX POST \
                   -H "Authorization: token ${{ '{{' }} secrets.CR_PAT {{ '}}' }}" \
                   -H "Accept: application/vnd.github.v3+json" \
@@ -35,8 +36,10 @@ jobs:
                   https://api.github.com/repos/linuxserver/{{ project_repo_name }}/actions/workflows/external_trigger.yml/dispatches
               else
                 echo "**** Workflow doesn't exist; skipping trigger. ****"
+                echo "Skipping branch ${br} due to no external trigger workflow present." >> $GITHUB_STEP_SUMMARY
               fi
             else
               echo "**** ${br} appears to be a dev branch; skipping trigger. ****"
+              echo "Skipping branch ${br} due to being detected as dev branch." >> $GITHUB_STEP_SUMMARY
             fi
           done
