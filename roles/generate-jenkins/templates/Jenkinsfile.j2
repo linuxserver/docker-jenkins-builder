@@ -1298,15 +1298,16 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
-        TEMPDIR=$(mktemp -d)
-        mkdir -p ${TEMPDIR}/repo
-        git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
-        cd ${TEMPDIR}/repo/${LS_REPO}
-        git checkout -f {{ ls_branch }}
-        git rm Jenkinsfile
-        git commit -m 'Disabling future builds'
-        git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
-        rm -Rf ${TEMPDIR}
+        sh '''#! /bin/bash
+          TEMPDIR=$(mktemp -d)
+          mkdir -p ${TEMPDIR}/repo
+          git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
+          cd ${TEMPDIR}/repo/${LS_REPO}
+          git checkout -f {{ ls_branch }}
+          git rm Jenkinsfile
+          git commit -m 'Disabling future builds'
+          git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git --all
+          rm -Rf ${TEMPDIR}'''
       }
     }
 {% endif %}
