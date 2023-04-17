@@ -39,10 +39,11 @@ pipeline {
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
+        sh '''docker pull quay.io/skopeo/stable:v1 || : '''
         script{
           env.EXIT_STATUS = ''
           env.LS_RELEASE = sh(
-            script: '''docker run --rm ghcr.io/linuxserver/alexeiled-skopeo sh -c 'skopeo inspect docker://docker.io/'${DOCKERHUB_IMAGE}':latest 2>/dev/null' | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
+            script: '''docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:latest 2>/dev/null | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
             script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
@@ -222,67 +223,69 @@ pipeline {
       }
       steps {
         sh '''#! /bin/bash
-        CI_URL=https://fakedomain.fake
-        CI_JSON_URL=https://gilbnlsio2.s3.us-east-1.amazonaws.com/linuxserver/lidarr/latest/report.json
-        SHELLCHECK_URL=https://fakedomain.fake
+        CI_URL="https://fakedomain.fake"
+        CI_JSON_URL="https://gilbnlsio2.s3.us-east-1.amazonaws.com/linuxserver/lidarr/latest/report.json"
+        SHELLCHECK_URL="https://fakedomain.fake"
             # Function to retrieve JSON data from URL
             get_json() {
-              local url=\"$1\"
-              local response=$(curl -s \"$url\")
+              local url="$1"
+              local response=$(curl -s "$url")
               if [ $? -ne 0 ]; then
-                echo \"Failed to retrieve JSON data from $url\"
+                echo "Failed to retrieve JSON data from $url"
                 return 1
               fi
-              local json=$(echo \"$response\" | jq .)
+              local json=$(echo "$response" | jq .)
               if [ $? -ne 0 ]; then
-                echo \"Failed to parse JSON data from $url\"
+                echo "Failed to parse JSON data from $url"
                 return 1
               fi
-              echo \"$json\"
+              echo "$json"
             }
 
             build_table() {
-              local data=\"$1\"
+              local data="$1"
 
               # Get the keys in the JSON data
-              local keys=$(echo \"$data\" | jq -r \'to_entries | map(.key) | .[]\')
+              local keys=$(echo "$data" | jq -r 'to_entries | map(.key) | .[]')
 
               # Check if keys are empty
-              if [ -z \"$keys\" ]; then
-                echo \"JSON report data does not contain any keys or the report does not exist.\"
+              if [ -z "$keys" ]; then
+                echo "JSON report data does not contain any keys or the report does not exist."
                 return 1
               fi
 
               # Build table header
-              local header=\"| Tag | Passed |\\n| --- | --- |\\n\"
+              local header="| Tag | Passed |\\n| --- | --- |\\n"
 
               # Loop through the JSON data to build the table rows
-              local rows=\"\"
+              local rows=""
               for build in $keys; do
-                local status=$(echo \"$data\" | jq -r \".[\\"$build\\"].test_success\")
-                if [ \"$status\" = \"true\" ]; then
-                  status=\"✅\"
+                local status=$(echo "$data" | jq -r ".[\\"$build\\"].test_success")
+                if [ "$status" = "true" ]; then
+                  status="✅"
                 else
-                  status=\"❌\"
+                  status="❌"
                 fi
-                local row=\"| \"$build\" | \"$status\" |\n\"
-                rows=\"$rows$row\"
+                local row="| "$build" | "$status" |\\n"
+                rows="${rows}${row}"
               done
 
-              local table=\"$header$rows\"
-              local escaped_table=$(echo \"$table\" | sed 's/"/\\"/g')
-              echo \"$escaped_table\"
+              local table="${header}${rows}"
+              local escaped_table=$(echo "$table" | sed 's/\"/\\\\"/g')
+              echo "$escaped_table"
             }
 
             # Retrieve JSON data from URL
-            data=$(get_json \"$CI_JSON_URL\")
+            data=$(get_json "$CI_JSON_URL")
             # Create table from JSON data
-            table=$(build_table \"$data\")
+            table=$(build_table "$data")
+            echo -e "$table"
 
-            curl -X POST -H \"Authorization: token $GITHUB_TOKEN\" \
-              -H \"Accept: application/vnd.github.v3+json\" \
-              \"https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments\" \
-              -d "{\\"body\\": \\"TEST I am a bot, here are the test results for this PR: \\n${CI_URL} \\n${SHELLCHECK_URL}\\n${table}\\"}"'''
+            #curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            #  -H "Accept: application/vnd.github.v3+json" \
+            #  "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
+            #  -d "{\\"body\\": \\"TEST I am a bot, here are the test results for this PR: \\n${CI_URL}\\n${SHELLCHECK_URL}\\n${table}\\"}"'''
+            echo -e "curling payload: {\\"body\\": \\"TEST I am a bot, here are the test results for this PR: \\n${CI_URL}\\n${SHELLCHECK_URL}\\n${table}\\"}"'''
       }
     }
     // Build Docker container local templating CI runs
@@ -1009,7 +1012,7 @@ pipeline {
               fi
 
               # Build table header
-              local header=\"| Tag | Passed |\n| --- | --- |\n\"
+              local header=\"| Tag | Passed |\\n| --- | --- |\\n\"
 
               # Loop through the JSON data to build the table rows
               local rows=\"\"
@@ -1037,7 +1040,7 @@ pipeline {
             curl -X POST -H \"Authorization: token $GITHUB_TOKEN\" \
               -H \"Accept: application/vnd.github.v3+json\" \
               \"https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments\" \
-              -d \"{\"body\":\"I am a bot, here are the test results for this PR: \\n$CI_URL\\n$SHELLCHECK_URL\\n$table\"}\"'''
+              -d \"{\"body\":\"I am a bot, here are the test results for this PR: \\n$CI_URL\\n$SHELLCHECK_URL\\n\"$table\"\"}\"'''
       }
     }
   }
