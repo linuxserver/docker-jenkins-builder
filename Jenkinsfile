@@ -246,7 +246,7 @@ pipeline {
           script{
             env.SHELLCHECK_URL = 'https://ci-tests.linuxserver.io/' + env.IMAGE + '/' + env.META_TAG + '/shellcheck-result.xml'
           }
-          sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-jenkins-builder/master/checkrun.sh | /bin/bash'''
+          sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-shellcheck/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
                 docker run --rm \
                   -v ${WORKSPACE}:/mnt \
@@ -369,26 +369,6 @@ pipeline {
       steps {
         script{
           env.EXIT_STATUS = 'ABORTED'
-        }
-      }
-    }
-    // If this is a master build check the S6 service file perms
-    stage("Check S6 Service file Permissions"){
-      when {
-        branch "master"
-        environment name: 'CHANGE_ID', value: ''
-        environment name: 'EXIT_STATUS', value: ''
-      }
-      steps {
-        script{
-          sh '''#! /bin/bash
-            WRONG_PERM=$(find ./  -path "./.git" -prune -o \\( -name "run" -o -name "finish" -o -name "check" \\) -not -perm -u=x,g=x,o=x -print)
-            if [[ -n "${WRONG_PERM}" ]]; then
-              echo "The following S6 service files are missing the executable bit; canceling the faulty build: ${WRONG_PERM}"
-              exit 1
-            else
-              echo "S6 service file perms look good."
-            fi '''
         }
       }
     }
