@@ -1113,6 +1113,11 @@ pipeline {
 {% endif %}
                       docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
                     fi
+{% if not build_armhf %}
+                    docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} || :
+                    docker manifest create ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}
+                    docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
+{% endif %}
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }}
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG}{{ ' ' }}
                     docker manifest push --purge ${MANIFESTIMAGE}:${EXT_RELEASE_TAG}{{ ' ' }}
