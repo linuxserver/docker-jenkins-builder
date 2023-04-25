@@ -22,9 +22,11 @@ jobs:
 {% if custom_version_command is defined or external_type != "os" %}
           if [ -n "${{ '{{' }} secrets.PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }} {{ '}}' }}" ]; then
             echo "**** Github secret PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }} is set; skipping trigger. ****"
+            echo "Github secret \`PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\` is set; skipping trigger." >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
           echo "**** External trigger running off of {{ ls_branch }} branch. To disable this trigger, set a Github secret named \"PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\". ****"
+          echo "External trigger running off of {{ ls_branch }} branch. To disable this trigger, set a Github secret named \`PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\`" >> $GITHUB_STEP_SUMMARY
           echo "**** Retrieving external version ****"
 {% endif %}
 {% if custom_version_command is defined and 'api.github.com' in custom_version_command %}
@@ -67,6 +69,7 @@ jobs:
           EXT_RELEASE=$(curl -sL "https://pypi.python.org/pypi/{{ better_vars.EXT_PIP }}/json" |jq -r '. | .info.version')
 {% elif external_type == "os" %}
           echo "**** No external release, exiting ****"
+          echo "No external release, exiting" >> $GITHUB_STEP_SUMMARY
           exit 0
 {% endif %}
 {% if custom_version_command is defined or external_type != "os" %}
@@ -81,6 +84,7 @@ jobs:
           fi
           EXT_RELEASE=$(echo ${EXT_RELEASE} | sed 's/[~,%@+;:/]//g')
           echo "**** External version: ${EXT_RELEASE} ****"
+          echo "External version: ${EXT_RELEASE}" >> $GITHUB_STEP_SUMMARY
           echo "**** Retrieving last pushed version ****"
           image="{{ better_vars.LS_USER }}/{{ project_name }}"
           tag="{{ release_tag }}"
@@ -124,12 +128,15 @@ jobs:
             exit 1
           fi
           echo "**** Last pushed version: ${IMAGE_VERSION} ****"
+          echo "Last pushed version: ${IMAGE_VERSION}" >> $GITHUB_STEP_SUMMARY
           if [ "${EXT_RELEASE}" == "${IMAGE_VERSION}" ]; then
             echo "**** Version ${EXT_RELEASE} already pushed, exiting ****"
+            echo "Version ${EXT_RELEASE} already pushed, exiting" >> $GITHUB_STEP_SUMMARY
             exit 0
 {% if external_type == "alpine_repo" and better_vars.MULTIARCH == 'true' %}
           elif [[ $(curl -sL "{{ better_vars.DIST_REPO }}aarch64/APKINDEX.tar.gz" | tar -xz -C /tmp && awk '/^P:'"{{ better_vars.DIST_REPO_PACKAGES }}"'$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://') != "${EXT_RELEASE}" ]]{% if build_armhf %} || [[ $(curl -sL "{{ better_vars.DIST_REPO }}armv7/APKINDEX.tar.gz" | tar -xz -C /tmp && awk '/^P:'"{{ better_vars.DIST_REPO_PACKAGES }}"'$/,/V:/' /tmp/APKINDEX | sed -n 2p | sed 's/^V://') != "${EXT_RELEASE}" ]]{% endif %}; then
             echo "**** New version ${EXT_RELEASE} found; but not all arch repos updated yet; exiting ****"
+            echo "New version ${EXT_RELEASE} found; but not all arch repos updated yet; exiting" >> $GITHUB_STEP_SUMMARY
             FAILURE_REASON="New version ${EXT_RELEASE} for {{ project_name }} tag {{ release_tag }} is detected, however not all arch repos are updated yet. Will try again later."
             curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://cdn.discordapp.com/avatars/354986384542662657/df91181b3f1cf0ef1592fbe18e0962d7.png","embeds": [{"color": 9802903,
               "description": "**Trigger Failed** \n**Reason:** '"${FAILURE_REASON}"' \n"}],
@@ -138,14 +145,17 @@ jobs:
 {% endif %}
           elif [ $(curl -s {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.building') == "true" ]; then
             echo "**** New version ${EXT_RELEASE} found; but there already seems to be an active build on Jenkins; exiting ****"
+            echo "New version ${EXT_RELEASE} found; but there already seems to be an active build on Jenkins; exiting" >> $GITHUB_STEP_SUMMARY
             exit 0
 {% if external_trigger_delay_hours > 0 %}
           elif [[ $(( $(date +%s%3N) - $(curl -s {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/lastBuild/api/json | jq -r '.timestamp')  )) -lt $(( {{ external_trigger_delay_hours }} * 3600000 )) ]]; then
             echo "**** New version ${EXT_RELEASE} found; but the last build was less than {{ external_trigger_delay_hours }} hours ago; skipping trigger ****"
+            echo "New version ${EXT_RELEASE} found; but the last build was less than {{ external_trigger_delay_hours }} hours ago; skipping trigger" >> $GITHUB_STEP_SUMMARY
             exit 0
 {% endif %}
           else
             echo "**** New version ${EXT_RELEASE} found; old version was ${IMAGE_VERSION}. Triggering new build ****"
+            echo "New version ${EXT_RELEASE} found; old version was ${IMAGE_VERSION}. Triggering new build" >> $GITHUB_STEP_SUMMARY
             response=$(curl -iX POST \
               {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/buildWithParameters?PACKAGE_CHECK=false \
               --user ${{ '{{' }} secrets.JENKINS_USER {{ '}}' }}:${{ '{{' }} secrets.JENKINS_TOKEN {{ '}}' }} | grep -i location | sed "s|^[L|l]ocation: \(.*\)|\1|")
@@ -155,6 +165,7 @@ jobs:
             buildurl=$(curl -s "${response%$'\r'}api/json" | jq -r '.executable.url')
             buildurl="${buildurl%$'\r'}"
             echo "**** Jenkins job build url: ${buildurl} ****"
+            echo "Jenkins job build url: ${buildurl}" >> $GITHUB_STEP_SUMMARY
             echo "**** Attempting to change the Jenkins job description ****"
             curl -iX POST \
               "${buildurl}submitDescription" \
