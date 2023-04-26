@@ -456,21 +456,26 @@ pipeline {
       steps {
         echo "Running on node: ${NODE_NAME}"
         sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
-        sh "docker buildx build \
-          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-          --label \"org.opencontainers.image.authors=linuxserver.io\" \
-          --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-          --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.title=Jenkins-builder\" \
-          --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh '''#! /bin/bash
+          BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+          docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+          docker buildx build \
+            --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+            --label \"org.opencontainers.image.authors=linuxserver.io\" \
+            --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
+            --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
+            --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
+            --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+            --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+            --label \"org.opencontainers.image.vendor=linuxserver.io\" \
+            --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+            --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+            --label \"org.opencontainers.image.title=Jenkins-builder\" \
+            --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
+            --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
+            --builder=${BUILDX_CONTAINER} --load \
+            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+          docker buildx rm ${BUILDX_CONTAINER}'''
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
@@ -487,21 +492,26 @@ pipeline {
           steps {
             echo "Running on node: ${NODE_NAME}"
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors=linuxserver.io\" \
-              --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-              --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title=Jenkins-builder\" \
-              --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors=linuxserver.io\" \
+                --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
+                --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor=linuxserver.io\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title=Jenkins-builder\" \
+                --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
+                --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
           }
         }
         stage('Build ARMHF') {
@@ -515,21 +525,26 @@ pipeline {
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.armhf"
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors=linuxserver.io\" \
-              --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-              --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title=Jenkins-builder\" \
-              --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-              --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} --platform=linux/arm/v7 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors=linuxserver.io\" \
+                --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
+                --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor=linuxserver.io\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title=Jenkins-builder\" \
+                --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
+                --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} --platform=linux/arm/v7 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
             sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -550,21 +565,26 @@ pipeline {
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                '''
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors=linuxserver.io\" \
-              --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-              --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title=Jenkins-builder\" \
-              --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors=linuxserver.io\" \
+                --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
+                --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor=linuxserver.io\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title=Jenkins-builder\" \
+                --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
+                --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
             sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
