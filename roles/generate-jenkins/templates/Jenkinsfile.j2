@@ -530,6 +530,8 @@ pipeline {
               git clone https://github.com/linuxserver/templates.git ${TEMPDIR}/unraid/templates
               if [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME}-logo.png ]]; then
                 sed -i "s|master/linuxserver.io/img/linuxserver-ls-logo.png|master/linuxserver.io/img/${CONTAINER_NAME}-logo.png|" ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml
+              elif [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME-icon.png ]]; then
+                sed -i "s|master/linuxserver.io/img/linuxserver-ls-logo.png|master/linuxserver.io/img/${CONTAINER_NAME}-icon.png|" ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml
               fi
               if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/unraid/templates/unraid/${CONTAINER_NAME}.xml) || ("$(md5sum ${TEMPDIR}/unraid/templates/unraid/${CONTAINER_NAME}.xml | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml | awk '{ print $1 }')") ]]; then
                 cd ${TEMPDIR}/unraid/templates/
