@@ -663,21 +663,26 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
         sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
 {% endif %}
-        sh "docker buildx build \
-          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-          --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-          --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-          --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh '''#! /bin/bash
+          BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+          docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+          docker buildx build \
+            --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+            --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+            --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+            --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+            --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+            --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+            --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+            --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+            --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+            --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+            --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+            --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+            --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
+            --builder=${BUILDX_CONTAINER} --load \
+            --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+          docker buildx rm ${BUILDX_CONTAINER}'''
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
@@ -696,21 +701,26 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+                --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+                --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+                --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+                --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
           }
         }
 {% if build_armhf %}
@@ -733,21 +743,26 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.armhf"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} --platform=linux/arm/v7 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+                --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+                --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+                --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+                --no-cache --pull -f Dockerfile.armhf -t ${IMAGE}:arm32v7-${META_TAG} --platform=linux/arm/v7 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
             sh "docker tag ${IMAGE}:arm32v7-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
@@ -775,21 +790,26 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+              BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+              docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+              docker buildx build \
+                --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+                --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+                --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+                --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+                --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+                --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+                --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+                --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+                --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+                --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+                --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
+                --builder=${BUILDX_CONTAINER} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} .
+              docker buildx rm ${BUILDX_CONTAINER}'''
             sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
