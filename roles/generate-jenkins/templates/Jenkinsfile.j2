@@ -376,7 +376,10 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker buildx build \
+        sh '''#! /bin/bash
+          BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+          docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+          docker buildx build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
           --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
@@ -389,7 +392,9 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
+          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 \
+          --builder=${BUILDX_CONTAINER} --load .
+          docker buildx rm ${BUILDX_CONTAINER}'''
       }
     }
 {% endif %}
@@ -1018,10 +1023,9 @@ pipeline {
           }
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-                  ${DELETEIMAGE}:${META_TAG} \
-                  ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
-                  ${DELETEIMAGE}:{{ release_tag }} || :
+                  docker rmi ${DELETEIMAGE}:${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:${EXT_RELEASE_TAG} || :
+                  docker rmi ${DELETEIMAGE}:{{ release_tag }} || :
                   if [ -n "${SEMVER}" ]; then
                     docker rmi ${DELETEIMAGE}:${SEMVER} || :
                   fi
@@ -1145,32 +1149,29 @@ pipeline {
           }
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-                  ${DELETEIMAGE}:amd64-${META_TAG} \
-                  ${DELETEIMAGE}:amd64-{{ release_tag }} \
-                  ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} \
+                  docker rmi ${DELETEIMAGE}:amd64-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:amd64-{{ release_tag }} || :
+                  docker rmi ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} || :
 {% if build_armhf %}
-                  ${DELETEIMAGE}:arm32v7-${META_TAG} \
-                  ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
+                  docker rmi ${DELETEIMAGE}:arm32v7-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm32v7-{{ release_tag }} || :
+                  docker rmi ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} || :
 {% endif %}
-                  ${DELETEIMAGE}:arm64v8-${META_TAG} \
-                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-{{ release_tag }} || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
                   if [ -n "${SEMVER}" ]; then
-                    docker rmi \
-                    ${DELETEIMAGE}:amd64-${SEMVER} \
+                    docker rmi ${DELETEIMAGE}:amd64-${SEMVER} || :
 {% if build_armhf %}
-                    ${DELETEIMAGE}:arm32v7-${SEMVER} \
+                    docker rmi ${DELETEIMAGE}:arm32v7-${SEMVER} || :
 {% endif %}
-                    ${DELETEIMAGE}:arm64v8-${SEMVER} || :
+                    docker rmi ${DELETEIMAGE}:arm64v8-${SEMVER} || :
                   fi
                 done
-                docker rmi \
 {% if build_armhf %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
+                docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :
 {% endif %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
              '''
         }
       }
@@ -1287,7 +1288,11 @@ pipeline {
                   -e GIT_BRANCH=master \
                   -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
                   ghcr.io/linuxserver/readme-sync bash -c 'node sync'
-                rm -Rf ${TEMPDIR} '''
+                rm -Rf ${TEMPDIR}
+{% if project_repo_name == "docker-jenkins-builder" %}
+                docker rmi jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} || :
+{% endif %}
+                '''
         }
       }
     }
@@ -1404,14 +1409,13 @@ pipeline {
                  "username": "Jenkins"}' ${BUILDS_DISCORD} '''
           // Clean up images if CI tests fail
           sh ''' if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
-                   docker rmi \
-                     ${IMAGE}:amd64-${META_TAG} \
+                   docker rmi ${IMAGE}:amd64-${META_TAG} || :
 {% if build_armhf %}
-                     ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
-                     ${IMAGE}:arm32v7-${META_TAG} \
+                   docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                   docker rmi  ${IMAGE}:arm32v7-${META_TAG} || :
 {% endif %}
-                     ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} \
-                     ${IMAGE}:arm64v8-${META_TAG} || :
+                   docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                   docker rmi ${IMAGE}:arm64v8-${META_TAG} || :
                  else
                    docker rmi ${IMAGE}:${META_TAG} || :
                  fi'''
