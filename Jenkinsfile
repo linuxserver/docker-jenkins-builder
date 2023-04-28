@@ -217,7 +217,10 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker buildx build \
+        sh '''#! /bin/bash
+          BUILDX_CONTAINER=$(head /dev/urandom | tr -dc 'a-z' | head -c12)
+          docker buildx create --driver=docker-container --name=${BUILDX_CONTAINER}
+          docker buildx build \
           --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
           --label \"org.opencontainers.image.authors=linuxserver.io\" \
           --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
@@ -230,7 +233,9 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title=Jenkins-builder\" \
           --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
+          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 \
+          --builder=${BUILDX_CONTAINER} --load .
+          docker buildx rm ${BUILDX_CONTAINER}'''
       }
     }
     // Run ShellCheck
@@ -652,6 +657,13 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
+        sh '''#! /bin/bash
+              echo "Packages were updated. Cleaning up the image and exiting."
+              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
+                docker rmi ${IMAGE}:amd64-${META_TAG}
+              else
+                docker rmi ${IMAGE}:${META_TAG}
+              fi'''
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
@@ -669,6 +681,13 @@ pipeline {
         }
       }
       steps {
+        sh '''#! /bin/bash
+              echo "There are no package updates. Cleaning up the image and exiting."
+              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
+                docker rmi ${IMAGE}:amd64-${META_TAG}
+              else
+                docker rmi ${IMAGE}:${META_TAG}
+              fi'''
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
@@ -771,10 +790,9 @@ pipeline {
           }
           sh '''#! /bin/bash
                 for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-                  ${DELETEIMAGE}:${META_TAG} \
-                  ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
-                  ${DELETEIMAGE}:latest || :
+                  docker rmi ${DELETEIMAGE}:${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:${EXT_RELEASE_TAG} || :
+                  docker rmi ${DELETEIMAGE}:latest || :
                   if [ -n "${SEMVER}" ]; then
                     docker rmi ${DELETEIMAGE}:${SEMVER} || :
                   fi
@@ -873,6 +891,26 @@ pipeline {
                   done
                '''
           }
+          sh '''#! /bin/bash
+                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
+                  docker rmi ${DELETEIMAGE}:amd64-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:amd64-latest || :
+                  docker rmi ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm32v7-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm32v7-latest || :
+                  docker rmi ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-${META_TAG} || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-latest || :
+                  docker rmi ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
+                  if [ -n "${SEMVER}" ]; then
+                    docker rmi ${DELETEIMAGE}:amd64-${SEMVER} || :
+                    docker rmi ${DELETEIMAGE}:arm32v7-${SEMVER} || :
+                    docker rmi ${DELETEIMAGE}:arm64v8-${SEMVER} || :
+                  fi
+                done
+                docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
+             '''
         }
       }
     }
@@ -934,7 +972,9 @@ pipeline {
                   -e GIT_BRANCH=master \
                   -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/mnt \
                   ghcr.io/linuxserver/readme-sync bash -c 'node sync'
-                rm -Rf ${TEMPDIR} '''
+                rm -Rf ${TEMPDIR}
+                docker rmi jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} || :
+                '''
         }
       }
     }
@@ -1028,6 +1068,16 @@ pipeline {
           sh ''' curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/jenkins-avatar.png","embeds": [{"color": 16711680,\
                  "description": "**Build:**  '${BUILD_NUMBER}'\\n**CI Results:**  '${CI_URL}'\\n**ShellCheck Results:**  '${SHELLCHECK_URL}'\\n**Status:**  failure\\n**Job:** '${RUN_DISPLAY_URL}'\\n**Change:** '${CODE_URL}'\\n**External Release:**: '${RELEASE_LINK}'\\n**DockerHub:** '${DOCKERHUB_LINK}'\\n"}],\
                  "username": "Jenkins"}' ${BUILDS_DISCORD} '''
+          // Clean up images if CI tests fail
+          sh ''' if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
+                   docker rmi ${IMAGE}:amd64-${META_TAG} || :
+                   docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                   docker rmi  ${IMAGE}:arm32v7-${META_TAG} || :
+                   docker rmi ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
+                   docker rmi ${IMAGE}:arm64v8-${META_TAG} || :
+                 else
+                   docker rmi ${IMAGE}:${META_TAG} || :
+                 fi'''
         }
       }
     }
