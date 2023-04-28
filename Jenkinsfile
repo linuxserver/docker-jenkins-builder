@@ -660,9 +660,9 @@ pipeline {
         sh '''#! /bin/bash
               echo "Packages were updated. Cleaning up the image and exiting."
               if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
-                docker rmi ${IMAGE}:amd64-${META_TAG}
+                docker rmi ${IMAGE}:amd64-${META_TAG} || :
               else
-                docker rmi ${IMAGE}:${META_TAG}
+                docker rmi ${IMAGE}:${META_TAG} || :
               fi'''
         script{
           env.EXIT_STATUS = 'ABORTED'
@@ -684,9 +684,9 @@ pipeline {
         sh '''#! /bin/bash
               echo "There are no package updates. Cleaning up the image and exiting."
               if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
-                docker rmi ${IMAGE}:amd64-${META_TAG}
+                docker rmi ${IMAGE}:amd64-${META_TAG} || :
               else
-                docker rmi ${IMAGE}:${META_TAG}
+                docker rmi ${IMAGE}:${META_TAG} || :
               fi'''
         script{
           env.EXIT_STATUS = 'ABORTED'
