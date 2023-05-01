@@ -1114,9 +1114,16 @@ pipeline {
                       docker manifest annotate ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} --os linux --arch arm64 --variant v8
                     fi
 {% if not build_armhf %}
-                    docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} || :
-                    docker manifest create ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}
-                    docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
+                    token=$(curl -sX GET "https://ghcr.io/token?scope=repository%3Alinuxserver%2F${CONTAINER_NAME}%3Apull" | jq -r '.token')
+                    digest=$(curl -s \
+                      --header "Accept: application/vnd.docker.distribution.manifest.v2+json" \
+                      --header "Authorization: Bearer ${token}" \
+                      "https://ghcr.io/v2/linuxserver/${CONTAINER_NAME}/manifests/arm32v7-{{ release_tag }}")
+                    if [[ $(echo "$digest" | jq -r '.layers') != "null" ]]; then
+                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} || :
+                      docker manifest create ${MANIFESTIMAGE}:arm32v7-{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}
+                      docker manifest push --purge ${MANIFESTIMAGE}:arm32v7-{{ release_tag }}
+                    fi
 {% endif %}
                     docker manifest push --purge ${MANIFESTIMAGE}:{{ release_tag }}
                     docker manifest push --purge ${MANIFESTIMAGE}:${META_TAG}{{ ' ' }}
