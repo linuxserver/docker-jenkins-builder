@@ -39,7 +39,12 @@ pipeline {
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
-        sh '''docker system prune -af --volumes || : '''
+        sh '''#! /bin/bash
+              containers=$(docker ps -aq)
+              if [[ -n "${containers}" ]]; then
+                docker stop ${containers}
+              fi
+              docker system prune -af --volumes || : '''
         script{
           env.EXIT_STATUS = ''
           env.LS_RELEASE = sh(
@@ -997,6 +1002,10 @@ pipeline {
     cleanup {
       sh '''#! /bin/bash
             echo "Performing docker system prune!!"
+            containers=$(docker ps -aq)
+            if [[ -n "${containers}" ]]; then
+              docker stop ${containers}
+            fi
             docker system prune -af --volumes || :
          '''
       cleanWs()
