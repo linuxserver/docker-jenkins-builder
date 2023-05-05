@@ -26,7 +26,7 @@ pipeline {
     PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
     DIST_IMAGE='alpine'
     MULTIARCH='true'
-    CI='false'
+    CI='true'
     CI_WEB='true'
     CI_PORT='8000'
     CI_SSL='false'
@@ -989,7 +989,7 @@ pipeline {
               curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github.v3+json" \
                 "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
-                -d "{\\"body\\": \\"I am a bot, here are the pushed images for this PR: \\n\\n\\`${GITHUBIMAGE}:${META_TAG}\\`\\"}"
+                -d "{\\"body\\": \\"I am a bot, here is the pushed image/manifest for this PR: \\n\\n\\`${GITHUBIMAGE}:${META_TAG}\\`\\"}"
             fi
             '''
 
