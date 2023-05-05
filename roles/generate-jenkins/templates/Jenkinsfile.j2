@@ -1380,9 +1380,9 @@ pipeline {
                 -d "{\\"body\\": \\"I am a bot, here are the test results for this PR: \\n${CI_URL}\\n${SHELLCHECK_URL}\\n${table}\\"}"
             else
               if [[ "${MULTIARCH}" = "true" ]]; then
-                PR_COMMENT_IMAGES="\\`${GITHUBIMAGE}:amd64-${EXT_RELEASE_TAG}\\`\\n{% if build_armhf %}\\`${GITHUBIMAGE}:arm32v7-${EXT_RELEASE_TAG}\\`\\n{% endif %}\\`${GITHUBIMAGE}:arm64v8-${EXT_RELEASE_TAG}\\`"
+                PR_COMMENT_IMAGES="\\`${GITHUBIMAGE}:amd64-${META_TAG}\\`\\n{% if build_armhf %}\\`${GITHUBIMAGE}:arm32v7-${META_TAG}\\`\\n{% endif %}\\`${GITHUBIMAGE}:arm64v8-${META_TAG}\\`"
               else
-                PR_COMMENT_IMAGES="\\`${GITHUBIMAGE}:${EXT_RELEASE_TAG}\\`"
+                PR_COMMENT_IMAGES="\\`${GITHUBIMAGE}:${META_TAG}\\`"
               fi
               curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
                 -H "Accept: application/vnd.github.v3+json" \
