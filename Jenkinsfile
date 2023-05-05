@@ -26,7 +26,7 @@ pipeline {
     PR_DOCKERHUB_IMAGE='lspipepr/jenkins-builder'
     DIST_IMAGE='alpine'
     MULTIARCH='true'
-    CI='true'
+    CI='false'
     CI_WEB='true'
     CI_PORT='8000'
     CI_SSL='false'
@@ -423,8 +423,7 @@ pipeline {
       }
       steps{
         sh '''#! /bin/bash
-              set -e
-              PACKAGE_UUID=$(curl -X GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/organizations/linuxserver-ci/packages | jq -r '.[] | select(.name=="linuxserver/jenkins-builder") | .uuid')
+              PACKAGE_UUID=$(curl -X GET -H "Authorization: Bearer ${SCARF_TOKEN}" https://scarf.sh/api/v1/organizations/linuxserver-ci/packages | jq -r '.[] | select(.name=="linuxserver/jenkins-builder") | .uuid' || :)
               if [ -z "${PACKAGE_UUID}" ]; then
                 echo "Adding package to Scarf.sh"
                 curl -sX POST https://scarf.sh/api/v1/organizations/linuxserver-ci/packages \
@@ -922,7 +921,6 @@ pipeline {
     stage('Pull Request Comment') {
       when {
         not {environment name: 'CHANGE_ID', value: ''}
-        environment name: 'CI', value: 'true'
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
@@ -976,16 +974,24 @@ pipeline {
               echo "$escaped_table"
             }
 
-            # Retrieve JSON data from URL
-            data=$(get_json "$CI_JSON_URL")
-            # Create table from JSON data
-            table=$(build_table "$data")
-            echo -e "$table"
+            if [[ "${CI}" = "true" ]]; then
+              # Retrieve JSON data from URL
+              data=$(get_json "$CI_JSON_URL")
+              # Create table from JSON data
+              table=$(build_table "$data")
+              echo -e "$table"
 
-            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-              -H "Accept: application/vnd.github.v3+json" \
-              "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
-              -d "{\\"body\\": \\"I am a bot, here are the test results for this PR: \\n${CI_URL}\\n${SHELLCHECK_URL}\\n${table}\\"}"'''
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
+                -d "{\\"body\\": \\"I am a bot, here are the test results for this PR: \\n${CI_URL}\\n${SHELLCHECK_URL}\\n${table}\\"}"
+            else
+              curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github.v3+json" \
+                "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
+                -d "{\\"body\\": \\"I am a bot, here are the pushed images for this PR: \\n\\n\\`${GITHUBIMAGE}:${META_TAG}\\`\\"}"
+            fi
+            '''
 
       }
     }
