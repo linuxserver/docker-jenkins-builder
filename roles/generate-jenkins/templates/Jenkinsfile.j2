@@ -25,7 +25,12 @@ pipeline {
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
-        sh '''docker pull quay.io/skopeo/stable:v1 || : '''
+        sh '''#! /bin/bash
+              containers=$(docker ps -aq)
+              if [[ -n "${containers}" ]]; then
+                docker stop ${containers}
+              fi
+              docker system prune -af --volumes || : '''
         script{
           env.EXIT_STATUS = ''
           env.LS_RELEASE = sh(
@@ -753,9 +758,12 @@ pipeline {
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER}"
             }
-            sh '''docker rmi \
-                  ${IMAGE}:arm32v7-${META_TAG} \
-                  ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} || :'''
+            sh '''#! /bin/bash
+                  containers=$(docker ps -aq)
+                  if [[ -n "${containers}" ]]; then
+                    docker stop ${containers}
+                  fi
+                  docker system prune -af --volumes || : '''
           }
         }
 {% endif %}
@@ -795,9 +803,12 @@ pipeline {
             retry(5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             }
-            sh '''docker rmi \
-                  ${IMAGE}:arm64v8-${META_TAG} \
-                  ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :'''
+            sh '''#! /bin/bash
+                  containers=$(docker ps -aq)
+                  if [[ -n "${containers}" ]]; then
+                    docker stop ${containers}
+                  fi
+                  docker system prune -af --volumes || : '''
           }
         }
       }
@@ -859,15 +870,6 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
-{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
-        sh '''#! /bin/bash
-              echo "Packages were updated. Cleaning up the image and exiting."
-              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
-                docker rmi ${IMAGE}:amd64-${META_TAG}
-              else
-                docker rmi ${IMAGE}:${META_TAG}
-              fi'''
-{% endif %}
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
@@ -885,15 +887,6 @@ pipeline {
         }
       }
       steps {
-{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
-        sh '''#! /bin/bash
-              echo "There are no package updates. Cleaning up the image and exiting."
-              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
-                docker rmi ${IMAGE}:amd64-${META_TAG}
-              else
-                docker rmi ${IMAGE}:${META_TAG}
-              fi'''
-{% endif %}
         script{
           env.EXIT_STATUS = 'ABORTED'
         }
@@ -999,17 +992,6 @@ pipeline {
                   done
                '''
           }
-          sh '''#! /bin/bash
-                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-                  ${DELETEIMAGE}:${META_TAG} \
-                  ${DELETEIMAGE}:${EXT_RELEASE_TAG} \
-                  ${DELETEIMAGE}:{{ release_tag }} || :
-                  if [ -n "${SEMVER}" ]; then
-                    docker rmi ${DELETEIMAGE}:${SEMVER} || :
-                  fi
-                done
-             '''
         }
       }
     }
@@ -1133,64 +1115,6 @@ pipeline {
                   done
                '''
           }
-{% if not project_repo_name == "docker-jenkins-builder" and "docker-baseimage" not in project_repo_name %}
-          sh '''#! /bin/bash
-                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-                  ${DELETEIMAGE}:amd64-${META_TAG} \
-                  ${DELETEIMAGE}:amd64-{{ release_tag }} \
-                  ${DELETEIMAGE}:amd64-${EXT_RELEASE_TAG} \
-{% if build_armhf %}
-                  ${DELETEIMAGE}:arm32v7-${META_TAG} \
-                  ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
-{% endif %}
-                  ${DELETEIMAGE}:arm64v8-${META_TAG} \
-                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
-                  if [ -n "${SEMVER}" ]; then
-                    docker rmi \
-                    ${DELETEIMAGE}:amd64-${SEMVER} \
-{% if build_armhf %}
-                    ${DELETEIMAGE}:arm32v7-${SEMVER} \
-{% endif %}
-                    ${DELETEIMAGE}:arm64v8-${SEMVER} || :
-                  fi
-                done
-                docker rmi \
-{% if build_armhf %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
-{% endif %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
-             '''
-{% endif %}
-{% if "docker-baseimage" in project_repo_name %}
-          sh '''#! /bin/bash
-                for DELETEIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                  docker rmi \
-{% if build_armhf %}
-                  ${DELETEIMAGE}:arm32v7-${META_TAG} \
-                  ${DELETEIMAGE}:arm32v7-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm32v7-${EXT_RELEASE_TAG} \
-{% endif %}
-                  ${DELETEIMAGE}:arm64v8-${META_TAG} \
-                  ${DELETEIMAGE}:arm64v8-{{ release_tag }} \
-                  ${DELETEIMAGE}:arm64v8-${EXT_RELEASE_TAG} || :
-                  if [ -n "${SEMVER}" ]; then
-                    docker rmi \
-{% if build_armhf %}
-                    ${DELETEIMAGE}:arm32v7-${SEMVER} \
-{% endif %}
-                    ${DELETEIMAGE}:arm64v8-${SEMVER} || :
-                  fi
-                done
-                docker rmi \
-{% if build_armhf %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm32v7-${COMMIT_SHA}-${BUILD_NUMBER} \
-{% endif %}
-                ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || :
-             '''
-{% endif %}
         }
       }
     }
@@ -1432,6 +1356,14 @@ pipeline {
       }
     }
     cleanup {
+      sh '''#! /bin/bash
+            echo "Performing docker system prune!!"
+            containers=$(docker ps -aq)
+            if [[ -n "${containers}" ]]; then
+              docker stop ${containers}
+            fi
+            docker system prune -af --volumes || :
+         '''
       cleanWs()
     }
   }
