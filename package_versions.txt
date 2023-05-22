@@ -21,7 +21,7 @@ ca-certificates-bundle  20230506-r0            apk
 cffi                    1.15.0                 python  
 coreutils               9.1-r0                 apk     
 cryptography            3.4.8                  python  
-curl                    8.0.1-r0               apk     
+curl                    8.1.0-r1               apk     
 expat                   2.5.0-r0               apk     
 gdbm                    1.23-r0                apk     
 gmp                     6.2.1-r2               apk     
@@ -33,7 +33,7 @@ libbsd                  0.11.6-r2              apk
 libbz2                  1.0.8-r1               apk     
 libc-utils              0.7.2-r3               apk     
 libcrypto1.1            1.1.1t-r2              apk     
-libcurl                 8.0.1-r0               apk     
+libcurl                 8.1.0-r1               apk     
 libffi                  3.4.2-r1               apk     
 libgcc                  11.2.1_git20220219-r2  apk     
 libintl                 0.21-r2                apk     
@@ -43,8 +43,8 @@ libssl1.1               1.1.1t-r2              apk
 libstdc++               11.2.1_git20220219-r2  apk     
 linux-pam               1.5.2-r0               apk     
 mpdecimal               2.5.1-r1               apk     
-musl                    1.2.3-r2               apk     
-musl-utils              1.2.3-r2               apk     
+musl                    1.2.3-r3               apk     
+musl-utils              1.2.3-r3               apk     
 ncurses-libs            6.3_p20220521-r0       apk     
 ncurses-terminfo-base   6.3_p20220521-r0       apk     
 netcat-openbsd          1.130-r3               apk     
