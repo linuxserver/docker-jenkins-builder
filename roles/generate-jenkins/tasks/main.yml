@@ -54,6 +54,10 @@
     owner: "abc"
     group: "abc"
 
+- name: set basefolder
+  set_fact:
+    project_base: "{{ '/tmp' if lookup('env', 'LOCAL') else 'jenkins/' + project_repo_name }}"
+
 - name: create destination dir for generated github files
   when: lookup('env', 'LOCAL') != "true"
   file:
@@ -348,6 +352,50 @@
     state: touch
     owner: "abc"
     group: "abc"
+
+# - name: armhf deprecate - set readme-vars
+#   when:
+#     - not 'deprecate armhf' in (changelogs | map(attribute="desc") | string | lower) and not build_armhf
+#   set_fact:
+#     armhf_date:
+#       [{ date: "{{'%d.%m.%y:' | strftime }}", desc: "Deprecate armhf." }]
+
+- name: armhf deprecate
+  register: armhf_deprecate_readme
+  when:
+    - not 'deprecate armhf' in (changelogs | map(attribute="desc") | string | lower)
+    - arch_armhf in (available_architectures | map(attribute="arch") )
+    - not build_armhf
+  shell: exit 1
+  failed_when: false
+  changed_when: armhf_deprecate_readme.rc != 0
+
+- name: armhf deprecate - fetch readme-vars
+  when: armhf_deprecate_readme.changed
+  slurp:
+    src: "{{ project_base }}/readme-vars.yml"
+  register: armhf_deprecate_raw_readme
+
+- name: armhf deprecate - update readme-vars
+  when: armhf_deprecate_readme.changed
+  set_fact:
+    changelogs: "{{ [{ 'date': '%d.%m.%y:' | strftime, 'desc': 'Deprecate armhf.' }] + changelogs }}"
+    available_architectures: "{{ available_architectures | rejectattr('arch', 'eq', arch_armhf) }}"
+    raw_available_architectures: "{{ (armhf_deprecate_raw_readme['content'] | b64decode | from_yaml).available_architectures | rejectattr('arch', 'eq', '{{ arch_armhf }}') }}"
+
+- name: armhf deprecate - write readme-vars
+  when: armhf_deprecate_readme.changed
+  shell: |
+    yq e -i 'with(.changelogs; . = {{ changelogs | replace("'", '"')}} | .[] style="flow")' "{{ project_base }}/readme-vars.yml"
+    yq e -i 'with(.available_architectures; . = {{ raw_available_architectures | replace("'", '"')}} | .[] style="flow")' "{{ project_base }}/readme-vars.yml"
+  register: write_readme
+  changed_when: write_readme.rc != 0
+
+- name: armhf deprecate - delete armhf dockerfile
+  when: armhf_deprecate_readme.changed
+  file:
+    path: "{{ project_base }}/Dockerfile.armhf"
+    state: absent
 
 - name: create destination dir for generated external files
   when:
