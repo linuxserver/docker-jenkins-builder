@@ -379,7 +379,7 @@
 - name: armhf deprecate - write readme-vars
   when: armhf_deprecate_readme.changed
   environment:
-    available_architectures: "{{ available_architectures | to_yaml }}"
+    available_architectures: "{{ raw_available_architectures | to_yaml }}"
     changelogs: "{{ changelogs | to_yaml }}"
   shell: |
     yq e -i 'with(.available_architectures; . = env(available_architectures) | .. style="double" | .[] style="flow")' "{{ project_base }}/readme-vars.yml"
