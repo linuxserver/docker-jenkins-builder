@@ -1201,6 +1201,41 @@ pipeline {
               curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done'''
       }
     }
+    // Add protection to the release branch
+    stage('Github-Release-Branch-Protection') {
+      when {
+        branch "{{ ls_branch }}"
+        environment name: 'CHANGE_ID', value: ''
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        echo "Setting up protection for release branch {{ ls_branch }}"
+        sh '''#! /bin/bash
+          curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/branches/{{ ls_branch }}/protection \
+          -d $(jq -c .  << EOF
+            {
+              "required_status_checks": null,
+              "enforce_admins": true,
+              "required_pull_request_reviews": {
+                "dismiss_stale_reviews": false,
+                "require_code_owner_reviews": false,
+                "require_last_push_approval": false,
+                "required_approving_review_count": 1
+              },
+              "restrictions": null,
+              "required_linear_history": false,
+              "allow_force_pushes": false,
+              "allow_deletions": false,
+              "block_creations": false,
+              "required_conversation_resolution": true,
+              "lock_branch": false,
+              "allow_fork_syncing": false,
+              "required_signatures": false
+            }
+EOF
+          ) '''
+      }
+    }
     // Use helper container to sync the current README on master to the dockerhub endpoint
     stage('Sync-README') {
       when {
