@@ -1236,6 +1236,36 @@ EOF
           ) '''
       }
     }
+    // Add stale exempt labels to the repository
+    stage('Github-Stale-Exempt-Labels') {
+      when {
+        branch "{{ ls_branch }}"
+        environment name: 'CHANGE_ID', value: ''
+        environment name: 'EXIT_STATUS', value: ''
+      }
+      steps {
+        echo "Setting up stale exempt labels for ${LS_USER}/${LS_REPO}"
+        sh '''#! /bin/bash
+          # awaiting-approval
+          if curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels/awaiting-approval | grep -q 'awaiting-approval'; then
+            curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels/awaiting-approval \
+              -d '{"description":"Stale exempt"}'
+          else
+            curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels \
+            -d '{"name":"awaiting-approval","description":"Stale exempt"}'
+          fi
+          
+          # work-in-progress
+          if curl -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels/work-in-progress | grep -q 'work-in-progress'; then
+            curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels/work-in-progress \
+              -d '{"description":"Stale exempt"}'
+          else
+            curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/labels \
+            -d '{"name":"work-in-progress","description":"Stale exempt"}'
+          fi
+        '''
+      }
+    }
     // Use helper container to sync the current README on master to the dockerhub endpoint
     stage('Sync-README') {
       when {
