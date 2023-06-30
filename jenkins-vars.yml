@@ -1,11 +1,11 @@
 ---
-
 # jenkins variables
 project_name: docker-jenkins-builder
 external_type: os
 release_type: stable
 release_tag: latest
 ls_branch: master
+build_armhf: true
 repo_vars:
   - BUILD_VERSION_ARG='BUILDER_VERSION'
   - LS_USER='linuxserver'
