@@ -57,4 +57,4 @@ external_trigger_delay_hours: 0
 unraid_template_sync: true
 unraid_template: true
 armhf_native: false
-build_armhf: true
+build_armhf: false

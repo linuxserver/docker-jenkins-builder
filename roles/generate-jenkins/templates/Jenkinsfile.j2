@@ -660,7 +660,7 @@ pipeline {
     stage('Build-Single') {
       when {
         expression {
-          env.MULTIARCH == 'false' || params.PACKAGE_CHECK == 'true'
+          env.MULTIARCH == 'false'{% if skip_package_check is not defined %} || params.PACKAGE_CHECK == 'true'{% endif +%}
         }
         environment name: 'EXIT_STATUS', value: ''
       }
@@ -691,7 +691,9 @@ pipeline {
       when {
         allOf {
           environment name: 'MULTIARCH', value: 'true'
+{% if skip_package_check is not defined %}
           expression { params.PACKAGE_CHECK == 'false' }
+{% endif %}
         }
         environment name: 'EXIT_STATUS', value: ''
       }

@@ -10,6 +10,9 @@ LABEL maintainer="homer, thelamer"
 
 RUN \
   echo "**** install build packages ****" && \
+  VERSION=v4.34.1 &&\
+  wget https://github.com/mikefarah/yq/releases/download/${VERSION}/yq_linux_arm -O /usr/bin/yq &&\
+  chmod +x /usr/bin/yq && \
   apk add --no-cache --upgrade \
     ansible
 
