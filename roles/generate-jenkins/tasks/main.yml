@@ -391,8 +391,19 @@
   register: write_readme
   changed_when: write_readme.rc != 0
 
+- name: armhf deprecate - copy readme-vars
+  when:
+    - armhf_deprecate_readme.changed
+    - lookup('env', 'LOCAL') != "true"
+  copy:
+    dest: "jenkins/{{ project_repo_name }}/readme-vars.yml"
+    src: "{{ project_base }}/readme-vars.yml"
+    remote_src: true
+
 - name: armhf deprecate - delete armhf dockerfile
-  when: armhf_deprecate_readme.changed
+  when:
+    - armhf_deprecate_readme.changed
+    - lookup('env', 'LOCAL') == "true"
   file:
     path: "{{ project_base }}/Dockerfile.armhf"
     state: absent
