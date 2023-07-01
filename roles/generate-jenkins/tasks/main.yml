@@ -397,7 +397,7 @@
     - lookup('env', 'LOCAL') != "true"
   copy:
     dest: "jenkins/{{ project_repo_name }}/readme-vars.yml"
-    src: "{{ project_base }}/readme-vars.yml"
+    src: "{{ dl_vars_project_base }}/readme-vars.yml"
     remote_src: true
 
 - name: armhf deprecate - delete armhf dockerfile
