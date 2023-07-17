@@ -10,8 +10,10 @@ full_custom_readme: |
   ## Running against remote project
 
   ```bash
+  TEMPDIR=$(mktemp -d)
   docker run --rm \
-    -e CONTAINER_NAME=${CONTAINER_NAME} \
+    -e CONTAINER_NAME=<container name> \
+    -e GITHUB_BRANCH=<branch name> \
     -v ${TEMPDIR}:/ansible/jenkins \
     lscr.io/linuxserver/jenkins-builder:latest
   ```
