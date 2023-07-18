@@ -10,7 +10,7 @@ full_custom_readme: |
   ## Running against remote project
 
   ```bash
-  TEMPDIR=$(mktemp -d)
+  TEMPDIR=$(mktemp -d) && \
   docker run --rm \
     -e CONTAINER_NAME=<container name> \
     -e GITHUB_BRANCH=<branch name> \
