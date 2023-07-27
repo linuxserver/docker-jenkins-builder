@@ -33,7 +33,7 @@ docker run -d \
 {% endif %}
 {% if security_opt_param %}
 {% for item in security_opt_param_vars %}
-  --security-opt={{ item.run_var }} \
+  --security-opt {{ item.run_var }} \
 {% endfor %}
 {% endif %}
 {% if opt_security_opt_param %}
