@@ -300,7 +300,7 @@ docker run -d \
 {% endif %}
 {% if security_opt_param %}
 {% for item in security_opt_param_vars %}
-  --security-opt={{ item.run_var }} \
+  --security-opt {{ item.run_var }} \
 {% endfor %}
 {% endif %}
 {% if opt_security_opt_param %}
@@ -512,7 +512,7 @@ Docker images are configured using parameters passed at runtime (such as those a
 {% endif %}
 {% if security_opt_param %}
 {% for item in security_opt_param_vars %}
-| `--security-opt {{ item.run_security_opt_var }}` | {{ item.desc }} |
+| `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
 {% endif %}
 {% if opt_security_opt_param %}
