@@ -257,13 +257,13 @@ services:
 {% endif %}
 {% endfor %}
 {% endif %}
-    restart: unless-stopped{% else %}{{ custom_compose }}{% endif %}
+    restart: unless-stopped
+{% else %}{{ custom_compose }}{% endif %}
 {% if external_application_snippet_enabled %}
 
 # This container requires an external application to be run separately.
 {{ external_application_compose_block }}
 {% endif %}
-
 ```
 
 ### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
@@ -405,7 +405,6 @@ docker run -d \
 # This container requires an external application to be run separately.
 {{ external_application_cli_block }}
 {% endif %}
-
 ```
 {% if optional_block_1 %}
 
@@ -566,8 +565,13 @@ Ensure any volume directories on the host are owned by the same user you specify
 In this instance `PUID=1000` and `PGID=1000`, to find yours use `id your_user` as below:
 
 ```bash
-$ id your_user
-    uid=1000(dockeruser) gid=1000(dockergroup) groups=1000(dockergroup)
+id your_user
+```
+
+Example output:
+
+```text
+uid=1000(your_user) gid=1000(your_user) groups=1000(your_user)
 ```
 {% if common_param_env_vars_enabled == 'optional' %}
 
@@ -584,13 +588,21 @@ We publish various [Docker Mods]({{ lsio_github_url }}/docker-mods) to enable ad
 ## Support Info
 
 * Shell access whilst the container is running:
-    * `docker exec -it {{ project_name }} /bin/bash`
+    ```bash
+    docker exec -it {{ project_name }} /bin/bash
+    ```
 * To monitor the logs of the container in realtime:
-    * `docker logs -f {{ project_name }}`
+    ```bash
+    docker logs -f {{ project_name }}
+    ```
 * Container version number
-    * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}`
+    ```bash
+    docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} {{ project_name }}
+    ```
 * Image version number
-    * `docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
+    ```bash
+    docker inspect -f {% raw %}'{{ index .Config.Labels "build_version" }}'{% endraw %} lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+    ```
 
 ## Updating Info
 
@@ -600,19 +612,48 @@ Below are the instructions for updating containers:
 
 ### Via Docker Compose
 
-* Update all images: `docker-compose pull`
-    * or update a single image: `docker-compose pull {{ project_name }}`
-* Let compose update all containers as necessary: `docker-compose up -d`
-    * or update a single container: `docker-compose up -d {{ project_name }}`
-* You can also remove the old dangling images: `docker image prune`
+* Update images:
+    * All images:
+        ```bash
+        docker-compose pull
+        ```
+    * Single image:
+        ```bash
+        docker-compose pull {{ project_name }}
+        ```
+* Update containers:
+    * All containers:
+        ```bash
+        docker-compose up -d
+        ```
+    * Single container:
+        ```bash
+        docker-compose up -d {{ project_name }}
+        ```
+* You can also remove the old dangling images:
+    ```bash
+    docker image prune
+    ```
 
 ### Via Docker Run
 
-* Update the image: `docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}`
-* Stop the running container: `docker stop {{ project_name }}`
-* Delete the container: `docker rm {{ project_name }}`
+* Update the image:
+    ```bash
+    docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+    ```
+* Stop the running container:
+    ```bash
+    docker stop {{ project_name }}
+    ```
+* Delete the container:
+    ```bash
+    docker rm {{ project_name }}
+    ```
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
-* You can also remove the old dangling images: `docker image prune`
+* You can also remove the old dangling images:
+    ```bash
+    docker image prune
+    ```
 
 ### Via Watchtower auto-updater (only use if you don't remember the original parameters)
 
@@ -620,9 +661,9 @@ Below are the instructions for updating containers:
 
     ```bash
     docker run --rm \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    containrrr/watchtower \
-    --run-once {{ project_name }}
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      containrrr/watchtower \
+      --run-once {{ project_name }}
     ```
 
 * You can also remove the old dangling images: `docker image prune`
