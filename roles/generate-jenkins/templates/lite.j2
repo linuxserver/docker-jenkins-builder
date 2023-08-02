@@ -7,15 +7,17 @@ This image is deprecated. We will not offer support for this image and it will n
 {% endif %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_github_repo_url }})
 
-# This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
+## This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
 
-{{ project_blurb }}
+{{ project_blurb | trim }}
 
 {% if app_setup_block_enabled %}
 
 ## Application Setup
+{% if app_setup_block is defined and app_setup_block %}
 
 {{ app_setup_block | trim }}
+{% endif %}
 {% endif %}
 
 ## Usage
@@ -27,6 +29,11 @@ docker run -d \
   --hostname={{ param_hostname }} \
 {% elif param_usage_include_hostname == 'optional' %}
   --hostname={{ param_hostname }} `#optional` \
+{% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+  --mac-address={{ param_mac_address }} \
+{% elif param_usage_include_mac_address == 'optional' %}
+  --mac-address={{ param_mac_address }} `#optional` \
 {% endif %}
 {% if param_usage_include_net is sameas true %}
   --net={{ param_net }} \
@@ -60,25 +67,37 @@ docker run -d \
 {% endif %}
 {% if common_param_env_vars_enabled is sameas true %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} \
+{% endif %}
 {% endfor %}
 {% elif common_param_env_vars_enabled == 'optional' %}
 {% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_env %}
 {% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
 {% if ' ' in item.env_value %}
-      - "{{ item.env_var }}={{ item.env_value }}"
+  -e {{ item.env_var }}="{{ item.env_value }}" \
 {% else %}
-      - {{ item.env_var }}={{ item.env_value }}
+  -e {{ item.env_var }}={{ item.env_value }} \
 {% endif %}
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_env %}
 {% for item in opt_param_env_vars %}
+{% if ' ' in item.env_value %}
+  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
+{% else %}
   -e {{ item.env_var }}={{ item.env_value }} `#optional` \
+{% endif %}
 {% endfor %}
 {% endif %}
 {% if param_usage_include_ports %}
@@ -134,5 +153,11 @@ docker run -d \
 {% endfor %}
 {% endif %}
   --restart unless-stopped \
-  {{ lsio_project_name_short }}/{{ project_name }}
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+{% if external_application_snippet_enabled %}
+
+# This container requires an external application to be run separately.
+{{ external_application_cli_block }}
+{% endif %}
+
 ```
