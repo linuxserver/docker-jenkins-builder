@@ -1,0 +1,162 @@
+```yaml
+{% if not custom_compose is defined %}---
+version: "2.1"
+services:
+  {{ project_name }}:
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+    container_name: {{ project_name }}
+{% if param_usage_include_hostname is sameas true %}
+    hostname: {{ param_hostname }}
+{% elif param_usage_include_hostname == 'optional' %}
+    hostname: {{ param_hostname }} #optional
+{% endif %}
+{% if param_usage_include_mac_address is sameas true %}
+    mac_address: {{ param_mac_address }}
+{% elif param_usage_include_mac_address == 'optional' %}
+    mac_address: {{ param_mac_address }} #optional
+{% endif %}
+{% if privileged is sameas true %}
+    privileged: true
+{% elif privileged == 'optional' %}
+    privileged: true #optional
+{% endif %}
+{% if cap_add_param or opt_cap_add_param %}
+    cap_add:
+{% endif %}
+{% if cap_add_param %}
+{% for item in cap_add_param_vars %}
+      - {{ item.cap_add_var }}
+{% endfor %}
+{% endif %}
+{% if opt_cap_add_param %}
+{% for item in opt_cap_add_param_vars %}
+      - {{ item.cap_add_var }} #optional
+{% endfor %}
+{% endif %}
+{% if security_opt_param or opt_security_opt_param %}
+    security_opt:
+{% endif %}
+{% if security_opt_param %}
+{% for item in security_opt_param_vars %}
+      - {{ item.compose_var }}
+{% endfor %}
+{% endif %}
+{% if opt_security_opt_param %}
+{% for item in opt_security_opt_param_vars %}
+      - {{ item.compose_var }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_net is sameas true %}
+    network_mode: {{ param_net }}
+{% elif param_usage_include_net == 'optional' %}
+    network_mode: {{ param_net }} #optional
+{% endif %}
+{% if common_param_env_vars_enabled or param_usage_include_env or opt_param_usage_include_env %}
+    environment:
+{% endif %}
+{% if common_param_env_vars_enabled is sameas true %}
+{% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}"
+{% else %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endif %}
+{% endfor %}
+{% elif common_param_env_vars_enabled == 'optional' %}
+{% for item in common_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}" #optional
+{% else %}
+      - {{ item.env_var }}={{ item.env_value }} #optional
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if param_usage_include_env %}
+{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}"
+{% else %}
+      - {{ item.env_var }}={{ item.env_value }}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_env %}
+{% for item in opt_param_env_vars %}
+{% if ' ' in item.env_value %}
+      - "{{ item.env_var }}={{ item.env_value }}" #optional
+{% else %}
+      - {{ item.env_var }}={{ item.env_value }} #optional
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if param_usage_include_vols or opt_param_usage_include_vols %}
+    volumes:
+{% endif %}
+{% if param_usage_include_vols %}
+{% for item in param_volumes %}
+      - {{ item.vol_host_path }}:{{ item.vol_path }}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_vols %}
+{% for item in opt_param_volumes %}
+      - {{ item.vol_host_path }}:{{ item.vol_path }} #optional
+{% endfor %}
+{% endif %}
+{% if param_usage_include_ports or opt_param_usage_include_ports %}
+    ports:
+{% endif %}
+{% if param_usage_include_ports %}
+{% for item in param_ports %}
+      - {{ item.external_port }}:{{ item.internal_port }}
+{% endfor %}
+{% endif %}
+{% if opt_param_usage_include_ports %}
+{% for item in opt_param_ports %}
+      - {{ item.external_port }}:{{ item.internal_port }} #optional
+{% endfor %}
+{% endif %}
+{% if param_device_map or opt_param_device_map %}
+    devices:
+{% endif %}
+{% if param_device_map %}
+{% for item in param_devices %}
+      - {{ item.device_host_path }}:{{ item.device_path }}
+{% endfor %}
+{% endif %}
+{% if opt_param_device_map %}
+{% for item in opt_param_devices %}
+      - {{ item.device_host_path }}:{{ item.device_path }} #optional
+{% endfor %}
+{% endif %}
+{% if custom_params is defined %}
+{% for item in custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}"
+{% else %}
+    {{ item.name_compose }}:
+{% for item2 in item.value %}
+      - {{ item2 }}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% if opt_custom_params is defined %}
+{% for item in opt_custom_params %}
+{% if item.array is not defined %}
+    {{ item.name_compose }}: "{{ item.value }}" #optional
+{% else %}
+    {{ item.name_compose }}: #optional
+{% for item2 in item.value %}
+      - {{ item2 }} #optional
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% endif %}
+    restart: unless-stopped
+{% else %}{{ custom_compose }}{% endif %}
+{% if external_application_snippet_enabled %}
+
+# This container requires an external application to be run separately.
+{{ external_application_compose_block }}
+{% endif %}
+```

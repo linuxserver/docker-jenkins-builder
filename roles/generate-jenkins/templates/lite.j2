@@ -1,8 +1,5 @@
 {% if project_deprecation_status %}
-# DEPRECATION NOTICE
-
-This image is deprecated. We will not offer support for this image and it will not be updated.
-{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+{% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
 {% endif %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_github_repo_url }})
@@ -13,150 +10,10 @@ This image is deprecated. We will not offer support for this image and it will n
 
 {% if app_setup_block_enabled %}
 
-## Application Setup
-{% if app_setup_block is defined and app_setup_block %}
+{% include "README_SNIPPETS/APPLICATION_SETUP.j2" | trim %}
 
-{{ app_setup_block | trim }}
-{% endif %}
 {% endif %}
 
 ## Usage
 
-```bash
-docker run -d \
-  --name={{ param_container_name }} \
-{% if param_usage_include_hostname is sameas true %}
-  --hostname={{ param_hostname }} \
-{% elif param_usage_include_hostname == 'optional' %}
-  --hostname={{ param_hostname }} `#optional` \
-{% endif %}
-{% if param_usage_include_mac_address is sameas true %}
-  --mac-address={{ param_mac_address }} \
-{% elif param_usage_include_mac_address == 'optional' %}
-  --mac-address={{ param_mac_address }} `#optional` \
-{% endif %}
-{% if param_usage_include_net is sameas true %}
-  --net={{ param_net }} \
-{% elif param_usage_include_net == 'optional' %}
-  --net={{ param_net }} `#optional` \
-{% endif %}
-{% if privileged is sameas true %}
-  --privileged \
-{% elif privileged == 'optional' %}
-  --privileged `#optional` \
-{% endif %}
-{% if cap_add_param %}
-{% for item in cap_add_param_vars %}
-  --cap-add={{ item.cap_add_var }} \
-{% endfor %}
-{% endif %}
-{% if opt_cap_add_param %}
-{% for item in opt_cap_add_param_vars %}
-  --cap-add={{ item.cap_add_var }} `#optional` \
-{% endfor %}
-{% endif %}
-{% if security_opt_param %}
-{% for item in security_opt_param_vars %}
-  --security-opt={{ item.run_var }} \
-{% endfor %}
-{% endif %}
-{% if opt_security_opt_param %}
-{% for item in opt_security_opt_param_vars %}
-  --security-opt {{ item.run_var }} `#optional` \
-{% endfor %}
-{% endif %}
-{% if common_param_env_vars_enabled is sameas true %}
-{% for item in common_param_env_vars %}
-{% if ' ' in item.env_value %}
-  -e {{ item.env_var }}="{{ item.env_value }}" \
-{% else %}
-  -e {{ item.env_var }}={{ item.env_value }} \
-{% endif %}
-{% endfor %}
-{% elif common_param_env_vars_enabled == 'optional' %}
-{% for item in common_param_env_vars %}
-{% if ' ' in item.env_value %}
-  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
-{% else %}
-  -e {{ item.env_var }}={{ item.env_value }} `#optional` \
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if param_usage_include_env %}
-{% for item in param_env_vars if not item.env_var | lower is eq "tz" %}
-{% if ' ' in item.env_value %}
-  -e {{ item.env_var }}="{{ item.env_value }}" \
-{% else %}
-  -e {{ item.env_var }}={{ item.env_value }} \
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_env %}
-{% for item in opt_param_env_vars %}
-{% if ' ' in item.env_value %}
-  -e {{ item.env_var }}="{{ item.env_value }}" `#optional` \
-{% else %}
-  -e {{ item.env_var }}={{ item.env_value }} `#optional` \
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if param_usage_include_ports %}
-{% for item in param_ports %}
-  -p {{ item.external_port }}:{{ item.internal_port }} \
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_ports %}
-{% for item in opt_param_ports %}
-  -p {{ item.external_port }}:{{ item.internal_port }} `#optional` \
-{% endfor %}
-{% endif %}
-{% if param_usage_include_vols %}
-{% for item in param_volumes %}
-  -v {{ item.vol_host_path }}:{{ item.vol_path }} \
-{% endfor %}
-{% endif %}
-{% if opt_param_usage_include_vols %}
-{% for item in opt_param_volumes %}
-  -v {{ item.vol_host_path }}:{{ item.vol_path }} `#optional` \
-{% endfor %}
-{% endif %}
-{% if param_device_map %}
-{% for item in param_devices %}
-  --device {{ item.device_host_path }}:{{ item.device_path }} \
-{% endfor %}
-{% endif %}
-{% if opt_param_device_map %}
-{% for item in opt_param_devices %}
-  --device {{ item.device_host_path }}:{{ item.device_path }} `#optional` \
-{% endfor %}
-{% endif %}
-{% if custom_params is defined %}
-{% for item in custom_params %}
-{% if item.array is not defined %}
-  --{{ item.name }}="{{ item.value }}" \
-{% else %}
-{% for item2 in item.value %}
-  --{{ item.name }}="{{ item2 }}" \
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-{% if opt_custom_params is defined %}
-{% for item in opt_custom_params %}
-{% if item.array is not defined %}
-  --{{ item.name }}="{{ item.value }}" `#optional` \
-{% else %}
-{% for item2 in item.value %}
-  --{{ item.name }}="{{ item2 }}" `#optional` \
-{% endfor %}
-{% endif %}
-{% endfor %}
-{% endif %}
-  --restart unless-stopped \
-  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
-{% if external_application_snippet_enabled %}
-
-# This container requires an external application to be run separately.
-{{ external_application_cli_block }}
-{% endif %}
-```
+{% include "README_SNIPPETS/DOCKER_CLI.j2" | trim %}
