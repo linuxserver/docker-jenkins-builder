@@ -5,7 +5,7 @@ You can set any environment variable from a file by using a special prepend `FIL
 As an example:
 
 ```bash
--e FILE__PASSWORD=/run/secrets/mysecretpassword
+-e FILE__MYVAR=/run/secrets/mysecretvariable
 ```
 
-Will set the environment variable `PASSWORD` based on the contents of the `/run/secrets/mysecretpassword` file.
+Will set the environment variable `MYVAR` based on the contents of the `/run/secrets/mysecretvariable` file.
