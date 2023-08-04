@@ -1,3 +1,4 @@
+{%- set output_type="DOCUMENTATION" -%}
 ---
 title: {{ project_name }}
 ---

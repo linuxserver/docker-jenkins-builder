@@ -1,4 +1,4 @@
-# DEPRECATION NOTICE
+{{ '!!! danger "' if output_type == "DOCUMENTATION" else '# ' }}DEPRECATION NOTICE{{ '"' if output_type == "DOCUMENTATION" }}
 
-This image is deprecated. We will not offer support for this image and it will not be updated.
+{{ '    ' if output_type == "DOCUMENTATION" }}This image is deprecated. We will not offer support for this image and it will not be updated.
 {% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}

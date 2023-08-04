@@ -1,4 +1,5 @@
 #jinja2: keep_trailing_newline:True
+{%- set output_type="DOCUMENTATION" -%}
 {%- set has_latest= true if (development_versions == true and 'latest' in (development_versions_items | map(attribute="tag"))) or (development_versions == false) else false -%}
 ---
 title: {{ project_name }}
@@ -169,8 +170,9 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 ### Portainer notice
 
-!!!warning
-This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed through Portainer.
+!!! warning
+
+    This image utilises `cap_add` or `sysctl` to work properly. This is not implemented properly in some versions of Portainer, thus this image may not work if deployed through Portainer.
 {% endif %}
 
 {% include "README_SNIPPETS/ENV_VAR_FILES.j2" | trim %}
