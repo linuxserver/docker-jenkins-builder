@@ -1,4 +1,4 @@
-{%- set output_format="**\\g<level>**: \\g<message>" -%}
+{%- set output_format="# \\g<message>" -%}
 {% from 'common_macros.j2' import noter with context %}
 {% include "README_SNIPPETS/DO_NOT_EDIT.j2" | trim %}
 {% if project_deprecation_status %}
