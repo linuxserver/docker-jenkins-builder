@@ -1,4 +1,5 @@
-{%- set output_type="lite" -%}
+{%- set output_format="**\\g<level>**: \\g<message>" -%}
+{% from 'common_macros.j2' import noter with context %}
 {% if project_deprecation_status %}
 {% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 

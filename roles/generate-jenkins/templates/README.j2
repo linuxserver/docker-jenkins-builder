@@ -1,5 +1,6 @@
 #jinja2: keep_trailing_newline:True
-{%- set output_type="README" -%}
+{%- set output_format="**\\g<level>**: \\g<message>" -%}
+{% from 'common_macros.j2' import noter with context %}
 {%- set has_latest= true if (development_versions == true and 'latest' in (development_versions_items | map(attribute="tag"))) or (development_versions == false) else false -%}
 {% include "README_SNIPPETS/DO_NOT_EDIT.j2" | trim %}
 {% include "README_SNIPPETS/GROUP_INFO.j2" | trim %}
@@ -12,7 +13,7 @@
 
 {% include "README_SNIPPETS/PROJECT_BADGES.j2" | trim %}
 
-{{ project_blurb | trim }}
+{{ noter(project_blurb) | trim }}
 {% if project_blurb_optional_extras_enabled %}
 
 {% for item in project_blurb_optional_extras %}

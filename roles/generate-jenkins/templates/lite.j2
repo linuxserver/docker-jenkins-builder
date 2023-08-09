@@ -1,4 +1,5 @@
-{%- set output_type="lite" -%}
+{%- set output_format="**\\g<level>**: \\g<message>" -%}
+{% from 'common_macros.j2' import noter with context %}
 {% if project_deprecation_status %}
 {% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
@@ -7,7 +8,7 @@
 
 ## This readme has been truncated from the full version found [HERE]({{ project_github_repo_url }})
 
-{{ project_blurb | trim }}
+{{ noter(project_blurb) | trim }}
 
 {% if app_setup_block_enabled %}
 

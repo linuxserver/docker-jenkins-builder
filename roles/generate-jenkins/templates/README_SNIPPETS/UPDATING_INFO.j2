@@ -62,8 +62,8 @@ Below are the instructions for updating containers:
 
 * You can also remove the old dangling images: `docker image prune`
 
-{{ '!!! warning\n\n    ' if output_type == "DOCUMENTATION" else '**Warning:** ' }}We do not endorse the use of Watchtower as a solution to automated updates of existing Docker containers. In fact we generally discourage automated updates. However, this is a useful tool for one-time manual updates of containers where you have forgotten the original parameters. In the long term, we highly recommend using [Docker Compose]({{ lsio_docs_url }}/general/docker-compose).
+{{ noter("?+warning(|We do not endorse the use of Watchtower as a solution to automated updates of existing Docker containers. In fact we generally discourage automated updates. However, this is a useful tool for one-time manual updates of containers where you have forgotten the original parameters. In the long term, we highly recommend using [Docker Compose]({{ lsio_docs_url }}/general/docker-compose).|)") }}
 
 ### Image Update Notifications - Diun (Docker Image Update Notifier)
 
-{{ '!!! tip\n\n    ' if output_type == "DOCUMENTATION" else '* ' }}We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.
+{{ noter("?+tip(|We recommend [Diun](https://crazymax.dev/diun/) for update notifications. Other tools that automatically update containers unattended are not recommended or supported.|)")}}
