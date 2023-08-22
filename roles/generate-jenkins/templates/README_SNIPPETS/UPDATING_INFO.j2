@@ -8,23 +8,32 @@ Below are the instructions for updating containers:
 
 * Update images:
     * All images:
+
         ```bash
         docker-compose pull
         ```
+
     * Single image:
+
         ```bash
         docker-compose pull {{ project_name }}
         ```
+
 * Update containers:
     * All containers:
+
         ```bash
         docker-compose up -d
         ```
+
     * Single container:
+
         ```bash
         docker-compose up -d {{ project_name }}
         ```
+
 * You can also remove the old dangling images:
+
     ```bash
     docker image prune
     ```
@@ -32,19 +41,26 @@ Below are the instructions for updating containers:
 ### Via Docker Run
 
 * Update the image:
+
     ```bash
     docker pull lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
     ```
+
 * Stop the running container:
+
     ```bash
     docker stop {{ project_name }}
     ```
+
 * Delete the container:
+
     ```bash
     docker rm {{ project_name }}
     ```
+
 * Recreate a new container with the same docker run parameters as instructed above (if mapped correctly to a host folder, your `/config` folder and settings will be preserved)
 * You can also remove the old dangling images:
+
     ```bash
     docker image prune
     ```
