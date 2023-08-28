@@ -1,0 +1,17 @@
+## Usage
+
+To help you get started creating a container from this image you can either use docker-compose or the docker cli.
+
+### docker-compose (recommended, [click here for more info]({{ lsio_docs_url }}/general/docker-compose))
+
+{% include "README_SNIPPETS/DOCKER_COMPOSE.j2" | trim %}
+
+### docker cli ([click here for more info](https://docs.docker.com/engine/reference/commandline/cli/))
+
+{% include "README_SNIPPETS/DOCKER_CLI.j2" | trim %}
+{% if optional_block_1 %}
+
+{% for item in optional_block_1_items %}
+{{ item }}
+{% endfor %}
+{% endif %}

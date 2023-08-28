@@ -1,8 +1,7 @@
+{%- set output_format="# \\g<message>" -%}
+{% from 'common_macros.j2' import noter with context %}
 {% if project_deprecation_status %}
-# DEPRECATION NOTICE
-
-This image is deprecated. We will not offer support for this image and it will not be updated.
-{% if project_deprecation_message is defined %}{{ project_deprecation_message }}{% endif %}
+{% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
 {% endif %}
 <!--- Provide a general summary of your changes in the Title above -->
