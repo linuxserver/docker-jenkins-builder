@@ -22,7 +22,7 @@ ca-certificates                      20230506-r0                         apk
 ca-certificates-bundle               20230506-r0                         apk        
 cffi                                 1.15.1                              python     
 coreutils                            9.3-r1                              apk        
-cryptography                         40.0.2                              python     
+cryptography                         41.0.3                              python     
 curl                                 8.2.1-r0                            apk        
 gdbm                                 1.23-r1                             apk        
 github.com/a8m/envsubst              v1.4.2                              go-module  
@@ -83,8 +83,8 @@ py3-cffi                             1.15.1-r3                           apk
 py3-cffi-pyc                         1.15.1-r3                           apk        
 py3-cparser                          2.21-r2                             apk        
 py3-cparser-pyc                      2.21-r2                             apk        
-py3-cryptography                     40.0.2-r1                           apk        
-py3-cryptography-pyc                 40.0.2-r1                           apk        
+py3-cryptography                     41.0.3-r0                           apk        
+py3-cryptography-pyc                 41.0.3-r0                           apk        
 py3-jinja2                           3.1.2-r2                            apk        
 py3-jinja2-pyc                       3.1.2-r2                            apk        
 py3-markupsafe                       2.1.2-r1                            apk        
