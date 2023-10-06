@@ -1,0 +1,14 @@
+[![Scarf.io pulls]({{ lsio_scarfio_pulls }})]({{ project_scarfio_url }})
+[![GitHub Stars]({{ lsio_shieldsio_github_stars }})]({{ project_github_repo_url }})
+[![GitHub Release]({{ lsio_shieldsio_github_release }}{{ "&include_prereleases" if has_latest == false }})]({{ project_github_repo_url }}/releases)
+[![GitHub Package Repository]({{ lsio_shieldsio_static_github_package }})]({{ project_github_repo_url }}/packages)
+[![GitLab Container Registry]({{ lsio_shieldsio_static_gitlab_registry }})]({{ lsio_gitlab_url }}/{{ project_repo_name }}/container_registry)
+[![Quay.io]({{ lsio_shieldsio_static_quay }})](https://quay.io/repository/linuxserver.io/{{ project_name }})
+[![Docker Pulls]({{ lsio_shieldsio_docker_pulls }})]({{ lsio_docker_hub_url }}/{{ project_name }})
+[![Docker Stars]({{ lsio_shieldsio_docker_stars }})]({{ lsio_docker_hub_url }}/{{ project_name }})
+[![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/)
+{% for var in repo_vars %}
+{% if 'CI' in var and 'TRUE' in var.upper() and '_' not in var %}
+[![LSIO CI]({{ lsio_shieldsio_dynamic_ci }})]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/index.html)
+{% endif %}
+{% endfor %}

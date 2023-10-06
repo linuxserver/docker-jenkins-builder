@@ -1,3 +1,5 @@
+{%- set output_format="# \\g<message>" -%}
+{% from 'common_macros.j2' import noter with context %}
 # Based on the issue template
 name: Feature request
 description: Suggest an idea for this project
@@ -8,13 +10,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        # DEPRECATION NOTICE
+{% include "README_SNIPPETS/DEPRECATION.j2" | indent(8) | trim %}
 
-        This image is deprecated. We will not offer support for this image and it will not be updated.
-{% if project_deprecation_message is defined %}
-
-        {{ project_deprecation_message | indent(8) | trim }}
-{% endif %}
 {% else %}
   - type: checkboxes
     attributes:

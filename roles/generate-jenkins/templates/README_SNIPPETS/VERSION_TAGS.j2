@@ -1,0 +1,12 @@
+## Version Tags
+
+This image provides various versions that are available via tags. Please read the descriptions carefully and exercise caution when using unstable or development tags.
+
+| Tag | Available | Description |
+| :----: | :----: |--- |
+| latest | {{ '✅ | ' + development_versions_items[(development_versions_items | map(attribute="tag")) == "latest"].desc if has_latest == true else '❌ |' }} |
+{% for item in development_versions_items %}
+{% if item.tag != 'latest' %}
+| {{ item.tag }} | ✅ | {{ item.desc }} |
+{% endif %}
+{% endfor %}
