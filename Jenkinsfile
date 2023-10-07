@@ -822,7 +822,7 @@ pipeline {
       steps {
         echo "Setting up protection for release branch master"
         sh '''#! /bin/bash
-          curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/branches/master/protection \
+          curl -H "Authorization: token ${GITHUB_TOKEN}" -X PUT https://api.github.com/repos/${LS_USER}/${LS_REPO}/branches/master/protection \
           -d $(jq -c .  << EOF
             {
               "required_status_checks": null,
