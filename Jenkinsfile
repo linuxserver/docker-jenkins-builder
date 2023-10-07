@@ -826,7 +826,7 @@ pipeline {
           -d $(jq -c .  << EOF
             {
               "required_status_checks": null,
-              "enforce_admins": true,
+              "enforce_admins": false,
               "required_pull_request_reviews": {
                 "dismiss_stale_reviews": false,
                 "require_code_owner_reviews": false,
