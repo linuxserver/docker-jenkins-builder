@@ -69,7 +69,7 @@ libunistring                         1.1-r1                              apk
 linux-pam                            1.5.2-r10                           apk        
 mpdecimal                            2.5.1-r2                            apk        
 musl                                 1.2.4-r2                            apk        
-musl-utils                           1.2.4-r1                            apk        
+musl-utils                           1.2.4-r2                            apk        
 ncurses-terminfo-base                6.4_p20230506-r0                    apk        
 netcat-openbsd                       1.219-r1                            apk        
 nghttp2-libs                         1.55.1-r0                           apk        
@@ -114,6 +114,7 @@ shadow                               4.13-r4                             apk
 skalibs                              2.13.1.1-r1                         apk        
 sqlite-libs                          3.41.2-r2                           apk        
 ssl_client                           1.36.1-r2                           apk        
+stdlib                               go1.20.4                            go-module  
 tzdata                               2023c-r1                            apk        
 utmps-libs                           0.1.2.1-r1                          apk        
 xz-libs                              5.4.3-r0                            apk        
