@@ -4,6 +4,7 @@
 title: {{ project_name }}
 ---
 {% include "README_SNIPPETS/DO_NOT_EDIT.j2" | trim %}
+
 {% if project_deprecation_status %}
 {% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
