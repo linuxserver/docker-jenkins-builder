@@ -527,6 +527,10 @@ pipeline {
                 cd ${TEMPDIR}/docs/docker-documentation
                 git add docs/images/docker-${CONTAINER_NAME}.md
                 git commit -m 'Bot Updating Documentation'
+{% if project_deprecation_status %}
+                git mv docs/images/docker-${CONTAINER_NAME}.md docs/deprecated_images/docker-${CONTAINER_NAME}.md || :
+                git commit -m 'Bot Moving Deprecated Documentation' || :
+{% endif %}
                 git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git --all
               fi
 {% if "jenkins-builder" not in project_name and "baseimage" not in project_name and full_custom_readme is not defined and unraid_template == true %}
