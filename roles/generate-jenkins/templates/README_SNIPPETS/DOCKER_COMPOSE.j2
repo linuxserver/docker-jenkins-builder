@@ -1,6 +1,5 @@
 ```yaml
 {% if not custom_compose is defined %}---
-version: "2.1"
 services:
   {{ project_name }}:
     image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
