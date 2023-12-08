@@ -297,7 +297,7 @@ pipeline {
           }
 
           if (env.SEMVER != null) {
-            if (BRANCH_NAME != "${GH_DEFAULT_BRANCH}") {
+            if (BRANCH_NAME != "${env.GH_DEFAULT_BRANCH}") {
               env.SEMVER = "${env.SEMVER}-${BRANCH_NAME}"
             }
             println("SEMVER: ${env.SEMVER}")
@@ -1220,7 +1220,7 @@ EOF
     stage('Sync-README') {
       when {
         branch "{{ ls_branch }}"
-        branch "{{ GH_DEFAULT_BRANCH }}"
+        environment name: 'GH_DEFAULT_BRANCH', value: '{{ ls_branch }}'
         environment name: 'CHANGE_ID', value: ''
         environment name: 'EXIT_STATUS', value: ''
       }

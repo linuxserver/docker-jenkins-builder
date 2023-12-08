@@ -58,6 +58,9 @@ pipeline {
           env.COMMIT_SHA = sh(
             script: '''git rev-parse HEAD''',
             returnStdout: true).trim()
+          env.GH_DEFAULT_BRANCH = sh(
+            script: '''git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@' ''',
+            returnStdout: true).trim()
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
@@ -136,7 +139,7 @@ pipeline {
           }
 
           if (env.SEMVER != null) {
-            if (BRANCH_NAME != "master" && BRANCH_NAME != "main") {
+            if (BRANCH_NAME != "${env.GH_DEFAULT_BRANCH}") {
               env.SEMVER = "${env.SEMVER}-${BRANCH_NAME}"
             }
             println("SEMVER: ${env.SEMVER}")
@@ -346,7 +349,7 @@ pipeline {
               fi
               mkdir -p ${TEMPDIR}/docs
               git clone https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/docs/docker-documentation
-              if [[ ("${BRANCH_NAME}" == "master") || ("${BRANCH_NAME}" == "main") ]] && [[ (! -f ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
+              if [[ "${BRANCH_NAME}" == "${GH_DEFAULT_BRANCH}" ]] && [[ (! -f ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
                 cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/docs/docker-documentation/docs/images/
                 cd ${TEMPDIR}/docs/docker-documentation
                 git add docs/images/docker-${CONTAINER_NAME}.md
@@ -850,6 +853,8 @@ EOF
     // Use helper container to sync the current README on master to the dockerhub endpoint
     stage('Sync-README') {
       when {
+        branch "master"
+        environment name: 'GH_DEFAULT_BRANCH', value: 'master'
         environment name: 'CHANGE_ID', value: ''
         environment name: 'EXIT_STATUS', value: ''
       }
