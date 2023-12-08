@@ -59,7 +59,7 @@ pipeline {
             script: '''git rev-parse HEAD''',
             returnStdout: true).trim()
           env.GH_DEFAULT_BRANCH = sh(
-            script: '''git symbolic-ref refs/remotes/origin/HEAD | sed 's@^refs/remotes/origin/@@' ''',
+            script: '''git remote show origin | grep "HEAD branch:" | sed 's|.*HEAD branch: ||' ''',
             returnStdout: true).trim()
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
