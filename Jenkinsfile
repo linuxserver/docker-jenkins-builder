@@ -16,6 +16,7 @@ pipeline {
     GITHUB_TOKEN=credentials('498b4638-2d02-4ce5-832d-8a57d01d97ab')
     GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
+    DOCKERHUB_TOKEN=credentials('docker-hub-ci-pat')
     BUILD_VERSION_ARG='BUILDER_VERSION'
     LS_USER='linuxserver'
     LS_REPO='docker-jenkins-builder'
@@ -380,7 +381,7 @@ pipeline {
                     echo "Syncing readme to Docker Hub"
                     DH_README_SYNC_PATH="${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/README.lite"
                   fi
-                  DH_TOKEN=$(curl -d '{"username":"'${DOCKERUSER}'", "password":"'${DOCKERPASS}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
+                  DH_TOKEN=$(curl -d '{"username":"'${DOCKERUSER}'", "password":"'${DOCKERHUB_TOKEN}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
                   curl -s \
                     -H "Authorization: JWT ${DH_TOKEN}" \
                     -H "Content-Type: application/json" \
