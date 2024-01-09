@@ -385,7 +385,7 @@ pipeline {
                     -H "Authorization: JWT ${DH_TOKEN}" \
                     -H "Content-Type: application/json" \
                     -X PATCH \
-                    -d '{"full_description":'$(jq -Rsa . ${DH_README_SYNC_PATH})'}' \
+                    -d "{\\"full_description\\":$(jq -Rsa . ${DH_README_SYNC_PATH})}" \
                     https://hub.docker.com/v2/repositories/${DOCKERHUB_IMAGE} || :
                 else
                   echo "Not the default Github branch. Skipping readme sync to Docker Hub."
