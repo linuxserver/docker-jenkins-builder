@@ -547,6 +547,12 @@ pipeline {
                   git commit -m 'Bot Updating Documentation'
 {% if project_deprecation_status %}
                   git mv docs/images/docker-${CONTAINER_NAME}.md docs/deprecated_images/docker-${CONTAINER_NAME}.md || :
+                  if ! command -v yq || ! yq --help | grep -q 'mikefarah'; then
+                    YQ_DL_VERSION=$(curl -fsX GET "https://api.github.com/repos/mikefarah/yq/releases/latest" | jq -r '. | .tag_name')
+                    echo "No yq found, retrieving from upstream release version ${YQ_DL_VERSION}"
+                    curl -fo /usr/local/bin/yq -L "https://github.com/mikefarah/yq/releases/download/${YQ_DL_VERSION}/yq_linux_amd64"
+                    chmod +x /usr/local/bin/yq
+                  fi
                   if ! yq -e '.plugins.[].redirects.redirect_maps.[] | select(. == "deprecated/" + env(CONTAINER_NAME) + ".md")' mkdocs.yml  >/dev/null 2>&1; then
                     yq -i '.plugins.[].redirects.redirect_maps |= . + {env(CONTAINER_NAME) + ".md" : "deprecated/" + env(CONTAINER_NAME) + ".md"}' mkdocs.yml
                   fi
