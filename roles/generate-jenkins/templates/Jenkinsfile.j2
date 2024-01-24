@@ -558,7 +558,7 @@ pipeline {
                   fi
                   git commit -m 'Bot Moving Deprecated Documentation' || :
 {% endif %}
-                  git pull https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git ${GH_DOCS_DEFAULT_BRANCH}
+                  git pull https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git ${GH_DOCS_DEFAULT_BRANCH} --rebase
                   git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/docker-documentation.git ${GH_DOCS_DEFAULT_BRANCH}
                 fi
 {% if "jenkins-builder" not in project_name and "baseimage" not in project_name and full_custom_readme is not defined and unraid_template == true %}
@@ -590,7 +590,7 @@ pipeline {
                     git add unraid/${CONTAINER_NAME}.xml
                     git commit -m 'Bot Updating Unraid Template'
                   fi
-                  git pull https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/templates.git ${GH_TEMPLATES_DEFAULT_BRANCH}
+                  git pull https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/templates.git ${GH_TEMPLATES_DEFAULT_BRANCH} --rebase
                   git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/linuxserver/templates.git ${GH_TEMPLATES_DEFAULT_BRANCH}
                 fi
 {% endif %}
