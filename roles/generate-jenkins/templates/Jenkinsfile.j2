@@ -51,7 +51,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/commit/' + env.GIT_COMMIT
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DOCKERHUB_IMAGE + '/tags/'
           env.PULL_REQUEST = env.CHANGE_ID
-          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE .editorconfig ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.yml ./.github/ISSUE_TEMPLATE/issue.feature.yml ./.github/PULL_REQUEST_TEMPLATE.md{% if project_deprecation_status != true %} ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/call_issue_pr_tracker.yml ./.github/workflows/call_issues_cron.yml ./.github/workflows/permissions.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %}{% if (s6v3image.stat.isdir is defined and s6v3image.stat.isdir) or (s6v3imageremote.stat.isdir is defined and s6v3imageremote.stat.isdir) %} ./root/etc/s6-overlay/s6-rc.d/init-deprecate/run ./root/etc/s6-overlay/s6-rc.d/init-deprecate/up ./root/etc/s6-overlay/s6-rc.d/init-deprecate/type ./root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end ./root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate ./root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate{% else %} ./root/etc/cont-init.d/99-deprecation{% endif %}{% endif %}'
+          env.TEMPLATED_FILES = 'Jenkinsfile README.md LICENSE .editorconfig ./.github/CONTRIBUTING.md ./.github/FUNDING.yml ./.github/ISSUE_TEMPLATE/config.yml ./.github/ISSUE_TEMPLATE/issue.bug.yml ./.github/ISSUE_TEMPLATE/issue.feature.yml ./.github/PULL_REQUEST_TEMPLATE.md{% if project_deprecation_status != true %} ./.github/workflows/external_trigger_scheduler.yml ./.github/workflows/greetings.yml ./.github/workflows/package_trigger_scheduler.yml ./.github/workflows/call_issue_pr_tracker.yml ./.github/workflows/call_issues_cron.yml ./.github/workflows/permissions.yml{% if custom_external_trigger != true %} ./.github/workflows/external_trigger.yml{% endif %}{% if custom_package_trigger != true %} ./.github/workflows/package_trigger.yml{% endif %}{% endif %}{% if sponsor_links is defined %} ./root/donate.txt{% endif %}{% if project_deprecation_status %} ./root/etc/s6-overlay/s6-rc.d/init-deprecate/run ./root/etc/s6-overlay/s6-rc.d/init-deprecate/up ./root/etc/s6-overlay/s6-rc.d/init-deprecate/type ./root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end ./root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate ./root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate{% endif %}'
         }
         sh '''#! /bin/bash
               echo "The default github branch detected as ${GH_DEFAULT_BRANCH}" '''
@@ -447,7 +447,14 @@ pipeline {
 {% if project_repo_name != "docker-jenkins-builder" %}
               docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
-              docker run --rm -e CONTAINER_NAME=${CONTAINER_NAME} -e GITHUB_BRANCH={{ ls_branch }} -v ${TEMPDIR}:/ansible/jenkins {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
+              # Cloned repo paths for templating:
+              # ${TEMPDIR}/docker-${CONTAINER_NAME}: Cloned branch {{ ls_branch }} of ${LS_USER}/${LS_REPO} for running the jenkins builder on
+              # ${TEMPDIR}/repo/${LS_REPO}: Cloned branch {{ ls_branch }} of ${LS_USER}/${LS_REPO} for commiting various templated file changes and pushing back to Github
+              # ${TEMPDIR}/docs/docker-documentation: Cloned docs repo for pushing docs updates to Github
+              # ${TEMPDIR}/unraid/docker-templates: Cloned docker-templates repo to check for logos
+              # ${TEMPDIR}/unraid/templates: Cloned templates repo for commiting unraid template changes and pushing back to Github
+              git clone --branch {{ ls_branch }} --depth 1 https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/docker-${CONTAINER_NAME}
+              docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
               # Stage 1 - Jenkinsfile update
               if [[ "$(md5sum Jenkinsfile | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/Jenkinsfile | awk '{ print $1 }')" ]]; then
                 mkdir -p ${TEMPDIR}/repo
@@ -507,14 +514,10 @@ pipeline {
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/workflows
                 mkdir -p ${TEMPDIR}/repo/${LS_REPO}/.github/ISSUE_TEMPLATE
 {% if project_deprecation_status %}
-                if [[ -d "${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d" ]]; then
-                  mkdir -p \
-                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d \
-                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d \
-                    ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/user/contents.d
-                else
-                  mkdir -p ${TEMPDIR}/repo/${LS_REPO}/root/etc/cont-init.d
-                fi
+                mkdir -p \
+                  ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d \
+                  ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d \
+                  ${TEMPDIR}/repo/${LS_REPO}/root/etc/s6-overlay/s6-rc.d/user/contents.d
 {% endif %}
                 cp --parents ${TEMPLATED_FILES} ${TEMPDIR}/repo/${LS_REPO}/ || :
                 cp --parents readme-vars.yml ${TEMPDIR}/repo/${LS_REPO}/ || :
