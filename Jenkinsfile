@@ -443,14 +443,16 @@ pipeline {
       }
       steps{
         sh '''curl -H "Content-Type: application/json" -H "Private-Token: ${GITLAB_TOKEN}" -X POST https://gitlab.com/api/v4/projects \
-        -d '{"namespace_id":'${GITLAB_NAMESPACE}',\
-             "name":"'${LS_REPO}'",
-             "mirror":true,\
-             "import_url":"https://github.com/linuxserver/'${LS_REPO}'.git",\
-             "issues_access_level":"disabled",\
-             "merge_requests_access_level":"disabled",\
-             "repository_access_level":"enabled",\
-             "visibility":"public"}' '''
+          -d '{"namespace_id":'${GITLAB_NAMESPACE}',\
+            "name":"'${LS_REPO}'",
+            "mirror":true,\
+            "import_url":"https://github.com/linuxserver/'${LS_REPO}'.git",\
+            "issues_access_level":"disabled",\
+            "merge_requests_access_level":"disabled",\
+            "repository_access_level":"enabled",\
+            "visibility":"public"}' '''
+        sh '''curl -H "Private-Token: ${GITLAB_TOKEN}" -X PUT "https://gitlab.com/api/v4/projects/Linuxserver.io%2F${LS_REPO}" \
+          -d "mirror=true&import_url=https://github.com/linuxserver/${LS_REPO}.git" '''
       } 
     }
     /* ###############
