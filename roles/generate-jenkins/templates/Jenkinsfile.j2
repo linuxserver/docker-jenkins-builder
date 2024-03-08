@@ -621,14 +621,14 @@ pipeline {
                   DH_README_SYNC_PATH="${TEMPDIR}/docker-${CONTAINER_NAME}/README.md"
                 fi
                 if curl -s https://hub.docker.com/v2/namespaces/${DOCKERHUB_IMAGE%%/*}/repositories/${DOCKERHUB_IMAGE##*/}/tags | jq -r '.message' | grep -q 404; then
-                  echo "Docker Hub endpoint doesn't exist yet. Pushing dummy image and sleeping 10 seconds to make sure endpoint is created."
-                  mkdir -p ${TEMPDIR}/dummy
-                  echo "FROM scratch" > ${TEMPDIR}/dummy/Dockerfile.dummy
-                  docker buildx build -t ${DOCKERHUB_IMAGE}:dummy -f ${TEMPDIR}/dummy/Dockerfile.dummy ${TEMPDIR}/dummy
-                  echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
-                  docker push ${DOCKERHUB_IMAGE}:dummy
-                  docker rmi ${DOCKERHUB_IMAGE}:dummy
-                  sleep 10
+                  echo "Docker Hub endpoint doesn't exist. Creating endpoint first."
+                  DH_TOKEN=$(curl -d '{"username":"linuxserverci", "password":"'${DOCKERHUB_TOKEN}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
+                  curl -s \
+                    -H "Authorization: JWT ${DH_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -X POST \
+                    -d '{"name":"'${DOCKERHUB_IMAGE##*/}'", "namespace":"'${DOCKERHUB_IMAGE%%/*}'"}' \
+                    https://hub.docker.com/v2/repositories/ || :
                 fi
                 DH_TOKEN=$(curl -d '{"username":"linuxserverci", "password":"'${DOCKERHUB_TOKEN}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
                 curl -s \
