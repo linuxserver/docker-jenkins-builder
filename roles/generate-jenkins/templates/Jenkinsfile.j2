@@ -625,6 +625,7 @@ pipeline {
                   mkdir -p ${TEMPDIR}/dummy
                   echo "FROM scratch" > ${TEMPDIR}/dummy/Dockerfile.dummy
                   docker buildx build -t ${DOCKERHUB_IMAGE}:dummy -f ${TEMPDIR}/dummy/Dockerfile.dummy ${TEMPDIR}/dummy
+                  echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
                   docker push ${DOCKERHUB_IMAGE}:dummy
                   docker rmi ${DOCKERHUB_IMAGE}:dummy
                   sleep 10
