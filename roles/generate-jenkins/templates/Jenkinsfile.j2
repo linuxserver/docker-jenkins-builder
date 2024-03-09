@@ -613,12 +613,22 @@ pipeline {
               fi
 {% endif %}
               if [[ "${BRANCH_NAME}" == "${GH_DEFAULT_BRANCH}" ]]; then
-                if [[ $(cat ${TEMPDIR}/docker-${CONTAINER_NAME}/README.md | wc -m) > 25000 ]]; then
+                if [[ $(cat ${TEMPDIR}/docker-${CONTAINER_NAME}/README.md | wc -m) -gt 25000 ]]; then
                   echo "Readme is longer than 25,000 characters. Syncing the lite version to Docker Hub"
                   DH_README_SYNC_PATH="${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/README.lite"
                 else
                   echo "Syncing readme to Docker Hub"
                   DH_README_SYNC_PATH="${TEMPDIR}/docker-${CONTAINER_NAME}/README.md"
+                fi
+                if curl -s https://hub.docker.com/v2/namespaces/${DOCKERHUB_IMAGE%%/*}/repositories/${DOCKERHUB_IMAGE##*/}/tags | jq -r '.message' | grep -q 404; then
+                  echo "Docker Hub endpoint doesn't exist. Creating endpoint first."
+                  DH_TOKEN=$(curl -d '{"username":"linuxserverci", "password":"'${DOCKERHUB_TOKEN}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
+                  curl -s \
+                    -H "Authorization: JWT ${DH_TOKEN}" \
+                    -H "Content-Type: application/json" \
+                    -X POST \
+                    -d '{"name":"'${DOCKERHUB_IMAGE##*/}'", "namespace":"'${DOCKERHUB_IMAGE%%/*}'"}' \
+                    https://hub.docker.com/v2/repositories/ || :
                 fi
                 DH_TOKEN=$(curl -d '{"username":"linuxserverci", "password":"'${DOCKERHUB_TOKEN}'"}' -H "Content-Type: application/json" -X POST https://hub.docker.com/v2/users/login | jq -r '.token')
                 curl -s \
