@@ -556,9 +556,9 @@ pipeline {
                   curl -fo /usr/local/bin/yq -L "https://github.com/mikefarah/yq/releases/download/${YQ_DL_VERSION}/yq_linux_amd64"
                   chmod +x /usr/local/bin/yq
                 fi
-                if ! yq -e '.plugins.[].redirects.redirect_maps.[] | select(. == "deprecated/" + env(CONTAINER_NAME) + ".md")' mkdocs.yml  >/dev/null 2>&1; then
+                if ! yq -e '.plugins.[].redirects.redirect_maps.[] | select(. == "deprecated_images/docker-" + env(CONTAINER_NAME) + ".md")' mkdocs.yml  >/dev/null 2>&1; then
                   echo "Updating mkdocs.yml with deprecation info"
-                  yq -i '(.plugins.[] | select(.redirects)).redirects.redirect_maps |= . + {env(CONTAINER_NAME) + ".md" : "deprecated/" + env(CONTAINER_NAME) + ".md"}' mkdocs.yml
+                  yq -i '(.plugins.[] | select(.redirects)).redirects.redirect_maps |= . + {"images/docker-" + env(CONTAINER_NAME) + ".md" : "deprecated_images/docker-" + env(CONTAINER_NAME) + ".md"}' mkdocs.yml
                   git add mkdocs.yml
                 fi
                 git commit -m 'Bot Moving Deprecated Documentation' || :
