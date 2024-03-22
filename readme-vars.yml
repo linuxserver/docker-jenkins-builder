@@ -7,17 +7,6 @@ full_custom_readme: |
 
   Expects to run as part of the LSIO CI process. Not for public consumption.
 
-  ## Running against remote project
-
-  ```bash
-  TEMPDIR=$(mktemp -d) && \
-  docker run --rm \
-    -e CONTAINER_NAME=<container name> \
-    -e GITHUB_BRANCH=<branch name> \
-    -v ${TEMPDIR}:/ansible/jenkins \
-    lscr.io/linuxserver/jenkins-builder:latest
-  ```
-
   ## Running against local project
 
   If you need to test functionality just navigate to the folder with the jenkins-vars.yml and run:
@@ -26,7 +15,6 @@ full_custom_readme: |
   docker pull lscr.io/linuxserver/jenkins-builder:latest && \
   docker run --rm \
     -v $(pwd):/tmp \
-    -e LOCAL=true \
     -e PUID=$(id -u) -e PGID=$(id -g) \
     lscr.io/linuxserver/jenkins-builder:latest && \
   rm -rf .jenkins-external
