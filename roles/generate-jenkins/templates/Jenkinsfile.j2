@@ -473,7 +473,7 @@ pipeline {
               else
                 echo "Jenkinsfile is up to date."
               fi
-              # Stage 2 - Delete old templates
+              echo "Starting Stage 2 - Delete old templates"
               OLD_TEMPLATES=".github/ISSUE_TEMPLATE.md .github/ISSUE_TEMPLATE/issue.bug.md .github/ISSUE_TEMPLATE/issue.feature.md .github/workflows/call_invalid_helper.yml .github/workflows/stale.yml"
 {% if project_deprecation_status %}
               OLD_TEMPLATES="${OLD_TEMPLATES} $(echo .github/workflows/{external_trigger,external_trigger_scheduler,package_trigger,package_trigger_scheduler,call_issue_pr_tracker,call_issues_cron}.yml)"
