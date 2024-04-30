@@ -19,13 +19,6 @@
 ######################################
 #   Grab the Variables from github   #
 ######################################
-- name: download variables
-  when: lookup('env', 'LOCAL') != "true"
-  get_url:
-    url: "https://raw.githubusercontent.com/{{ github_user }}/docker-{{ container_name }}/{{ github_branch }}/{{ item }}"
-    dest: "/tmp/{{ item }}"
-  loop: "{{  templated_vars  }}"
-
 - name: include var files for this project
   include_vars:
     file: "/tmp/{{ item }}"
@@ -38,16 +31,7 @@
 ############################
 #   Directory Management   #
 ############################
-- name: create destination dir for generated Jenkinsfile
-  when: lookup('env', 'LOCAL') != "true"
-  file:
-    path: "jenkins/{{ project_repo_name }}"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: create destination dir for generated github files
-  when: lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.github"
     state: directory
@@ -56,55 +40,28 @@
 
 - name: set basefolder
   set_fact:
-    project_base: "{{ '/tmp' if lookup('env', 'LOCAL') else 'jenkins/' + project_repo_name }}"
+    project_base: "/tmp"
 
 - name: set vars basefolder
   set_fact:
     dl_vars_project_base: /tmp
 
-- name: create destination dir for generated github files
-  when: lookup('env', 'LOCAL') != "true"
-  file:
-    path: "jenkins/{{ project_repo_name }}/.github"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: create destination dir for generated github workflow files
-  when: lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.github/workflows"
     state: directory
     owner: "abc"
     group: "abc"
 
-- name: create destination dir for generated github workflow files
-  when: lookup('env', 'LOCAL') != "true"
-  file:
-    path: "jenkins/{{ project_repo_name }}/.github/workflows"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: create destination dir for generated github ISSUE_TEMPLATE files
-  when: lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.github/ISSUE_TEMPLATE"
     state: directory
     owner: "abc"
     group: "abc"
 
-- name: create destination dir for generated github ISSUE_TEMPLATE files
-  when: lookup('env', 'LOCAL') != "true"
-  file:
-    path: "jenkins/{{ project_repo_name }}/.github/ISSUE_TEMPLATE"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: create destination dir for generated donate.txt
   when:
-    - lookup('env', 'LOCAL') == "true"
     - sponsor_links is defined
   file:
     path: "/tmp/root"
@@ -112,19 +69,8 @@
     owner: "abc"
     group: "abc"
 
-- name: create destination dir for generated donate.txt
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - sponsor_links is defined
-  file:
-    path: "jenkins/{{ project_repo_name }}/root"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: create destination dir for generated 99-deprecation
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/cont-init.d"
@@ -132,19 +78,8 @@
     owner: "abc"
     group: "abc"
 
-- name: create destination dir for generated 99-deprecation
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/cont-init.d"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
 - name: deprecate - create dir for init-services/dependencies.d
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d"
@@ -154,7 +89,6 @@
 
 - name: deprecate - create file for init-services/dependencies.d/init-deprecate
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate"
@@ -164,7 +98,6 @@
 
 - name: deprecate - create dir for init-deprecate/dependencies.d
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d"
@@ -174,7 +107,6 @@
 
 - name: deprecate - create file for init-deprecate/dependencies.d/init-config-end
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end"
@@ -184,7 +116,6 @@
 
 - name: deprecate - create file for init-deprecate/type
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
@@ -194,7 +125,6 @@
 
 - name: deprecate - populate file for init-deprecate/type
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   copy:
     dest: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
@@ -203,7 +133,6 @@
 
 - name: deprecate - create file for init-deprecate/up
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
@@ -213,7 +142,6 @@
 
 - name: deprecate - populate file for init-deprecate/up
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   copy:
     dest: "/tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
@@ -222,98 +150,9 @@
 
 - name: deprecate - create file for user/contents.d/init-deprecate
   when:
-    - lookup('env', 'LOCAL') == "true"
     - project_deprecation_status == true
   file:
     path: "/tmp/root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate"
-    state: touch
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - create dir for init-services/dependencies.d
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - create file for init-services/dependencies.d/init-deprecate
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate"
-    state: touch
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - create dir for init-deprecate/dependencies.d
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - create file for init-deprecate/dependencies.d/init-config-end
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end"
-    state: touch
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - create file for init-deprecate/type
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
-    state: touch
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - populate file for init-deprecate/type
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  copy:
-    dest: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/type"
-    content: |
-      oneshot
-
-- name: deprecate - create file for init-deprecate/up
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
-    state: touch
-    owner: "abc"
-    group: "abc"
-
-- name: deprecate - populate file for init-deprecate/up
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  copy:
-    dest: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/init-deprecate/up"
-    content: |
-      /etc/s6-overlay/s6-rc.d/init-deprecate/run
-
-- name: deprecate - create file for user/contents.d/init-deprecate
-  when:
-    - lookup('env', 'LOCAL') != "true"
-    - project_deprecation_status == true
-  file:
-    path: "jenkins/{{ project_repo_name }}/root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate"
     state: touch
     owner: "abc"
     group: "abc"
@@ -352,72 +191,28 @@
   register: write_readme
   changed_when: write_readme.rc != 0
 
-- name: armhf deprecate - copy readme-vars
-  when:
-    - armhf_deprecate_readme.changed
-    - lookup('env', 'LOCAL') != "true"
-  copy:
-    dest: "jenkins/{{ project_repo_name }}/readme-vars.yml"
-    src: "{{ dl_vars_project_base }}/readme-vars.yml"
-    remote_src: true
-
 - name: armhf deprecate - delete armhf dockerfile
   when:
     - armhf_deprecate_readme.changed
-    - lookup('env', 'LOCAL') == "true"
   file:
     path: "{{ project_base }}/Dockerfile.armhf"
     state: absent
 
 - name: create destination dir for generated external files
-  when:
-    - lookup('env', 'LOCAL') == "true"
   file:
     path: "/tmp/.jenkins-external"
     state: directory
     owner: "abc"
     group: "abc"
 
-- name: create destination dir for generated external files
-  when:
-    - lookup('env', 'LOCAL') != "true"
-  file:
-    path: "jenkins/{{ project_repo_name }}/.jenkins-external"
-    state: directory
-    owner: "abc"
-    group: "abc"
-
-- name: Create symbolic link for legacy pathing
-  when: lookup('env', 'LOCAL') != "true"
-  shell: "ln -s {{ project_repo_name }} {{ project_name }}"
-  args:
-    chdir: /ansible/jenkins
-
 ##############################
 #   Loop Through Templates   #
 ##############################
 
 # Normal Files
+
 - name: write templates
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.readme is not defined
-    - item.donate is not defined
-    - item.deprecation is not defined
-    - item.unraid_template is not defined
-    - item.package_trigger is not defined
-    - item.external_trigger is not defined
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write templates local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.readme is not defined
     - item.donate is not defined
     - item.deprecation is not defined
@@ -436,20 +231,6 @@
 
 - name: write readme normal
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.readme is defined
-    - full_custom_readme is not defined
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write readme normal local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.readme is defined
     - full_custom_readme is not defined
   template:
@@ -462,20 +243,6 @@
 
 - name: write readme full custom
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.readme is defined
-    - full_custom_readme is defined
-  template:
-    src: "../templates/{{ item.src }}-CUSTOM"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write readme full custom local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.readme is defined
     - full_custom_readme is defined
   template:
@@ -490,20 +257,6 @@
 
 - name: write donation links
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.donate is defined
-    - sponsor_links is defined
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write donation links local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.donate is defined
     - sponsor_links is defined
   template:
@@ -518,21 +271,6 @@
 
 - name: write deprecation init script
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.deprecation is defined
-    - project_deprecation_status == true
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-    mode: 0755
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write deprecation init script local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.deprecation is defined
     - project_deprecation_status == true
   template:
@@ -549,23 +287,6 @@
 
 - name: write Unraid template
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - unraid_template
-    - item.unraid_template is defined
-    - full_custom_readme is not defined
-    - '"baseimage" not in project_name'
-    - '"jenkins-builder" not in project_name'
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write Unraid template local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - unraid_template
     - item.unraid_template is defined
     - full_custom_readme is not defined
@@ -583,20 +304,6 @@
 
 - name: write package trigger
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.package_trigger is defined
-    - custom_package_trigger != true
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write package trigger local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.package_trigger is defined
     - custom_package_trigger != true
   template:
@@ -611,20 +318,6 @@
 
 - name: write external trigger
   when:
-    - lookup('env', 'LOCAL') != "true"
-    - item.external_trigger is defined
-    - custom_external_trigger != true
-  template:
-    src: "../templates/{{ item.src }}"
-    dest: "jenkins/{{ project_repo_name }}/{{ item.dest }}"
-    owner: "abc"
-    group: "abc"
-  delegate_to: localhost
-  loop: "{{  templated_files  }}"
-
-- name: write external trigger local
-  when:
-    - lookup('env', 'LOCAL') == "true"
     - item.external_trigger is defined
     - custom_external_trigger != true
   template:
@@ -634,12 +327,3 @@
     group: "abc"
   delegate_to: localhost
   loop: "{{  templated_files  }}"
-
-##########################################
-#  For build nodes not running as Root   #
-##########################################
-- name: Allow non root host to delete temp files
-  when:
-    - lookup('env', 'LOCAL') != "true"
-  command: chmod -R 777 /ansible/jenkins
-  delegate_to: localhost

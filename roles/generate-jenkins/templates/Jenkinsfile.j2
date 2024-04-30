@@ -454,7 +454,7 @@ pipeline {
               # ${TEMPDIR}/unraid/docker-templates: Cloned docker-templates repo to check for logos
               # ${TEMPDIR}/unraid/templates: Cloned templates repo for commiting unraid template changes and pushing back to Github
               git clone --branch {{ ls_branch }} --depth 1 https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/docker-${CONTAINER_NAME}
-              docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
+              docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true -e PUID=$(id -u) -e PGID=$(id -g) {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
               echo "Starting Stage 1 - Jenkinsfile update"
               if [[ "$(md5sum Jenkinsfile | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/Jenkinsfile | awk '{ print $1 }')" ]]; then
                 mkdir -p ${TEMPDIR}/repo
@@ -556,9 +556,9 @@ pipeline {
                   curl -fo /usr/local/bin/yq -L "https://github.com/mikefarah/yq/releases/download/${YQ_DL_VERSION}/yq_linux_amd64"
                   chmod +x /usr/local/bin/yq
                 fi
-                if ! yq -e '.plugins.[].redirects.redirect_maps.[] | select(. == "deprecated/" + env(CONTAINER_NAME) + ".md")' mkdocs.yml  >/dev/null 2>&1; then
+                if ! yq -e '.plugins.[].redirects.redirect_maps.[] | select(. == "deprecated_images/docker-" + env(CONTAINER_NAME) + ".md")' mkdocs.yml  >/dev/null 2>&1; then
                   echo "Updating mkdocs.yml with deprecation info"
-                  yq -i '(.plugins.[] | select(.redirects)).redirects.redirect_maps |= . + {env(CONTAINER_NAME) + ".md" : "deprecated/" + env(CONTAINER_NAME) + ".md"}' mkdocs.yml
+                  yq -i '(.plugins.[] | select(.redirects)).redirects.redirect_maps |= . + {"images/docker-" + env(CONTAINER_NAME) + ".md" : "deprecated_images/docker-" + env(CONTAINER_NAME) + ".md"}' mkdocs.yml
                   git add mkdocs.yml
                 fi
                 git commit -m 'Bot Moving Deprecated Documentation' || :
@@ -880,7 +880,7 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
-              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" == "false" ]; then
+              if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" != "true" ]; then
                 LOCAL_CONTAINER=${IMAGE}:amd64-${META_TAG}
               else
                 LOCAL_CONTAINER=${IMAGE}:${META_TAG}
