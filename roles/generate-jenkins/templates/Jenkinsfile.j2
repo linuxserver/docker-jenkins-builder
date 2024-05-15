@@ -994,8 +994,8 @@ pipeline {
 {% if repo_vars | select('regex', 'CI_WEB_SCREENSHOT_TIMEOUT') %}
                 -e WEB_SCREENSHOT_TIMEOUT=\"${CI_WEB_SCREENSHOT_TIMEOUT}\" \
 {% endif %}
-{% if repo_vars | select('regex', 'CI_SCREENSHOT_DELAY') %}
-                -e SCREENSHOT_DELAY=\"${CI_SCREENSHOT_DELAY}\" \
+{% if repo_vars | select('regex', 'CI_WEB_SCREENSHOT_DELAY') %}
+                -e WEB_SCREENSHOT_DELAY=\"${CI_WEB_SCREENSHOT_DELAY}\" \
 {% endif %}
 {% if repo_vars | select('regex', 'CI_DOCKER_LOGS_TIMEOUT') %}
                 -e DOCKER_LOGS_TIMEOUT=\"${CI_DOCKER_LOGS_TIMEOUT}\" \
