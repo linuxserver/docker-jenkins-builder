@@ -934,7 +934,20 @@ pipeline {
                 --shm-size=1gb \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -e IMAGE=\"${IMAGE}\" \
-                -e DELAY_START=\"${CI_DELAY}\" \
+{% if repo_vars | select('regex', 'CI_SBOM_TIMEOUT') %}
+                -e SBOM_TIMEOUT=\"${CI_SBOM_TIMEOUT}\" \
+{% endif %}
+{% if repo_vars | select('regex', 'CI_WEB_SCREENSHOT_TIMEOUT') %}
+                -e WEB_SCREENSHOT_TIMEOUT=\"${CI_WEB_SCREENSHOT_TIMEOUT}\" \
+{% endif %}
+{% if repo_vars | select('regex', 'CI_WEB_SCREENSHOT_DELAY') %}
+                -e WEB_SCREENSHOT_DELAY=\"${CI_WEB_SCREENSHOT_DELAY}\" \
+{% endif %}
+{% if repo_vars | select('regex', 'CI_DOCKER_LOGS_TIMEOUT') %}
+                -e DOCKER_LOGS_TIMEOUT=\"${CI_DOCKER_LOGS_TIMEOUT}\" \
+{% elif repo_vars | select('regex', 'CI_DELAY') %}
+                -e DOCKER_LOGS_TIMEOUT=\"${CI_DELAY}\" \
+{% endif %}
                 -e TAGS=\"${CI_TAGS}\" \
                 -e META_TAG=\"${META_TAG}\" \
                 -e PORT=\"${CI_PORT}\" \
