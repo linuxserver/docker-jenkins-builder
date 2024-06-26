@@ -34,6 +34,11 @@
 {% if app_setup_block_enabled %}
 {% include "README_SNIPPETS/APPLICATION_SETUP.j2" | trim %}
 
+{% if readonly_supported is defined and readonly_supported %}
+{% include "README_SNIPPETS/READONLY.j2" | trim %}
+
+{% endif %}
+
 {% if ["CI_SSL='true'", "CI_SSL= 'true'" ,"CI_SSL = 'true'"]|select("in", repo_vars) %}
 {% include "README_SNIPPETS/STRICT_PROXY.j2" | trim %}
 
@@ -136,6 +141,9 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% for item in opt_security_opt_param_vars %}
 | `--security-opt {{ item.run_var }}` | {{ item.desc }} |
 {% endfor %}
+{% endif %}
+{% if readonly_supported is defined and readonly_supported %}
+| `--read-only=true` | Run container with a read-only filesystem. Please [read the docs](https://docs.linuxserver.io/misc/read-only/). |
 {% endif %}
 {% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
 
