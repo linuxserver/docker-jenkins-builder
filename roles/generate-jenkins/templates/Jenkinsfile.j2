@@ -541,7 +541,7 @@ pipeline {
               fi
               echo "Starting Stage 4 - External repo updates: Docs, Unraid Template and Readme Sync to Docker Hub"
               mkdir -p ${TEMPDIR}/docs
-              git clone https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/docs/docker-documentation
+              git clone --depth=1 https://github.com/linuxserver/docker-documentation.git ${TEMPDIR}/docs/docker-documentation
               if [[ "${BRANCH_NAME}" == "${GH_DEFAULT_BRANCH}"  ]] && [[ (! -f ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md) || ("$(md5sum ${TEMPDIR}/docs/docker-documentation/docs/images/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')" != "$(md5sum ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md | awk '{ print $1 }')") ]]; then
                 cp ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/docker-${CONTAINER_NAME}.md ${TEMPDIR}/docs/docker-documentation/docs/images/
                 cd ${TEMPDIR}/docs/docker-documentation
@@ -575,8 +575,8 @@ pipeline {
               fi
 {% if "jenkins-builder" not in project_name and "baseimage" not in project_name and full_custom_readme is not defined and unraid_template == true %}
               mkdir -p ${TEMPDIR}/unraid
-              git clone https://github.com/linuxserver/docker-templates.git ${TEMPDIR}/unraid/docker-templates
-              git clone https://github.com/linuxserver/templates.git ${TEMPDIR}/unraid/templates
+              git clone --depth=1 https://github.com/linuxserver/docker-templates.git ${TEMPDIR}/unraid/docker-templates
+              git clone --depth=1 https://github.com/linuxserver/templates.git ${TEMPDIR}/unraid/templates
               if [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME}-logo.png ]]; then
                 sed -i "s|master/linuxserver.io/img/linuxserver-ls-logo.png|master/linuxserver.io/img/${CONTAINER_NAME}-logo.png|" ${TEMPDIR}/docker-${CONTAINER_NAME}/.jenkins-external/${CONTAINER_NAME}.xml
               elif [[ -f ${TEMPDIR}/unraid/docker-templates/linuxserver.io/img/${CONTAINER_NAME}-icon.png ]]; then
