@@ -461,10 +461,10 @@ pipeline {
       }
     }
     /* #######################
-           GitLab Mirroring
+       GitLab Mirroring and Quay.io Repo Visibility
        ####################### */
-    // Ping into Gitlab to mirror this repo and have a registry endpoint
-    stage("GitLab Mirror"){
+    // Ping into Gitlab to mirror this repo and have a registry endpoint & mark this repo on Quay.io as public
+    stage("GitLab Mirror and Quay.io Visibility"){
       when {
         environment name: 'EXIT_STATUS', value: ''
       }
@@ -480,17 +480,6 @@ pipeline {
             "visibility":"public"}' '''
         sh '''curl -H "Private-Token: ${GITLAB_TOKEN}" -X PUT "https://gitlab.com/api/v4/projects/Linuxserver.io%2F${LS_REPO}" \
           -d "mirror=true&import_url=https://github.com/linuxserver/${LS_REPO}.git" '''
-      } 
-    }
-    /* #######################
-           Quay.io Repo Visibility
-       ####################### */
-    // Mark this repo on Quay.io as public
-    stage("Quay.io Repo Visibility"){
-      when {
-        environment name: 'EXIT_STATUS', value: ''
-      }
-      steps{
         sh '''curl -H "Content-Type: application/json" -H "Authorization: Bearer ${QUAYIO_API_TOKEN}" -X POST "https://quay.io/api/v1/repository${QUAYIMAGE/quay.io/}/changevisibility" \
           -d '{"visibility":"public"}' ||: '''
       } 
