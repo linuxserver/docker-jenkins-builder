@@ -17,6 +17,7 @@ pipeline {
     GITLAB_TOKEN=credentials('b6f0f1dd-6952-4cf6-95d1-9c06380283f0')
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
     DOCKERHUB_TOKEN=credentials('docker-hub-ci-pat')
+    QUAYIO_API_TOKEN=credentials('quayio-repo-api-token')
     BUILD_VERSION_ARG='BUILDER_VERSION'
     LS_USER='linuxserver'
     LS_REPO='docker-jenkins-builder'
@@ -39,6 +40,7 @@ pipeline {
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
+        echo "Running on node: ${NODE_NAME}"
         sh '''#! /bin/bash
               containers=$(docker ps -aq)
               if [[ -n "${containers}" ]]; then
@@ -459,10 +461,10 @@ pipeline {
       }
     }
     /* #######################
-           GitLab Mirroring
+       GitLab Mirroring and Quay.io Repo Visibility
        ####################### */
-    // Ping into Gitlab to mirror this repo and have a registry endpoint
-    stage("GitLab Mirror"){
+    // Ping into Gitlab to mirror this repo and have a registry endpoint & mark this repo on Quay.io as public
+    stage("GitLab Mirror and Quay.io Visibility"){
       when {
         environment name: 'EXIT_STATUS', value: ''
       }
@@ -478,6 +480,8 @@ pipeline {
             "visibility":"public"}' '''
         sh '''curl -H "Private-Token: ${GITLAB_TOKEN}" -X PUT "https://gitlab.com/api/v4/projects/Linuxserver.io%2F${LS_REPO}" \
           -d "mirror=true&import_url=https://github.com/linuxserver/${LS_REPO}.git" '''
+        sh '''curl -H "Content-Type: application/json" -H "Authorization: Bearer ${QUAYIO_API_TOKEN}" -X POST "https://quay.io/api/v1/repository${QUAYIMAGE/quay.io/}/changevisibility" \
+          -d '{"visibility":"public"}' ||: '''
       } 
     }
     /* ###############
@@ -572,7 +576,7 @@ pipeline {
               --provenance=false --sbom=false \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
             sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
-            retry(5) {
+            retry_backoff(5,5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             }
             sh '''#! /bin/bash
@@ -728,7 +732,7 @@ pipeline {
             passwordVariable: 'QUAYPASS'
           ]
         ]) {
-          retry(5) {
+          retry_backoff(5,5) {
             sh '''#! /bin/bash
                   set -e
                   echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
@@ -769,7 +773,7 @@ pipeline {
             passwordVariable: 'QUAYPASS'
           ]
         ]) {
-          retry(5) {
+          retry_backoff(5,5) {
             sh '''#! /bin/bash
                   set -e
                   echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
@@ -992,4 +996,21 @@ EOF
       cleanWs()
     }
   }
+}
+
+def retry_backoff(int max_attempts, int power_base, Closure c) {
+  int n = 0
+  while (n < max_attempts) {
+    try {
+      c()
+      return
+    } catch (err) {
+      if ((n + 1) >= max_attempts) {
+        throw err
+      }
+      sleep(power_base ** n)
+      n++
+    }
+  }
+  return
 }
