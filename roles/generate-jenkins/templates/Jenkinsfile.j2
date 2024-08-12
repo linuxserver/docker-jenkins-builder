@@ -27,14 +27,16 @@ pipeline {
     stage("Set git config"){
       steps{
         sh '''#!/bin/bash
-                echo ${GIT_SIGNING_KEY} > /config/.ssh/id_sign
-                git config --global gpg.format ssh
-                git config --global user.signingkey /config/.ssh/id_sign
-                git config --global commit.gpgsign true
-                git config --global user.name LinuxServer-CI
-                git config --global user.email ci@linuxserver.io
-          '''
-        }
+              cat ${GIT_SIGNING_KEY} > /config/.ssh/id_sign
+              chmod 600 /config/.ssh/id_sign
+              ssh-keygen -y -f /config/.ssh/id_sign > /config/.ssh/id_sign.pub
+              echo "Using $(ssh-keygen -lf /config/.ssh/id_sign) to sign commits"
+              git config --global gpg.format ssh
+              git config --global user.signingkey /config/.ssh/id_sign
+              git config --global commit.gpgsign true
+              git config --global user.name LinuxServer-CI
+              git config --global user.email ci@linuxserver.io
+        '''
       }
     }
     // Setup all the basic environment variables needed for the build
@@ -1114,7 +1116,7 @@ pipeline {
              "object": "'${COMMIT_SHA}'",\
              "message": "Tagging Release '${EXT_RELEASE_CLEAN}'-ls'${LS_TAG_NUMBER}' to {{ ls_branch }}",\
              "type": "commit",\
-             "tagger": {"name": "LinuxServer Jenkins","email": "jenkins@linuxserver.io","date": "'${GITHUB_DATE}'"}}' '''
+             "tagger": {"name": "LinuxServer-CI","email": "ci@linuxserver.io","date": "'${GITHUB_DATE}'"}}' '''
         echo "Pushing New release for Tag"
         sh '''#! /bin/bash
 {% if custom_version_command is defined %}
@@ -1318,6 +1320,13 @@ EOF
      ###################### */
   post {
     always {
+      sh '''#!/bin/bash
+            rm -rf /config/.ssh/id_sign
+            rm -rf /config/.ssh/id_sign.pub
+            git config --global --unset gpg.format
+            git config --global --unset user.signingkey
+            git config --global --unset commit.gpgsign
+        '''
       script{
         if (env.EXIT_STATUS == "ABORTED"){
           sh 'echo "build aborted"'
