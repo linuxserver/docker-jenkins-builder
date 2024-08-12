@@ -18,11 +18,25 @@ pipeline {
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
     DOCKERHUB_TOKEN=credentials('docker-hub-ci-pat')
     QUAYIO_API_TOKEN=credentials('quayio-repo-api-token')
+    GIT_SIGNING_KEY=credentials('484fbca6-9a4f-455e-b9e3-97ac98785f5f')
 {% for repo_var in repo_vars %}
     {{ repo_var }}
 {% endfor %}
   }
   stages {
+    stage("Set git config"){
+      steps{
+        sh '''#!/bin/bash
+                echo ${GIT_SIGNING_KEY} > /config/.ssh/id_sign
+                git config --global gpg.format ssh
+                git config --global user.signingkey /config/.ssh/id_sign
+                git config --global commit.gpgsign true
+                git config --global user.name LinuxServer-CI
+                git config --global user.email ci@linuxserver.io
+          '''
+        }
+      }
+    }
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
