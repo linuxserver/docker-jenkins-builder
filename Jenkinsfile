@@ -18,6 +18,7 @@ pipeline {
     GITLAB_NAMESPACE=credentials('gitlab-namespace-id')
     DOCKERHUB_TOKEN=credentials('docker-hub-ci-pat')
     QUAYIO_API_TOKEN=credentials('quayio-repo-api-token')
+    GIT_SIGNING_KEY=credentials('484fbca6-9a4f-455e-b9e3-97ac98785f5f')
     BUILD_VERSION_ARG='BUILDER_VERSION'
     LS_USER='linuxserver'
     LS_REPO='docker-jenkins-builder'
@@ -37,6 +38,19 @@ pipeline {
     CI_WEBPATH=''
   }
   stages {
+    stage("Set git config"){
+      steps{
+        sh '''#!/bin/bash
+              cat ${GIT_SIGNING_KEY} > /config/.ssh/id_sign
+              chmod 600 /config/.ssh/id_sign
+              ssh-keygen -y -f /config/.ssh/id_sign > /config/.ssh/id_sign.pub
+              echo "Using $(ssh-keygen -lf /config/.ssh/id_sign) to sign commits"
+              git config --global gpg.format ssh
+              git config --global user.signingkey /config/.ssh/id_sign
+              git config --global commit.gpgsign true
+        '''
+      }
+    }
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
@@ -750,7 +764,7 @@ pipeline {
                     docker push ${PUSHIMAGE}:${META_TAG}
                     docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
-                     docker push ${PUSHIMAGE}:${SEMVER}
+                      docker push ${PUSHIMAGE}:${SEMVER}
                     fi
                   done
                '''
@@ -836,7 +850,7 @@ pipeline {
              "object": "'${COMMIT_SHA}'",\
              "message": "Tagging Release '${EXT_RELEASE_CLEAN}'-ls'${LS_TAG_NUMBER}' to master",\
              "type": "commit",\
-             "tagger": {"name": "LinuxServer Jenkins","email": "jenkins@linuxserver.io","date": "'${GITHUB_DATE}'"}}' '''
+             "tagger": {"name": "LinuxServer-CI","email": "ci@linuxserver.io","date": "'${GITHUB_DATE}'"}}' '''
         echo "Pushing New release for Tag"
         sh '''#! /bin/bash
               echo "Updating base packages to ${PACKAGE_TAG}" > releasebody.json
@@ -968,6 +982,13 @@ EOF
      ###################### */
   post {
     always {
+      sh '''#!/bin/bash
+            rm -rf /config/.ssh/id_sign
+            rm -rf /config/.ssh/id_sign.pub
+            git config --global --unset gpg.format
+            git config --global --unset user.signingkey
+            git config --global --unset commit.gpgsign
+        '''
       script{
         if (env.EXIT_STATUS == "ABORTED"){
           sh 'echo "build aborted"'
