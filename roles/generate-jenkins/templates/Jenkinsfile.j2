@@ -945,6 +945,14 @@ pipeline {
           }
           sh '''#! /bin/bash
                 set -e
+                if grep -q 'docker-baseimage' <<< "${LS_REPO}"; then
+                  echo "Detected baseimage, setting LSIO_FIRST_PARTY=true"
+                  if [ -n "${CI_DOCKERENV}" ]; then
+                    CI_DOCKERENV="LSIO_FIRST_PARTY=true|${CI_DOCKERENV}"
+                  else
+                    CI_DOCKERENV="LSIO_FIRST_PARTY=true"
+                  fi
+                fi
                 docker pull ghcr.io/linuxserver/ci:latest
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
@@ -975,7 +983,7 @@ pipeline {
                 -e BASE=\"${DIST_IMAGE}\" \
                 -e SECRET_KEY=\"${S3_SECRET}\" \
                 -e ACCESS_KEY=\"${S3_KEY}\" \
-                -e DOCKER_ENV=\"{% if "docker-baseimage" in project_repo_name %}LSIO_FIRST_PARTY=true|{% endif %}${CI_DOCKERENV}\" \
+                -e DOCKER_ENV=\"${CI_DOCKERENV}\" \
                 -e WEB_SCREENSHOT=\"${CI_WEB}\" \
                 -e WEB_AUTH=\"${CI_AUTH}\" \
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
