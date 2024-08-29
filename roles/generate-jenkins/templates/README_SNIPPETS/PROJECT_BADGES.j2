@@ -9,6 +9,6 @@
 [![Jenkins Build]({{ lsio_shieldsio_jenkins_build }})]({{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/{{ ls_branch }}/)
 {% for var in repo_vars %}
 {% if 'CI' in var and 'TRUE' in var.upper() and '_' not in var %}
-[![LSIO CI]({{ lsio_shieldsio_dynamic_ci }})]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/latest/index.html)
+[![LSIO CI]({{ lsio_shieldsio_dynamic_ci }})]({{ lsio_object_url }}/{{ lsio_project_name_short }}/{{ project_name }}/{{ release_tag }}/index.html)
 {% endif %}
 {% endfor %}
