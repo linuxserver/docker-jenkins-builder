@@ -1,3 +1,11 @@
 {% macro noter(text) -%}
-{{ text | regex_replace('\?\+(?P<level>\w+)(?>\[(?P<title>[ \'\"\w]+)\])?\(\|(?P<message>.*)\|\)', output_format ) }}
+{% set ns = namespace(text=text) %}
+{% for match in (text | regex_findall('\?\+(?:\w+)(?:\[(?:[ \'\"\w]+)\])?\(\|(?:.*)\|\)')) %}
+{%- set match_obj=(match | regex_replace('\?\+(?P<severity>\w+)(?>\[(?P<title>[ \'\"\w]+)\])?\(\|(?P<message>.*)\|\)','{"message":"\g<message>", 
+"severity":"\g<severity>", "title":"\g<title>"}')) | from_json -%}
+{%- set match_result=match_obj.get("message") | admonition(flavour=markdown, severity=match_obj.get("severity"), title=match_obj.get("title")) -%}
+{%- set ns.text=(ns.text | replace(match, match_result)) -%}
+{% endfor %}
+
+{{ ns.text }}
 {%- endmacro %}

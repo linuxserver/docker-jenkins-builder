@@ -1,5 +1,5 @@
 #jinja2: keep_trailing_newline:True
-{%- set output_format="# \\g<message>" -%}
+{%- set markdown="gfm" -%}
 {% from 'common_macros.j2' import noter with context %}
 {%- set has_latest= true if (development_versions == true and 'latest' in (development_versions_items | map(attribute="tag"))) or (development_versions == false) else false -%}
 {% include "README_SNIPPETS/DO_NOT_EDIT.j2" | trim %}
@@ -9,8 +9,6 @@
 {% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
 {% endif %}
-{%- set output_format="**\\g<level>**: \\g<message>" -%}
-{%- from 'common_macros.j2' import noter with context %}
 # [{{ lsio_project_name_short }}/{{ project_name }}]({{ project_github_repo_url }})
 
 {% include "README_SNIPPETS/PROJECT_BADGES.j2" | trim %}

@@ -1,5 +1,4 @@
-{%- set output_format="!!! \\g<level> \\g<title>\n\n    \\g<message>" -%}
-{% from 'common_macros.j2' import noter with context %}
+{%- set markdown="gfm" -%}
 ---
 title: {{ project_name }}
 ---
