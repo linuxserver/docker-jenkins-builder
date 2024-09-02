@@ -1,4 +1,4 @@
-{%- set markdown="gfm" -%}
+{%- set markdown="mkdocs" -%}
 ---
 title: {{ project_name }}
 ---
