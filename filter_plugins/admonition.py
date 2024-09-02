@@ -1,10 +1,5 @@
 #!/usr/bin/python
 
-from ansible.module_utils.common.text.converters import to_native
-import re
-import sys
-
-
 class FilterModule(object):
     def filters(self):
         return {'admonition': self.admonition}
@@ -44,7 +39,6 @@ class FilterModule(object):
         severities = severities_flavours.get(flavour)
 
         note = ""
-
 
         aa_severity = severity
 
