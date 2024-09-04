@@ -44,7 +44,7 @@ jobs:
               else
                 echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
                 echo "> Triggering package trigger for branch ${br}" >> $GITHUB_STEP_SUMMARY
-                echo "> To disable, add \`{{ project_name }}_${br}\` into the Github organizational variable \`SKIP_PACKAGE_TRIGGER\`." >> $GITHUB_STEP_SUMMARY
+                printf "> To disable, add \`{{ project_name }}_%s\` into the Github organizational variable \`SKIP_PACKAGE_TRIGGER\`.\n\n" "${br}" >> $GITHUB_STEP_SUMMARY
                 triggered_branches="${triggered_branches}${br} "
                 response=$(curl -iX POST \
                   {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/${br}/buildWithParameters?PACKAGE_CHECK=true \
