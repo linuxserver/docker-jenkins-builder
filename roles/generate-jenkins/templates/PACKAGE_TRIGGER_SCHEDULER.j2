@@ -32,12 +32,15 @@ jobs:
               if [[ $(yq -r '.skip_package_check' <<< "${JENKINS_VARS}") == "true" ]]; then
                 echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
                 echo "> Skipping branch ${br} due to \`skip_package_check\` being set in \`jenkins-vars.yml\`." >> $GITHUB_STEP_SUMMARY
+                skipped_branches="${skipped_branches}${br} "
               elif grep -wq "^{{ project_name }}_${br}$" <<< "${SKIP_PACKAGE_TRIGGER}"; then
                 echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
                 echo "> Github organizational variable \`SKIP_PACKAGE_TRIGGER\` contains \`{{ project_name }}_${br}\`; skipping trigger." >> $GITHUB_STEP_SUMMARY
+                skipped_branches="${skipped_branches}${br} "
               elif [ $(curl -s {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/job/${br}/lastBuild/api/json | jq -r '.building') == "true" ]; then
-                  echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
-                  echo "> There already seems to be an active build on Jenkins; skipping package trigger for ${br}" >> $GITHUB_STEP_SUMMARY
+                echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
+                echo "> There already seems to be an active build on Jenkins; skipping package trigger for ${br}" >> $GITHUB_STEP_SUMMARY
+                skipped_branches="${skipped_branches}${br} "
               else
                 echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
                 echo "> Triggering package trigger for branch ${br}" >> $GITHUB_STEP_SUMMARY
@@ -64,8 +67,16 @@ jobs:
               echo "Skipping branch ${br} due to being detected as dev branch." >> $GITHUB_STEP_SUMMARY
             fi
           done
-          echo "**** Package check build(s) triggered for branch(es): ${triggered_branches} ****"
-          echo "**** Notifying Discord ****"
-          curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://cdn.discordapp.com/avatars/354986384542662657/df91181b3f1cf0ef1592fbe18e0962d7.png","embeds": [{"color": 9802903,
-            "description": "**Package Check Build(s) Triggered for {{ project_name }}** \n**Branch(es):** '"${triggered_branches}"' \n**Build URL:** '"{{ lsio_ci_url }}/blue/organizations/jenkins/Docker-Pipeline-Builders%2F{{ project_repo_name }}/activity/"' \n"}],
-            "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}
+          if [[ -n "${triggered_branches}" ]] || [[ -n "${skipped_branches}" ]]; then
+            if [[ -n "${triggered_branches}" ]]; then
+              NOTIFY_BRANCHES="**Triggered:** ${triggered_branches} \n"
+            fi
+            if [[ -n "${skipped_branches}" ]]; then
+              NOTIFY_BRANCHES="${NOTIFY_BRANCHES}**Skipped:** ${skipped_branches} \n"
+            fi
+            echo "**** Package check build(s) triggered for branch(es): ${triggered_branches} ****"
+            echo "**** Notifying Discord ****"
+            curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://cdn.discordapp.com/avatars/354986384542662657/df91181b3f1cf0ef1592fbe18e0962d7.png","embeds": [{"color": 9802903,
+              "description": "**Package Check Build(s) Triggered for {{ project_name }}** \n'"${NOTIFY_BRANCHES}"'**Build URL:** '"{{ lsio_ci_url }}/blue/organizations/jenkins/Docker-Pipeline-Builders%2F{{ project_repo_name }}/activity/"' \n"}],
+              "username": "Github Actions"}' ${{ '{{' }} secrets.DISCORD_WEBHOOK {{ '}}' }}
+          fi
