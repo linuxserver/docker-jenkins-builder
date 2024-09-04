@@ -16,7 +16,6 @@ templated_files:
   - { src: 'LICENSE.j2', dest: 'LICENSE' }
   - { src: 'lite.j2', dest: '.jenkins-external/README.lite' , readme: 'true' }
   - { src: 'PACKAGE_TRIGGER_SCHEDULER.j2', dest: '.github/workflows/package_trigger_scheduler.yml' }
-  - { src: 'PACKAGE_TRIGGER.j2', dest: '.github/workflows/package_trigger.yml', package_trigger: 'true' }
   - { src: 'PULL_REQUEST_TEMPLATE.j2', dest: '.github/PULL_REQUEST_TEMPLATE.md' }
   - { src: 'README.j2', dest: 'README.md' , readme: 'true' }
   - { src: 'UNRAID_TEMPLATE.j2', dest: '.jenkins-external/{{ project_name | lower }}.xml' , unraid_template: 'true' }
