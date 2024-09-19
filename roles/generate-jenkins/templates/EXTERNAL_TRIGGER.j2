@@ -18,16 +18,18 @@ jobs:
 
       - name: External Trigger
         if: github.ref == 'refs/heads/{{ ls_branch }}'
+        env:
+          SKIP_EXTERNAL_TRIGGER: ${{ '{{' }} vars.SKIP_EXTERNAL_TRIGGER {{ '}}' }}
         run: |
           printf "# External trigger for {{ project_repo_name }}\n\n" >> $GITHUB_STEP_SUMMARY
 {% if custom_version_command is defined or external_type != "os" %}
-          if [ -n "${{ '{{' }} secrets.PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }} {{ '}}' }}" ]; then
+          if grep -wq "^{{ project_name }}_{{ ls_branch }}$" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
             echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
-            echo "> Github secret \`PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\` is set; skipping trigger." >> $GITHUB_STEP_SUMMARY
+            echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` contains \`{{ project_name }}_{{ ls_branch }}\`; skipping trigger." >> $GITHUB_STEP_SUMMARY
             exit 0
           fi
           echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
-          echo "> External trigger running off of {{ ls_branch }} branch. To disable this trigger, set a Github secret named \`PAUSE_EXTERNAL_TRIGGER_{{ project_name|upper|regex_replace('[^A-Z0-9_]','_') }}_{{ ls_branch|upper|regex_replace('[^A-Z0-9_]','_') }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "> External trigger running off of {{ ls_branch }} branch. To disable this trigger, add \`{{ project_name }}_{{ ls_branch }}\` into the Github organizational variable \`SKIP_EXTERNAL_TRIGGER\`." >> $GITHUB_STEP_SUMMARY
           printf "\n## Retrieving external version\n\n" >> $GITHUB_STEP_SUMMARY
 {% endif %}
 {% if custom_version_command is defined and 'api.github.com' in custom_version_command %}
