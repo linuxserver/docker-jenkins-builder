@@ -166,8 +166,8 @@ jobs:
             exit 0
 {% endif %}
           else
-{% if external_artifact_check %}
-            {{ external_artifact_check | indent(12)}}
+{% if external_artifact_check is defined %}
+            {{ external_artifact_check | indent(12) }}
 {%- endif %}
             if [[ "${artifacts_found}" == "false" ]]; then
               echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
