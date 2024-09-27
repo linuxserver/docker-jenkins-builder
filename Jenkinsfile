@@ -1055,7 +1055,6 @@ EOF
       cleanWs()
     }
   }
-}
 
 def retry_backoff(int max_attempts, int power_base, Closure c) {
   int n = 0
