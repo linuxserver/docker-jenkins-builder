@@ -1008,31 +1008,31 @@ EOF
         }else{
           if (currentBuild.currentResult == "SUCCESS"){
             if (env.GITHUBIMAGE =~ /lspipepr/){
-              env.JOB_WEBHOOK_STATUS="Success"
+              env.JOB_WEBHOOK_STATUS='Success'
               env.JOB_WEBHOOK_COLOUR=3957028
-              env.JOB_WEBHOOK_FOOTER="PR Build"
+              env.JOB_WEBHOOK_FOOTER='PR Build'
             }else if (env.GITHUBIMAGE =~ /lsiodev/){
-              env.JOB_WEBHOOK_STATUS="Success"
+              env.JOB_WEBHOOK_STATUS='Success'
               env.JOB_WEBHOOK_COLOUR=3957028
-              env.JOB_WEBHOOK_FOOTER="Dev Build"
+              env.JOB_WEBHOOK_FOOTER='Dev Build'
             }else{
-              env.JOB_WEBHOOK_STATUS="Success"
+              env.JOB_WEBHOOK_STATUS='Success'
               env.JOB_WEBHOOK_COLOUR=1681177
-              env.JOB_WEBHOOK_FOOTER="Live Build"
+              env.JOB_WEBHOOK_FOOTER='Live Build'
             }
           }else{
             if (env.GITHUBIMAGE =~ /lspipepr/){
-              env.JOB_WEBHOOK_STATUS="Failure"
+              env.JOB_WEBHOOK_STATUS='Failure'
               env.JOB_WEBHOOK_COLOUR=12669523
-              env.JOB_WEBHOOK_FOOTER="PR Build"
+              env.JOB_WEBHOOK_FOOTER='PR Build'
             }else if (env.GITHUBIMAGE =~ /lsiodev/){
-              env.JOB_WEBHOOK_STATUS="Failure"
+              env.JOB_WEBHOOK_STATUS='Failure'
               env.JOB_WEBHOOK_COLOUR=12669523
-              env.JOB_WEBHOOK_FOOTER="Dev Build"
+              env.JOB_WEBHOOK_FOOTER='Dev Build'
             }else{
-              env.JOB_WEBHOOK_STATUS="Failure"
+              env.JOB_WEBHOOK_STATUS='Failure'
               env.JOB_WEBHOOK_COLOUR=16711680
-              env.JOB_WEBHOOK_FOOTER="Live Build"
+              env.JOB_WEBHOOK_FOOTER='Live Build'
             }
           }
           sh ''' curl -X POST -H "Content-Type: application/json" --data '{"avatar_url": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/jenkins-avatar.png","embeds": [{"'color'": '${JOB_WEBHOOK_COLOUR}',\
