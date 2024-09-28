@@ -23,7 +23,7 @@ jobs:
         run: |
           printf "# External trigger for {{ project_repo_name }}\n\n" >> $GITHUB_STEP_SUMMARY
 {% if custom_version_command is defined or external_type != "os" %}
-          if grep -wq "^{{ project_name }}_{{ ls_branch }}$" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
+          if grep -q "^{{ project_name }}_{{ ls_branch }}" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
             echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
             echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` contains \`{{ project_name }}_{{ ls_branch }}\`; skipping trigger." >> $GITHUB_STEP_SUMMARY
             exit 0
