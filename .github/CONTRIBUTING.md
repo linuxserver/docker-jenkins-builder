@@ -105,7 +105,7 @@ docker build \
   -t linuxserver/jenkins-builder:latest .
 ```
 
-The ARM variants can be built on x86_64 hardware using `lscr.io/linuxserver/qemu-static`
+The ARM variants can be built on x86_64 hardware and vice versa using `lscr.io/linuxserver/qemu-static`
 
 ```bash
 docker run --rm --privileged lscr.io/linuxserver/qemu-static --reset
