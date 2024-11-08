@@ -415,7 +415,7 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} \
+          --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder=container \
           --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
       }
     }
@@ -756,9 +756,12 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
           --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} \
+          --no-cache --pull -t ${IMAGE}:${META_TAG} -t ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 \
+          --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder=container \
           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        retry_backoff(5,5) {
+            sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER}"
+          }
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
@@ -792,9 +795,12 @@ pipeline {
               --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
               --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} \
+              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} -t ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 \
+              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder=container \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            retry_backoff(5,5) {
+              sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER}"
+            }
           }
         }
         stage('Build ARM64') {
@@ -827,10 +833,9 @@ pipeline {
               --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
               --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
               --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} \
+              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} -t ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/arm64 \
+              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder=container \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
-            sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             retry_backoff(5,5) {
               sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
             }
@@ -1020,22 +1025,13 @@ pipeline {
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                   for PUSHIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                    docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:{{ release_tag }}
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${EXT_RELEASE_TAG}
+                    docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:{{ release_tag }} -t {PUSHIMAGE}:${EXT_RELEASE_TAG} ghcr.io/linuxserver/lsiodev-buildcache:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     if [ -n "${SEMVER}" ]; then
-                      docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
+                      docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ghcr.io/linuxserver/lsiodev-buildcache:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
-                    docker push ${PUSHIMAGE}:{{ release_tag }}
 {% if project_deprecation_status == true %}
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ghcr.io/linuxserver/jenkins-builder:empty
-{% else %}
-                    docker push ${PUSHIMAGE}:${META_TAG}
 {% endif %}
-                    docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
-                    if [ -n "${SEMVER}" ]; then
-                      docker push ${PUSHIMAGE}:${SEMVER}
-                    fi
                   done
                '''
           }
@@ -1064,30 +1060,12 @@ pipeline {
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
-                  if [ "${CI}" == "false" ]; then
-                    docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
-                    docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
-                  fi
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-                    docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-{{ release_tag }}
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
-                    docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     if [ -n "${SEMVER}" ]; then
-                      docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
-                      docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
-                    fi
-                    docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-{{ release_tag }}
-                    docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
-                    docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                    if [ -n "${SEMVER}" ]; then
-                      docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
-                      docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                      docker imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ghcr.io/linuxserver/lsiodev-buildcache:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                      docker imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
                   done
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
