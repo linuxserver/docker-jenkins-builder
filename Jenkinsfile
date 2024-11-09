@@ -189,6 +189,7 @@ pipeline {
           env.VERSION_TAG = env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           env.META_TAG = env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           env.EXT_RELEASE_TAG = 'version-' + env.EXT_RELEASE_CLEAN
+          env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
         }
       }
     }
@@ -213,6 +214,7 @@ pipeline {
           env.META_TAG = env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           env.EXT_RELEASE_TAG = 'version-' + env.EXT_RELEASE_CLEAN
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DEV_DOCKERHUB_IMAGE + '/tags/'
+          env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
         }
       }
     }
@@ -237,6 +239,7 @@ pipeline {
           env.EXT_RELEASE_TAG = 'version-' + env.EXT_RELEASE_CLEAN
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/pull/' + env.PULL_REQUEST
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.PR_DOCKERHUB_IMAGE + '/tags/'
+          env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
         }
       }
     }
@@ -256,7 +259,7 @@ pipeline {
           --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
           --label \"org.opencontainers.image.title=Jenkins-builder\" \
           --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-          --provenance=false --sbom=false \
+          --provenance=false --sbom=false --builder=container \
           --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
       }
     }
@@ -526,8 +529,23 @@ pipeline {
           --label \"org.opencontainers.image.title=Jenkins-builder\" \
           --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
           --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --provenance=false --sbom=false \
+          --provenance=false --sbom=false --builder=container \
           --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh '''#! /bin/bash
+              set -e
+              IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+              for i in "${CACHE[@]}"; do
+                  docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+              done'''
+        retry_backoff(5,5) {
+            sh '''#! /bin/bash
+                  set -e
+                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                  for i in "${CACHE[@]}"; do
+                      docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                  done
+                  wait'''
+            }
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
@@ -558,8 +576,23 @@ pipeline {
               --label \"org.opencontainers.image.title=Jenkins-builder\" \
               --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
               --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --provenance=false --sbom=false \
+              --provenance=false --sbom=false --builder=container \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  set -e
+                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                  for i in "${CACHE[@]}"; do
+                      docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done'''
+            retry_backoff(5,5) {
+                sh '''#! /bin/bash
+                      set -e
+                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                      for i in "${CACHE[@]}"; do
+                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                      done
+                      wait'''
+            }
           }
         }
         stage('Build ARM64') {
@@ -587,11 +620,22 @@ pipeline {
               --label \"org.opencontainers.image.title=Jenkins-builder\" \
               --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
               --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --provenance=false --sbom=false \
+              --provenance=false --sbom=false --builder=container \
               --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
-            sh "docker tag ${IMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
+            sh '''#! /bin/bash
+                  set -e
+                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                  for i in "${CACHE[@]}"; do
+                      docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done'''
             retry_backoff(5,5) {
-              sh "docker push ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}"
+                sh '''#! /bin/bash
+                      set -e
+                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                      for i in "${CACHE[@]}"; do
+                          docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                      done
+                      wait'''
             }
             sh '''#! /bin/bash
                   containers=$(docker ps -aq)
@@ -764,17 +808,16 @@ pipeline {
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
                   for PUSHIMAGE in "${GITHUBIMAGE}" "${GITLABIMAGE}" "${QUAYIMAGE}" "${IMAGE}"; do
-                    docker tag ${IMAGE}:${META_TAG} ${PUSHIMAGE}:${META_TAG}
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:latest
-                    docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${EXT_RELEASE_TAG}
+                    [[ ${PUSHIMAGE%%/*} =~ \. ]] && PUSHIMAGEPLUS="${PUSHIMAGE}" || PUSHIMAGEPLUS="docker.io/${PUSHIMAGE}"
+                    IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                    for i in "${CACHE[@]}"; do
+                        if [[ "${PUSHIMAGEPLUS}" == "$(cut -d "/" -f1 <<< ${i})"* ]]; then
+                            CACHEIMAGE=${i}
+                        fi
+                    done
+                    docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:latest -t {PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     if [ -n "${SEMVER}" ]; then
-                      docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
-                    fi
-                    docker push ${PUSHIMAGE}:latest
-                    docker push ${PUSHIMAGE}:${META_TAG}
-                    docker push ${PUSHIMAGE}:${EXT_RELEASE_TAG}
-                    if [ -n "${SEMVER}" ]; then
-                      docker push ${PUSHIMAGE}:${SEMVER}
+                      docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
                   done
                '''
@@ -804,30 +847,19 @@ pipeline {
                   echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                   echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
                   echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
-                  if [ "${CI}" == "false" ]; then
-                    docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
-                    docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
-                  fi
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-                    docker tag ${IMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-latest
-                    docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
-                    docker tag ${IMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-latest
-                    docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                    [[ ${MANIFESTIMAGE%%/*} =~ \. ]] && MANIFESTIMAGEPLUS="${MANIFESTIMAGE}" || PUSHIMAGEPLUS="docker.io/${MANIFESTIMAGE}"
+                    IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                    for i in "${CACHE[@]}"; do
+                        if [[ "${MANIFESTIMAGEPLUS}" == "$(cut -d "/" -f1 <<< ${i})"* ]]; then
+                            CACHEIMAGE=${i}
+                        fi
+                    done
+                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-latest -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-latest -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     if [ -n "${SEMVER}" ]; then
-                      docker tag ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:amd64-${SEMVER}
-                      docker tag ${MANIFESTIMAGE}:arm64v8-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
-                    fi
-                    docker push ${MANIFESTIMAGE}:amd64-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}
-                    docker push ${MANIFESTIMAGE}:amd64-latest
-                    docker push ${MANIFESTIMAGE}:arm64v8-${META_TAG}
-                    docker push ${MANIFESTIMAGE}:arm64v8-latest
-                    docker push ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
-                    if [ -n "${SEMVER}" ]; then
-                      docker push ${MANIFESTIMAGE}:amd64-${SEMVER}
-                      docker push ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                      docker imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                      docker imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
                   done
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
