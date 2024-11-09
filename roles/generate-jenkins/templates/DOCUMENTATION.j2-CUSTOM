@@ -1,4 +1,5 @@
 {%- set markdown="mkdocs" -%}
+{% from 'common_macros.j2' import noter with context %}
 ---
 title: {{ project_name }}
 ---
