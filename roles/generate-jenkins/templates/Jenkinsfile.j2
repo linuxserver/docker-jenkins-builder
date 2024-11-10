@@ -1075,8 +1075,8 @@ pipeline {
                     if [ -n "${SEMVER}" ]; then
                       docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
-{% if project_deprecation_status == true %}
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ghcr.io/linuxserver/jenkins-builder:empty || true
+{% if project_deprecation_status %}
+                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% endif %}
                   done
                '''
@@ -1122,12 +1122,13 @@ pipeline {
                     fi
                   done
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
-{% if project_deprecation_status == true %}
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} ghcr.io/linuxserver/jenkins-builder:empty || true
+{% if project_deprecation_status %}
+                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
 {% endif %}
+                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
