@@ -1027,7 +1027,7 @@ pipeline {
                       docker tag ${PUSHIMAGE}:${META_TAG} ${PUSHIMAGE}:${SEMVER}
                     fi
 {% if project_deprecation_status == true %}
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
+                    docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
                     docker push ${PUSHIMAGE}:{{ release_tag }}
 {% endif %}
