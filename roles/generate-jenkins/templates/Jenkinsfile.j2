@@ -1076,7 +1076,7 @@ pipeline {
                       docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
 {% if project_deprecation_status %}
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
+                    docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% endif %}
                   done
                '''
