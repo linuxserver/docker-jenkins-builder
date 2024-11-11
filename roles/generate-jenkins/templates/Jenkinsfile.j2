@@ -8,7 +8,7 @@ pipeline {
   }
   // Input to determine if this is a package check
   parameters {
-     string(defaultValue: 'false', description: 'package check run', name: 'PACKAGE_CHECK')
+    string(defaultValue: 'false', description: 'package check run', name: 'PACKAGE_CHECK')
   }
   // Configuration for the variables used for this specific repo
   environment {
@@ -771,11 +771,13 @@ pipeline {
         retry_backoff(5,5) {
             sh '''#! /bin/bash
                   set -e
-                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                  for i in "${CACHE[@]}"; do
-                      docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                  done
-                  wait'''
+                  if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                      for i in "${CACHE[@]}"; do
+                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                      done
+                      wait
+                  fi'''
             }
       }
     }
@@ -822,11 +824,13 @@ pipeline {
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
-                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                      for i in "${CACHE[@]}"; do
-                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                      done
-                      wait'''
+                      if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                          IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                          for i in "${CACHE[@]}"; do
+                              docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                          done
+                          wait
+                      fi'''
             }
           }
         }
@@ -872,11 +876,13 @@ pipeline {
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
-                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                      for i in "${CACHE[@]}"; do
-                          docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
-                      done
-                      wait'''
+                      if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                          IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                          for i in "${CACHE[@]}"; do
+                              docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                          done
+                          wait
+                      fi'''
             }
             sh '''#! /bin/bash
                   containers=$(docker ps -aq)
