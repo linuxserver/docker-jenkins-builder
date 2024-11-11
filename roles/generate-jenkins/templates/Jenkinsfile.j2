@@ -197,8 +197,8 @@ pipeline {
          env.EXT_RELEASE = sh(
            script: '''docker run --rm ${DIST_IMAGE}:${DIST_TAG} bash -c\
                       'echo -e "'"${DIST_REPO}"'" > /etc/apt/sources.list.d/check.list \
-                       && apt-get --allow-unauthenticated update -qq >/dev/null 2>&1\
-                       && apt-cache --no-all-versions show '"${DIST_REPO_PACKAGES}"' | md5sum | cut -c1-8' ''',
+                      && apt-get --allow-unauthenticated update -qq >/dev/null 2>&1\
+                      && apt-cache --no-all-versions show '"${DIST_REPO_PACKAGES}"' | md5sum | cut -c1-8' ''',
            returnStdout: true).trim()
          env.RELEASE_LINK = 'deb_repo'
        }
@@ -766,18 +766,20 @@ pipeline {
               set -e
               IFS=',' read -ra CACHE <<< "$BUILDCACHE"
               for i in "${CACHE[@]}"; do
-                  docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
-              done'''
+                docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+              done
+           '''
         retry_backoff(5,5) {
             sh '''#! /bin/bash
                   set -e
                   if [[ "${PACKAGE_CHECK}" != "true" ]]; then
-                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                      for i in "${CACHE[@]}"; do
-                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                      done
-                      wait
-                  fi'''
+                    IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                    for i in "${CACHE[@]}"; do
+                      docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                    done
+                    wait
+                  fi
+               '''
             }
       }
     }
@@ -819,18 +821,20 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                      docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
-                  done'''
+                    docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done
+               '''
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
                       if [[ "${PACKAGE_CHECK}" != "true" ]]; then
-                          IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                          for i in "${CACHE[@]}"; do
-                              docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                          done
-                          wait
-                      fi'''
+                        IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                        for i in "${CACHE[@]}"; do
+                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                        done
+                        wait
+                      fi
+                   '''
             }
           }
         }
@@ -871,25 +875,28 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                      docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
-                  done'''
+                    docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done
+               '''
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
                       if [[ "${PACKAGE_CHECK}" != "true" ]]; then
-                          IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                          for i in "${CACHE[@]}"; do
-                              docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
-                          done
-                          wait
-                      fi'''
+                        IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                        for i in "${CACHE[@]}"; do
+                          docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                        done
+                        wait
+                      fi
+                   '''
             }
             sh '''#! /bin/bash
                   containers=$(docker ps -aq)
                   if [[ -n "${containers}" ]]; then
                     docker stop ${containers}
                   fi
-                  docker system prune -af --volumes || : '''
+                  docker system prune -af --volumes || :
+               '''
           }
         }
       }
