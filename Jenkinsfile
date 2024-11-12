@@ -8,7 +8,7 @@ pipeline {
   }
   // Input to determine if this is a package check
   parameters {
-     string(defaultValue: 'false', description: 'package check run', name: 'PACKAGE_CHECK')
+    string(defaultValue: 'false', description: 'package check run', name: 'PACKAGE_CHECK')
   }
   // Configuration for the variables used for this specific repo
   environment {
@@ -535,16 +535,20 @@ pipeline {
               set -e
               IFS=',' read -ra CACHE <<< "$BUILDCACHE"
               for i in "${CACHE[@]}"; do
-                  docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
-              done'''
+                docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+              done
+           '''
         retry_backoff(5,5) {
             sh '''#! /bin/bash
                   set -e
-                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                  for i in "${CACHE[@]}"; do
+                  if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                    IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                    for i in "${CACHE[@]}"; do
                       docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                  done
-                  wait'''
+                    done
+                    wait
+                  fi
+               '''
             }
       }
     }
@@ -582,16 +586,20 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                      docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
-                  done'''
+                    docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done
+               '''
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
-                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                      for i in "${CACHE[@]}"; do
+                      if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                        IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                        for i in "${CACHE[@]}"; do
                           docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                      done
-                      wait'''
+                        done
+                        wait
+                      fi
+                   '''
             }
           }
         }
@@ -626,23 +634,28 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                      docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
-                  done'''
+                    docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done
+               '''
             retry_backoff(5,5) {
                 sh '''#! /bin/bash
                       set -e
-                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                      for i in "${CACHE[@]}"; do
+                      if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                        IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                        for i in "${CACHE[@]}"; do
                           docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
-                      done
-                      wait'''
+                        done
+                        wait
+                      fi
+                   '''
             }
             sh '''#! /bin/bash
                   containers=$(docker ps -aq)
                   if [[ -n "${containers}" ]]; then
                     docker stop ${containers}
                   fi
-                  docker system prune -af --volumes || : '''
+                  docker system prune -af --volumes || :
+               '''
           }
         }
       }
@@ -815,9 +828,9 @@ pipeline {
                             CACHEIMAGE=${i}
                         fi
                     done
-                    docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:latest -t {PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
+                    docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:latest -t {PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
                     if [ -n "${SEMVER}" ]; then
-                      docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd68-${COMMIT_SHA}-${BUILD_NUMBER}
+                      docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
                     fi
                   done
                '''
@@ -865,6 +878,7 @@ pipeline {
                   for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:latest ${MANIFESTIMAGE}:amd64-latest ${MANIFESTIMAGE}:arm64v8-latest
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                     if [ -n "${SEMVER}" ]; then
                       docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
