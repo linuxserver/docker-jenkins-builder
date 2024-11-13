@@ -544,7 +544,7 @@ pipeline {
                   if [[ "${PACKAGE_CHECK}" != "true" ]]; then
                     IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                     for i in "${CACHE[@]}"; do
-                      docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                      docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                     done
                     wait
                   fi
@@ -586,7 +586,7 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                    docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
+                    docker tag ${IMAGE}:amd64-${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
                   done
                '''
             retry_backoff(5,5) {
@@ -595,7 +595,7 @@ pipeline {
                       if [[ "${PACKAGE_CHECK}" != "true" ]]; then
                         IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                         for i in "${CACHE[@]}"; do
-                          docker push ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                          docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                         done
                         wait
                       fi
@@ -634,7 +634,7 @@ pipeline {
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
-                    docker tag ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+                    docker tag ${IMAGE}:arm64v8-${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
                   done
                '''
             retry_backoff(5,5) {
@@ -643,7 +643,7 @@ pipeline {
                       if [[ "${PACKAGE_CHECK}" != "true" ]]; then
                         IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                         for i in "${CACHE[@]}"; do
-                          docker push ${IMAGE}:${META_TAG} ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                          docker push ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
                         done
                         wait
                       fi
