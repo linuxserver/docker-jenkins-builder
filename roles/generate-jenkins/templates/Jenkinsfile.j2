@@ -769,18 +769,31 @@ pipeline {
                 docker tag ${IMAGE}:${META_TAG} ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
               done
            '''
-        retry_backoff(5,5) {
-            sh '''#! /bin/bash
-                  set -e
-                  if [[ "${PACKAGE_CHECK}" != "true" ]]; then
-                    IFS=',' read -ra CACHE <<< "$BUILDCACHE"
-                    for i in "${CACHE[@]}"; do
-                      docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
-                    done
-                    wait
-                  fi
-               '''
-            }
+        withCredentials([
+          [
+            $class: 'UsernamePasswordMultiBinding',
+            credentialsId: 'Quay.io-Robot',
+            usernameVariable: 'QUAYUSER',
+            passwordVariable: 'QUAYPASS'
+          ]
+        ]) {
+          retry_backoff(5,5) {
+              sh '''#! /bin/bash
+                    set -e
+                    echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
+                    echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
+                    echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
+                    echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
+                    if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                      IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                      for i in "${CACHE[@]}"; do
+                        docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                      done
+                      wait
+                    fi
+                '''
+          }
+        }
       }
     }
     // Build MultiArch Docker containers for push to LS Repo
