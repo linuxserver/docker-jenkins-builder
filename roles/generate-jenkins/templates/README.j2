@@ -35,7 +35,7 @@
 {% if kasm_blurb is defined %}
 {% include "README_SNIPPETS/KASM.j2" | trim %}
 
-{% endif %} 
+{% endif %}
 {% if readonly_supported is defined and readonly_supported %}
 {% include "README_SNIPPETS/READONLY.j2" | trim %}
 
@@ -80,7 +80,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% endif %}
 {% if param_usage_include_ports %}
 {% for item in param_ports %}
-| `-p {{ item.internal_port }}` | {{ item.port_desc }} |
+| `-p {{ item.external_port }}:{{ item.internal_port }}` | {{ item.port_desc }} |
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_ports %}
