@@ -521,23 +521,36 @@ pipeline {
               else
                 echo "No templates to delete"
               fi
-              echo "Starting Stage 3 - Update templates"
 {% if full_custom_readme is not defined and (init_diagram is not defined or init_diagram) %}
-              if ! grep -q 'init_diagram:' ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml; then
+              echo "Starting Stage 2.5 - Update init diagram"
+              if ! grep -q 'init_diagram:' readme-vars.yml; then
                 echo "Adding the key 'init_diagram' to readme-vars.yml"
-                sed -i '\\|^#.*changelog.*$|d' ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml 
-                sed -i 's|^changelogs:|# init diagram\\ninit_diagram:\\n\\n# changelog\\nchangelogs:|' ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml ${TEMPDIR}/repo/${LS_REPO}/readme-vars.yml
+                sed -i '\\|^#.*changelog.*$|d' readme-vars.yml 
+                sed -i 's|^changelogs:|# init diagram\\ninit_diagram:\\n\\n# changelog\\nchangelogs:|' readme-vars.yml
               fi
-              docker run -d --rm -v /tmp/d2:/output -e PUID=$(id -u) -e PGID=$(id -g) ghcr.io/linuxserver/d2-builder:latest ${CONTAINER_NAME}:{{ ls_branch }}
-              yq -ei '.init_diagram |= load_str("/tmp/d2/${CONTAINER_NAME}-{{ ls_branch }}.d2")' ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml
-              if [[ $(grep -hs ^ ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml | md5sum | cut -c1-8) != $(grep -hs ^ ${TEMPDIR}/repo/${LS_REPO}/readme-vars.yml | md5sum | cut -c1-8) ]]; then
-                echo "'init_diagram' has been updated. Re-running jenkins builder."
-                docker run --rm -v ${TEMPDIR}/docker-${CONTAINER_NAME}:/tmp -e LOCAL=true -e PUID=$(id -u) -e PGID=$(id -g) {% if project_repo_name != "docker-jenkins-builder" %}ghcr.io/linuxserver/jenkins-builder:latest{% else %}jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER}{% endif %}{{ ' ' }}
-                cp ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml ${TEMPDIR}/repo/${LS_REPO}/readme-vars.yml
+              docker run -d --rm -v ${TEMPDIR}/d2:/output -e PUID=$(id -u) -e PGID=$(id -g) ghcr.io/linuxserver/d2-builder:latest ${CONTAINER_NAME}:{{ ls_branch }}
+              yq -ei '.init_diagram |= load_str("${TEMPDIR}/d2/${CONTAINER_NAME}-{{ ls_branch }}.d2")' readme-vars.yml || :
+              if [[ $(grep -hs ^ readme-vars.yml | md5sum | cut -c1-8) != $(grep -hs ^ ${TEMPDIR}/docker-${CONTAINER_NAME}/readme-vars.yml | md5sum | cut -c1-8) ]]; then
+                echo "'init_diagram' has been updated. Updating repo and exiting build, new one will trigger based on commit."
+                mkdir -p ${TEMPDIR}/repo
+                git clone https://github.com/${LS_USER}/${LS_REPO}.git ${TEMPDIR}/repo/${LS_REPO}
+                cd ${TEMPDIR}/repo/${LS_REPO}
+                git checkout -f {{ ls_branch }}
+                cp ${WORKSPACE}/readme-vars.yml ${TEMPDIR}/repo/${LS_REPO}/readme-vars.yml
+                git add readme-vars.yml
+                git commit -m 'Bot Updating Templated Files'
+                git pull https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git {{ ls_branch }}
+                git push https://LinuxServer-CI:${GITHUB_TOKEN}@github.com/${LS_USER}/${LS_REPO}.git {{ ls_branch }}
+                echo "true" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
+                echo "Updating templates and exiting build, new one will trigger based on commit"
+                rm -Rf ${TEMPDIR}
+                exit 0
+              else
+                echo "false" > /tmp/${COMMIT_SHA}-${BUILD_NUMBER}
+                echo "Init diagram is unchanged"
               fi
-              rm -rf /tmp/d2
 {% endif %}
+              echo "Starting Stage 3 - Update templates"
               CURRENTHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
               cd ${TEMPDIR}/docker-${CONTAINER_NAME}
               NEWHASH=$(grep -hs ^ ${TEMPLATED_FILES} | md5sum | cut -c1-8)
