@@ -146,7 +146,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% endfor %}
 {% endif %}
 {% endif %}
-{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or param_usage_include_mac_address or security_opt_param is defined or opt_security_opt_param is defined or (readonly_supported is defined and readonly_supported) or cap_add_param is defined or opt_cap_add_param is defined or nonroot_supported is defined %}
+{% if custom_params is defined or opt_custom_params is defined or param_usage_include_hostname or param_usage_include_mac_address or security_opt_param is defined or opt_security_opt_param is defined or (readonly_supported is defined and readonly_supported) or cap_add_param is defined or opt_cap_add_param is defined or (nonroot_supported is defined and nonroot_supported) %}
 
 #### Miscellaneous Options
 
