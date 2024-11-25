@@ -78,12 +78,12 @@ Containers are configured using parameters passed at runtime (such as those abov
 | :----: | --- |
 {% if param_usage_include_ports %}
 {% for item in param_ports %}
-| `{{ item.internal_port }}` | {{ item.port_desc }} |
+| `{{ item.external_port }}:{{ item.internal_port }}` | {{ item.port_desc }} |
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_ports %}
 {% for item in opt_param_ports %}
-| `{{ item.internal_port }}` | {{ item.port_desc }} |
+| `{{ item.external_port }}:{{ item.internal_port }}` | {{ item.port_desc }} |
 {% endfor %}
 {% endif %}
 {% if param_usage_include_net %}
