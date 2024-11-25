@@ -150,6 +150,15 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% if readonly_supported is defined and readonly_supported %}
 | `--read-only=true` | Run container with a read-only filesystem. Please [read the docs](https://docs.linuxserver.io/misc/read-only/). |
 {% endif %}
+{% if cap_add_param %}
+{% for item in cap_add_param_vars %}
+| `--cap-add={{ item.cap_add_var }}` | {{ item.desc }} |
+{% endfor %}
+{% endif %}
+{% if opt_cap_add_param %}
+{% for item in opt_cap_add_param_vars %}
+| `--cap-add={{ item.cap_add_var }}` | {{ item.desc }} |
+{% endfor %}
 {% if nonroot_supported is defined and nonroot_supported %}
 | `--user=1000:1000` | Run container with a non-root user. Please [read the docs](https://docs.linuxserver.io/misc/non-root/). |
 {% endif %}
