@@ -40,6 +40,10 @@
 {% include "README_SNIPPETS/READONLY.j2" | trim %}
 
 {% endif %}
+{% if nonroot_supported is defined and nonroot_supported %}
+{% include "README_SNIPPETS/NONROOT.j2" | trim %}
+
+{% endif %}
 {% if ["CI_SSL='true'", "CI_SSL= 'true'" ,"CI_SSL = 'true'"]|select("in", repo_vars) %}
 {% include "README_SNIPPETS/STRICT_PROXY.j2" | trim %}
 
@@ -80,7 +84,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% endif %}
 {% if param_usage_include_ports %}
 {% for item in param_ports %}
-| `-p {{ item.internal_port }}` | {{ item.port_desc }} |
+| `-p {{ item.external_port }}:{{ item.internal_port }}` | {{ item.port_desc }} |
 {% endfor %}
 {% endif %}
 {% if opt_param_usage_include_ports %}
@@ -155,6 +159,8 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% for item in opt_cap_add_param_vars %}
 | `--cap-add={{ item.cap_add_var }}` | {{ item.desc }} |
 {% endfor %}
+{% if nonroot_supported is defined and nonroot_supported %}
+| `--user=1000:1000` | Run container with a non-root user. Please [read the docs](https://docs.linuxserver.io/misc/non-root/). |
 {% endif %}
 {% if cap_add_param or opt_cap_add_param or (custom_params is defined and 'sysctl' in (custom_params | map(attribute="name")) ) %}
 
