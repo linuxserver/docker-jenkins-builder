@@ -159,6 +159,7 @@ Containers are configured using parameters passed at runtime (such as those abov
 {% for item in opt_cap_add_param_vars %}
 | `--cap-add={{ item.cap_add_var }}` | {{ item.desc }} |
 {% endfor %}
+{% endif %}
 {% if nonroot_supported is defined and nonroot_supported %}
 | `--user=1000:1000` | Run container with a non-root user. Please [read the docs](https://docs.linuxserver.io/misc/non-root/). |
 {% endif %}
