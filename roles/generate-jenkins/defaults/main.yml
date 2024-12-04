@@ -60,3 +60,4 @@ armhf_native: false
 build_armhf: false
 image_provenance: false
 image_sbom: false
+image_builder: 'container'
