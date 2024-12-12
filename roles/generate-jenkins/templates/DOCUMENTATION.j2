@@ -224,4 +224,14 @@ Containers are configured using parameters passed at runtime (such as those abov
 
 {% include "README_SNIPPETS/BUILDING_LOCALLY.j2" | trim %}
 
+{% if init_diagram is defined and init_diagram %}
+To help with development, we generate this dependency graph.
+
+??? info "Init dependency graph"
+
+    ```d2
+    {{ init_diagram | indent(4) | trim }}
+    ```
+
+{% endif %}
 {% include "README_SNIPPETS/VERSIONS.j2" | trim %}
