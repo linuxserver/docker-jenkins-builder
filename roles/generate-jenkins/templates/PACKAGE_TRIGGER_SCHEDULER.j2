@@ -33,7 +33,8 @@ jobs:
               skipped_branches="${skipped_branches}${br} "
             elif [[ "${br}" == $(yq -r '.ls_branch' <<< "${JENKINS_VARS}") ]]; then
               echo "Branch appears to be live; checking workflow." >> $GITHUB_STEP_SUMMARY
-              if [[ $(yq -r '.project_deprecation_status' <<< "${JENKINS_VARS}") == "true" ]]; then
+              README_VARS=$(curl -sX GET https://raw.githubusercontent.com/linuxserver/{{ project_repo_name }}/${br}/readme-vars.yml)
+              if [[ $(yq -r '.project_deprecation_status' <<< "${README_VARS}") == "true" ]]; then
                 echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
                 echo "> Branch appears to be deprecated; skipping trigger." >> $GITHUB_STEP_SUMMARY
                 skipped_branches="${skipped_branches}${br} "
