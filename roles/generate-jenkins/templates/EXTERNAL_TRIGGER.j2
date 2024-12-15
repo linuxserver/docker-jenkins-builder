@@ -114,7 +114,7 @@ jobs:
             "https://ghcr.io/v2/${image}/manifests/${tag}")
           if jq -e '.layers // empty' <<< "${multidigest}" >/dev/null 2>&1; then
             # If there's a layer element it's a single-arch manifest so just get that digest
-            digest=$(jq -r '.layers[0].digest' <<< "${multidigest}")
+            digest=$(jq -r '.config.digest' <<< "${multidigest}")
           else
             # Otherwise it's multi-arch or has manifest annotations
             if jq -e '.manifests[]?.annotations // empty' <<< "${multidigest}" >/dev/null 2>&1; then
