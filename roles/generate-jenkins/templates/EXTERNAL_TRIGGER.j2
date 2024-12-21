@@ -23,7 +23,10 @@ jobs:
         run: |
           printf "# External trigger for {{ project_repo_name }}\n\n" >> $GITHUB_STEP_SUMMARY
 {% if custom_version_command is defined or external_type != "os" %}
-          if grep -q "^{{ project_name }}_{{ ls_branch }}" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
+          if grep -q "^{{ project_name }}_{{ ls_branch }}_" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
+            echo "> [!NOTE]" >> $GITHUB_STEP_SUMMARY
+            echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` contains \`{{ project_name }}_{{ ls_branch }}_\`; will skip trigger if version matches." >> $GITHUB_STEP_SUMMARY
+          elif grep -q "^{{ project_name }}_{{ ls_branch }}" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
             echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
             echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` contains \`{{ project_name }}_{{ ls_branch }}\`; skipping trigger." >> $GITHUB_STEP_SUMMARY
             exit 0
@@ -88,6 +91,13 @@ jobs:
           echo "No external release, exiting" >> $GITHUB_STEP_SUMMARY
           exit 0
 {% endif %}
+          if $SKIPVER=$(awk -NF '_' '{print $3}' <<< "${SKIP_EXTERNAL_TRIGGER}"); then
+            if [[ "${SKIPVER}" == ${EXT_RELEASE} ]]; then
+              echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
+              echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` matches current external release; skipping trigger." >> $GITHUB_STEP_SUMMARY
+              exit 0
+            fi
+          fi
 {% if custom_version_command is defined or external_type != "os" %}
           if [ -z "${EXT_RELEASE}" ] || [ "${EXT_RELEASE}" == "null" ]; then
             echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
