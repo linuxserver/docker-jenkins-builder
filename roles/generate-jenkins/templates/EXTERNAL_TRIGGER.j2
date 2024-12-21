@@ -91,12 +91,10 @@ jobs:
           echo "No external release, exiting" >> $GITHUB_STEP_SUMMARY
           exit 0
 {% endif %}
-          if $SKIPVER=$(awk -NF '_' '{print $3}' <<< "${SKIP_EXTERNAL_TRIGGER}"); then
-            if [[ "${SKIPVER}" == ${EXT_RELEASE} ]]; then
-              echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
-              echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` matches current external release; skipping trigger." >> $GITHUB_STEP_SUMMARY
-              exit 0
-            fi
+          if grep -q "^{{ project_name }}_{{ ls_branch }}_${EXT_RELEASE}" <<< "${SKIP_EXTERNAL_TRIGGER}"; then
+            echo "> [!WARNING]" >> $GITHUB_STEP_SUMMARY
+            echo "> Github organizational variable \`SKIP_EXTERNAL_TRIGGER\` matches current external release; skipping trigger." >> $GITHUB_STEP_SUMMARY
+            exit 0
           fi
 {% if custom_version_command is defined or external_type != "os" %}
           if [ -z "${EXT_RELEASE}" ] || [ "${EXT_RELEASE}" == "null" ]; then
