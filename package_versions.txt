@@ -49,7 +49,7 @@ golang.org/x/xerrors                 v0.0.0-20220609144429-65e65417b02f  go-modu
 gopkg.in/op/go-logging.v1            v1.0.0-20160211212156-b2cb9fa56473  go-module    
 gopkg.in/yaml.v3                     v3.0.1                              go-module    
 grafana-ansible-collection           2.1.4                               npm          
-jinja2                               3.1.4                               python       
+jinja2                               3.1.5                               python       
 jq                                   1.7.1-r0                            apk          
 libacl                               2.3.2-r0                            apk          
 libattr                              2.5.2-r0                            apk          
@@ -90,8 +90,8 @@ py3-cparser                          2.22-r1                             apk
 py3-cparser-pyc                      2.22-r1                             apk          
 py3-cryptography                     42.0.7-r0                           apk          
 py3-cryptography-pyc                 42.0.7-r0                           apk          
-py3-jinja2                           3.1.4-r0                            apk          
-py3-jinja2-pyc                       3.1.4-r0                            apk          
+py3-jinja2                           3.1.5-r0                            apk          
+py3-jinja2-pyc                       3.1.5-r0                            apk          
 py3-markupsafe                       2.1.5-r1                            apk          
 py3-markupsafe-pyc                   2.1.5-r1                            apk          
 py3-packaging                        24.0-r1                             apk          
