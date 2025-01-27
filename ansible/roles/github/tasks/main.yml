@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks
+
+- name: Create .github directories
+  file:
+    path: "/tmp/{{ item }}"
+    state: directory
+    owner: "abc"
+    group: "abc"
+    mode: "0755"
+  loop:
+    - .github/ISSUE_TEMPLATE
+    - .github/workflows
+
+- name: Populate Github workflows
+  template:
+    src: "{{ item }}.j2"
+    dest: "/tmp/.github/workflows/{{ item }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - call_issue_pr_tracker.yml
+    - call_issues_cron.yml
+    - external_trigger_scheduler.yml
+    - external_trigger.yml
+    - greetings.yml
+    - package_trigger_scheduler.yml
+    - permissions.yml
+
+- name: Populate conditional Github workflows
+  when: item.when
+  template:
+    src: "{{ item.file }}.j2"
+    dest: "/tmp/.github/workflows/{{ item.file }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - file: package_trigger_scheduler.yml
+      when: custom_package_trigger != true
+    - file: external_trigger_scheduler.yml
+      when: custom_external_trigger != true
+    - file: external_trigger.yml
+      when: custom_external_trigger != true
+
+- name: Populate Github issue templates
+  template:
+    src: "{{ item }}.j2"
+    dest: "/tmp/.github/ISSUE_TEMPLATE/{{ item }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - issue.bug.yml
+    - config.yml
+    - issue.feature.yml
+
+- name: Populate Github metadata
+  template:
+    src: "{{ item }}.j2"
+    dest: "/tmp/.github/{{ item }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - CONTRIBUTING.md
+    - FUNDING.yml
+    - PULL_REQUEST_TEMPLATE.md

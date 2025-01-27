@@ -1,5 +1,5 @@
 {%- set markdown="gfm" -%}
-{% from 'common_macros.j2' import noter with context %}
+{{- noter -}}
 {% if project_deprecation_status %}
 {% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
 
