@@ -26,7 +26,7 @@
 
 - name: include template loop variables
   include_vars:
-    file: "/ansible/roles/generate-jenkins/templates.yml"
+    file: "/app/roles/generate-jenkins/templates.yml"
 
 ############################
 #   Directory Management   #
