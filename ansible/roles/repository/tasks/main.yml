@@ -15,8 +15,8 @@
   when:
     - sponsor_links is defined
   template:
-    src: donate.yml.j2
-    dest: /tmp/donate.txt
+    src: donate.txt.j2
+    dest: /tmp/root/donate.txt
     owner: "abc"
     group: "abc"
     mode: "0644"
