@@ -2,12 +2,14 @@
 {% from 'common_macros.j2' import noter with context %}
 ---
 title: {{ project_name }}
+{% if project_categories is defined and project_blurb is defined %}
 {% if project_categories and project_blurb %}
 tags:
 {% for tag in project_categories.split(",") %}
     - {{ tag | title }}
 {% endfor %}
 description: "{{ noter(project_blurb) | trim }}"
+{% endif %}
 {% endif %}
 ---
 {% include "README_SNIPPETS/DO_NOT_EDIT.j2" | trim %}
