@@ -1,13 +1,85 @@
 ---
 - hosts: localhost
   vars_files:
-    - vars/common
+    - vars/common.yml
+    - vars/default.yml
   pre_tasks:
     - name: Set container_name
+      tags: [ "always" ]
+      changed_when: false
       set_fact:
         container_name: "{{ lookup('env', 'CONTAINER_NAME' ) | default(omit) }}"
+
     - name: Set github_branch
+      tags: [ "always" ]
+      changed_when: false
       set_fact:
         github_branch: "{{ lookup('env', 'GITHUB_BRANCH' ) | default(omit) }}"
-  roles:
-    - { role: roles/generate-jenkins }
+
+    - name: Set UID
+      tags: [ "always" ]
+      changed_when: false
+      when: lookup('env', 'PUID')
+      user:
+        name: abc
+        non_unique: yes
+        uid: "{{ lookup('env', 'PUID') | int }}"
+
+    - name: Set GID
+      tags: [ "always" ]
+      changed_when: false
+      when: lookup('env', 'PGID')
+      group:
+        name: abc
+        non_unique: yes
+        gid: "{{ lookup('env', 'PGID') | int }}"
+
+    - name: Set noter
+      tags: [ "always" ]
+      changed_when: false
+      set_fact:
+        noter: "{{ lookup('template', 'common_macros.j2') | trim}}"
+
+    - name: Include var files for this project
+      tags: [ "always" ]
+      include_vars:
+        file: "/tmp/{{ item }}"
+      loop:
+        - 'jenkins-vars.yml'
+        - 'readme-vars.yml'
+
+  tasks:
+
+    - name: Add deprecation in S6
+      ansible.builtin.include_role:
+        name: deprecate
+      when:
+        project_deprecation_status == true
+
+    - name: Setup .github meta directory
+      tags:
+        - github
+      ansible.builtin.include_role:
+        name: github
+        apply:
+          tags:
+            - github
+
+    - name: Generate documentation
+      tags:
+        - documentation
+        - external
+        - mkdocs
+        - readme
+        - unraid
+      ansible.builtin.include_role:
+        name: documentation
+
+    - name: Generate Repository
+      tags:
+        - repository
+      ansible.builtin.include_role:
+        name: repository
+        apply:
+          tags:
+            - repository
