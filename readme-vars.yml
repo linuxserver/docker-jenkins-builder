@@ -1,6 +1,7 @@
 ---
 # project information
 project_name: jenkins-builder
+project_categories: "Internal"
 full_custom_readme: |
   {% raw -%}
   # linuxserver/jenkins-builder
