@@ -1,0 +1,34 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks
+
+- name: Create Root directory for donation
+  when:
+    - sponsor_links is defined
+  file:
+    path: "/tmp/root"
+    state: directory
+    owner: "abc"
+    group: "abc"
+    mode: "0755"
+
+- name: Populate donation file
+  when:
+    - sponsor_links is defined
+  template:
+    src: donate.txt.j2
+    dest: /tmp/root/donate.txt
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+
+- name: Populate Repository files
+  template:
+    src: "{{ item }}.j2"
+    dest: "/tmp/{{ item }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - .editorconfig
+    - Jenkinsfile
+    - LICENSE

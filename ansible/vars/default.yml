@@ -1,10 +1,7 @@
 ---
-
 github_branch: master
 github_user: linuxserver
-templated_vars:
- - 'jenkins-vars.yml'
- - 'readme-vars.yml'
+
 project_blurb_optional_extras_enabled: false
 project_blurb_optional_extras: []
 available_architectures: []
@@ -60,5 +57,5 @@ armhf_native: false
 build_armhf: false
 image_provenance: true
 image_sbom: true
-image_builder: 'container'
+image_builder: "container"
 project_categories: ""

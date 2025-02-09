@@ -1,0 +1,69 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks
+
+- name: Create Jenkins external directories
+  tags:
+    - documentation
+    - external
+    - mkdocs
+    - readme
+    - unraid
+  file:
+    path: "/tmp/.jenkins-external"
+    state: directory
+    owner: "abc"
+    group: "abc"
+    mode: "0755"
+
+- name: Template Unraid template
+  tags:
+    - external
+    - unraid
+  when:
+    - unraid_template
+    - item.unraid_template is defined
+    - full_custom_readme is not defined
+    - '"baseimage" not in project_name'
+    - '"jenkins-builder" not in project_name'
+  template:
+    src: unraid.xml.j2
+    dest: "/tmp/.jenkins-external/{{ project_name | lower }}.xml"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+
+- name: Template MkDocs page
+  tags:
+    - documentation
+    - external
+    - mkdocs
+  template:
+    src: documentation{{'-custom' if full_custom_readme is defined }}.md.j2
+    dest: "/tmp/.jenkins-external/{{ project_repo_name }}.md"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+
+- name: Template lite README
+  tags:
+    - documentation
+    - external
+    - readme
+  template:
+    src: lite{{'-custom' if full_custom_readme is defined }}.md.j2
+    dest: "/tmp/.jenkins-external/README.lite"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+
+- name: Template README
+  tags:
+    - documentation
+    - external
+    - readme
+  template:
+    src: readme{{'-custom' if full_custom_readme is defined }}.md.j2
+    dest: "/tmp/README.md"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"

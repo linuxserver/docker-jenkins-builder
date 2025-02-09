@@ -1,0 +1,41 @@
+---
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks
+
+- name: Create deprecation directories
+  file:
+    path: "/tmp/{{ item }}"
+    state: directory
+    owner: "abc"
+    group: "abc"
+    mode: "0755"
+  loop:
+    - root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d
+    - root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d
+
+- name: Create deprecation files
+  file:
+    path: "/tmp/{{ item }}"
+    state: touch
+    owner: "abc"
+    group: "abc"
+  loop:
+    - root/etc/s6-overlay/s6-rc.d/init-deprecate/dependencies.d/init-config-end
+    - root/etc/s6-overlay/s6-rc.d/init-deprecate/up
+    - root/etc/s6-overlay/s6-rc.d/init-services/dependencies.d/init-deprecate
+    - root/etc/s6-overlay/s6-rc.d/user/contents.d/init-deprecate
+
+- name: Populate file for init-deprecate/type
+  copy:
+    dest: /tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/type
+    content: |
+      oneshot
+    owner: "abc"
+    group: "abc"
+
+- name: Populate file for init-deprecate/up
+  template:
+    src: deprecation.j2
+    dest: /tmp/root/etc/s6-overlay/s6-rc.d/init-deprecate/run
+    owner: "abc"
+    group: "abc"
+    mode: "0755"
