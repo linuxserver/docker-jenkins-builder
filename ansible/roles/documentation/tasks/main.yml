@@ -21,7 +21,6 @@
     - unraid
   when:
     - unraid_template
-    - item.unraid_template is defined
     - full_custom_readme is not defined
     - '"baseimage" not in project_name'
     - '"jenkins-builder" not in project_name'
