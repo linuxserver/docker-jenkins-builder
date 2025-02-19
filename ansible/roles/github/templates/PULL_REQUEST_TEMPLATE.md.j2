@@ -1,7 +1,7 @@
 {%- set markdown="gfm" -%}
 {{- noter -}}
 {% if project_deprecation_status %}
-{% include "README_SNIPPETS/DEPRECATION.j2" | trim %}
+{% include "deprecation.md.j2" | trim %}
 
 {% endif %}
 <!--- Provide a general summary of your changes in the Title above -->
