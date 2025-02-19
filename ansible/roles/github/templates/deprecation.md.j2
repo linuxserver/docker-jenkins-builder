@@ -1,0 +1,3 @@
+{{ "This image is deprecated. We will not offer support for this image and it will not be updated." | admonition(flavour=markdown, severity="deprecation") }}
+
+{% if project_deprecation_message is defined %}{{ noter(project_deprecation_message) }}{% endif %}
