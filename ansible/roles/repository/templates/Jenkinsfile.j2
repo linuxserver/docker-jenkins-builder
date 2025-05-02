@@ -913,7 +913,7 @@ pipeline {
         }
         stage('Build ARM64') {
           agent {
-{% if use_qemu is defined %}
+{% if use_qemu is defined or use_qemu_arm64 is defined %}
             label 'X86-64-MULTI'
 {% else %}
             label 'ARM64'
@@ -987,7 +987,7 @@ pipeline {
 {% if build_riscv64 %}
         stage('Build RISCV64') {
           agent {
-{% if use_qemu is defined %}
+{% if use_qemu is defined or use_qemu_riscv64 is defined %}
             label 'X86-64-MULTI'
 {% else %}
             label 'RISCV64'
