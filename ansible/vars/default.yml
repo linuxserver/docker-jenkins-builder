@@ -55,6 +55,7 @@ unraid_template_sync: true
 unraid_template: true
 armhf_native: false
 build_armhf: false
+build_riscv64: false
 image_provenance: true
 image_sbom: true
 image_builder: "container"

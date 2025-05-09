@@ -352,7 +352,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + {% if build_riscv64 %}'|riscv64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           }
@@ -376,7 +376,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lsiodev-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lsiodev-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + {% if build_riscv64 %}'|riscv64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA
           }
@@ -400,7 +400,7 @@ pipeline {
           env.GITLABIMAGE = 'registry.gitlab.com/linuxserver.io/' + env.LS_REPO + '/lspipepr-' + env.CONTAINER_NAME
           env.QUAYIMAGE = 'quay.io/linuxserver.io/lspipepr-' + env.CONTAINER_NAME
           if (env.MULTIARCH == 'true') {
-            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + '|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
+            env.CI_TAGS = 'amd64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + {% if build_riscv64 %}'|riscv64-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST + {% endif %}'|arm64v8-{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}' + env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           } else {
             env.CI_TAGS = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-pkg-' + env.PACKAGE_TAG + '-dev-' + env.COMMIT_SHA + '-pr-' + env.PULL_REQUEST
           }
@@ -913,7 +913,7 @@ pipeline {
         }
         stage('Build ARM64') {
           agent {
-{% if use_qemu is defined %}
+{% if use_qemu is defined or use_qemu_arm64 is defined %}
             label 'X86-64-MULTI'
 {% else %}
             label 'ARM64'
@@ -984,6 +984,81 @@ pipeline {
                '''
           }
         }
+{% if build_riscv64 %}
+        stage('Build RISCV64') {
+          agent {
+{% if use_qemu is defined or use_qemu_riscv64 is defined %}
+            label 'X86-64-MULTI'
+{% else %}
+            label 'RISCV64'
+{% endif %}
+          }
+          steps {
+            echo "Running on node: ${NODE_NAME}"
+{% if "docker-baseimage" not in project_repo_name %}
+            sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.riscv64"
+{% endif %}
+            sh "docker buildx build \
+              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
+              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
+              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
+              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
+              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
+              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
+              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
+              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
+              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
+              --no-cache --pull -f Dockerfile.riscv64 -t ${IMAGE}:riscv64-${META_TAG} --platform=linux/riscv64 \
+              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
+              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  set -e
+                  IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                  for i in "${CACHE[@]}"; do
+                    docker tag ${IMAGE}:riscv64-${META_TAG} ${i}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER}
+                  done
+               '''
+            withCredentials([
+              [
+                $class: 'UsernamePasswordMultiBinding',
+                credentialsId: 'Quay.io-Robot',
+                usernameVariable: 'QUAYUSER',
+                passwordVariable: 'QUAYPASS'
+              ]
+            ]) {
+              retry_backoff(5,5) {
+                  sh '''#! /bin/bash
+                        set -e
+                        echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
+                        echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
+                        echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
+                        echo $QUAYPASS | docker login quay.io -u $QUAYUSER --password-stdin
+                        if [[ "${PACKAGE_CHECK}" != "true" ]]; then
+                          IFS=',' read -ra CACHE <<< "$BUILDCACHE"
+                          for i in "${CACHE[@]}"; do
+                            docker push ${i}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                          done
+                          for p in $(jobs -p); do
+                            wait "$p" || { echo "job $p failed" >&2; exit 1; }
+                          done
+                        fi
+                    '''
+              }
+            }
+            sh '''#! /bin/bash
+                  containers=$(docker ps -aq)
+                  if [[ -n "${containers}" ]]; then
+                    docker stop ${containers}
+                  fi
+                  docker system prune -f --volumes || :
+                  docker image prune -af || :
+               '''
+          }
+        }
+{% endif %}
       }
     }
 {% if skip_package_check is not defined %}
@@ -1099,6 +1174,10 @@ pipeline {
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
                   docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
+{% if build_riscv64 %}
+                  docker pull ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=riscv64
+                  docker tag ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:riscv64-${META_TAG}
+{% endif %}
                 fi
                 docker run --rm \
                 --shm-size=1gb \
@@ -1189,22 +1268,28 @@ pipeline {
                   done
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+{% if build_riscv64 %}
+                  docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${META_TAG} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }} -t ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER}
+{% endif %}
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER}
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER}
+{% if build_riscv64 %}
+                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${SEMVER} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER}
+{% endif %}
                   fi
                 done
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
 {% if project_deprecation_status %}
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
+                  docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}{% if build_riscv64 %} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
+                  docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}
 {% endif %}
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
+                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${META_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${META_TAG}
 
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
+                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG}
                   if [ -n "${SEMVER}" ]; then
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
+                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${SEMVER}{% endif %} ${MANIFESTIMAGE}:arm64v8-${SEMVER}
                   fi
                 done
               '''
