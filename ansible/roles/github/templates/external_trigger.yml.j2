@@ -10,6 +10,9 @@ name: External Trigger Main
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   external-trigger-{{ ls_branch|regex_replace('[^a-zA-Z0-9-]','-') }}:
     runs-on: ubuntu-latest
