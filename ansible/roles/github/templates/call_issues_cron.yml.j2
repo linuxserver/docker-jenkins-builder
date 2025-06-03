@@ -4,6 +4,9 @@ on:
     - cron:  '{{ 60 | random(seed=('docker-' + project_name + '-minute')) }} {{ 24 | random(seed=('docker-' + project_name + '-hour')) }} * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   stale:
     permissions:
