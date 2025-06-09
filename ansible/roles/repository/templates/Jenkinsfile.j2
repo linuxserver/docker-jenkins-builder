@@ -1073,6 +1073,7 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
+              chown 65532:65532 "${TEMPDIR}"
               if [ "${MULTIARCH}" == "true" ] && [ "${PACKAGE_CHECK}" != "true" ]; then
                 LOCAL_CONTAINER=${IMAGE}:amd64-${META_TAG}
               else
