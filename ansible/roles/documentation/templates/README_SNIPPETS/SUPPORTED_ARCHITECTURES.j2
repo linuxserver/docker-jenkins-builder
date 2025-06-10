@@ -13,4 +13,3 @@ The architectures supported by this image are:
 | riscv64 | {{ '✅ | riscv64-\<version tag\>' }} |
 {% endif %}
 | arm64 | {{ '✅ | arm64v8-\<version tag\>' if 'arm64' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
-| armhf | {{ '✅ | arm32v7-\<version tag\>' if 'armhf' in (available_architectures | map(attribute="arch") ) else '❌ |' }} |
