@@ -65,6 +65,10 @@ description: "{{ noter(project_blurb) | trim }}"
 {% include "README_SNIPPETS/KASM.j2" | trim %}
 
 {% endif %}
+{% if selkies_blurb is defined %}
+{% include "README_SNIPPETS/SELKIES.j2" | trim %} 
+
+{% endif %}
 {% if readonly_supported is defined and readonly_supported %}
 {% include "README_SNIPPETS/READONLY.j2" | trim %}
 

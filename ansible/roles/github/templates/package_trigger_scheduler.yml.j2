@@ -5,6 +5,9 @@ on:
     - cron:  '{{ 60 | random(seed=(project_name + '-minute')) }} {{ 24 | random(seed=(project_name + '-hour')) }} * * {{ 7 | random(seed=(project_name + '-day')) }}'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   package-trigger-scheduler:
     runs-on: ubuntu-latest
