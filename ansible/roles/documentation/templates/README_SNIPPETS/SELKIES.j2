@@ -25,6 +25,16 @@ This container is based on [Docker Baseimage Selkies](https://github.com/linuxse
 | LC_ALL | Set the Language for the container to run as IE `fr_FR.UTF-8` `ar_AE.UTF-8` |
 | NO_DECOR | If set the application will run without window borders in openbox for use as a PWA. |
 | NO_FULL | Do not automatically fullscreen applications when using openbox. |
+| DISABLE_ZINK | Do not set zink related environment variables when a video card is detected. |
+| WATERMARK_PNG | Full path inside the container to a watermark png IE `/config/image.png` |
+| WATERMARK_LOCATION | Where to paint the image over the stream integer options below |
+
+* 1 - Top Left
+* 2 - Top Right
+* 3 - Bottom Left
+* 4 - Bottom Right
+* 5 - Centered
+* 6 - Animated
 
 #### Optional run configurations
 
