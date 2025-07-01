@@ -91,13 +91,19 @@
 {# Set the WebUI link based on the link the CI runs against #}
     <TemplateURL>{{ "false" if unraid_template_sync is sameas false else "https://raw.githubusercontent.com/linuxserver/templates/main/unraid/" + project_name | lower + ".xml" }}</TemplateURL>
     <Icon>https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/linuxserver-ls-logo.png</Icon>
-{% if (unraid_requirement is defined and unraid_requirement != "") or (external_application_snippet_enabled) %}
+{% if (unraid_requirement is defined and unraid_requirement != "") or (external_application_snippet_enabled) or (selkies_blurb is defined) %}
     <Requires>
-        {{ unraid_requirement }}
-        {% if external_application_snippet_enabled %}
+{% if unraid_requirement is defined %}
+        {{ unraid_requirement | indent(4) | trim }}
+{% endif %}
+{% if external_application_snippet_enabled %}
         This container requires an external application to be run separately.
-        {{ external_application_unraid_block }}
-        {% endif %}
+        {{ external_application_unraid_block | indent(4) | trim }}
+{% endif %}
+{% if selkies_blurb is defined %}
+        This image is unprotected by default __**do not**__ expose it to the internet.
+        Please read {{ project_github_repo_url }}#security for more information.
+{% endif %}
     </Requires>
 {% endif %}
 {# Create changelog #}
