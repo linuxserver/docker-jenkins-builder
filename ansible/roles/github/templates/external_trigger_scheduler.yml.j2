@@ -5,6 +5,9 @@ on:
     - cron:  '{{ 60 | random(seed=(project_name + '-external-minute')) }} * * * *'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   external-trigger-scheduler:
     runs-on: ubuntu-latest
