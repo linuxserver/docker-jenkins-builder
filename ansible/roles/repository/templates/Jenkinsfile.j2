@@ -1315,7 +1315,7 @@ pipeline {
         echo "Auto-generating release notes"
         sh '''AUTO_RELEASE_NOTES=$(curl -fsL -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases/generate-notes  \
         -d '{"tag_name":"'${META_TAG}'",\
-             "target_commitish": "{{ ls_branch }}"}' | jq -r '.body') '''
+             "target_commitish": "{{ ls_branch }}"}' | jq -r '.body' | sed 's|## What.s Changed||') '''
         echo "Pushing New tag for current commit ${META_TAG}"
         sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/git/tags \
         -d '{"tag":"'${META_TAG}'",\
@@ -1351,12 +1351,20 @@ pipeline {
 {% elif external_type == "pip_version" %}
               echo "Updating PIP version of ${EXT_PIP} to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% elif external_type == "custom" %}              echo "Custom External Release" > releasebody.json{% endif %}
-              echo '{"tag_name":"'${META_TAG}'",\
-                     "target_commitish": "{{ ls_branch }}",\
-                     "name": "'${META_TAG}'",\
-                     "body": "**CI Report:**\\n\\n'${CI_URL:-N/A}'\\n\\n**LinuxServer Changes:**\\n\\n'${AUTO_RELEASE_NOTES}'\\n\\n**Remote Changes:**\\n\\n' > start
-              printf '","draft": false,"prerelease": {% if release_type == "stable" %}false{% elif release_type == "prerelease" %}true{% endif %}}' >> releasebody.json
-              paste -d'\\0' start releasebody.json > releasebody.json.done
+              jq -n \
+                --arg tag_name "$META_TAG" \
+                --arg target_commitish "{{ ls_branch }}" \
+                --arg ci_url "${CI_URL:-N/A}" \
+                --arg ls_notes "$AUTO_RELEASE_NOTES" \
+                --arg remote_notes "$(cat releasebody.json)" \
+                '{
+                  "tag_name": $tag_name,
+                  "target_commitish": $target_commitish,
+                  "name": $tag_name,
+                  "body": ("**CI Report:**\\n\\n" + $ci_url + "\\n\\n**LinuxServer Changes:**\\n\\n" + $ls_notes + "\\n\\n**Remote Changes:**\\n\\n" + $remote_notes),
+                  "draft": false,
+                  "prerelease": {% if release_type == "stable" %}false{% elif release_type == "prerelease" %}true{% endif %}
+                }' > releasebody.json.done
               curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done'''
       }
     }
