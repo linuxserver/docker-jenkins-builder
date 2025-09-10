@@ -1313,9 +1313,15 @@ pipeline {
       }
       steps {
         echo "Auto-generating release notes"
-        sh '''AUTO_RELEASE_NOTES=$(curl -fsL -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases/generate-notes  \
-        -d '{"tag_name":"'${META_TAG}'",\
-             "target_commitish": "{{ ls_branch }}"}' | jq -r '.body' | sed 's|## What.s Changed||') '''
+        sh '''if [ "$(git tag --points-at HEAD)" != "" ]; then
+            echo "Existing tag points to current commit, suggesting no new LS changes"
+            AUTO_RELEASE_NOTES="No changes"
+          else
+            AUTO_RELEASE_NOTES=$(curl -fsL -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases/generate-notes  \
+              -d '{"tag_name":"'${META_TAG}'",\
+                  "target_commitish": "{{ ls_branch }}"}' \
+              | jq -r '.body' | sed 's|## What.s Changed||')
+          fi'''
         echo "Pushing New tag for current commit ${META_TAG}"
         sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/git/tags \
         -d '{"tag":"'${META_TAG}'",\
