@@ -364,6 +364,7 @@ pipeline {
           env.META_TAG = {% if release_tag != "latest" %}'{{ release_tag }}-' + {% endif %}env.EXT_RELEASE_CLEAN + '-ls' + env.LS_TAG_NUMBER
           env.EXT_RELEASE_TAG = '{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}version-' + env.EXT_RELEASE_CLEAN
           env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
+          env.CITEST_IMAGETAG = 'latest'
         }
       }
     }
@@ -389,6 +390,7 @@ pipeline {
           env.EXT_RELEASE_TAG = '{% if release_tag != "latest" %}{{ release_tag }}-{% endif %}version-' + env.EXT_RELEASE_CLEAN
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.DEV_DOCKERHUB_IMAGE + '/tags/'
           env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
+          env.CITEST_IMAGETAG = 'develop'
         }
       }
     }
@@ -414,6 +416,7 @@ pipeline {
           env.CODE_URL = 'https://github.com/' + env.LS_USER + '/' + env.LS_REPO + '/pull/' + env.PULL_REQUEST
           env.DOCKERHUB_LINK = 'https://hub.docker.com/r/' + env.PR_DOCKERHUB_IMAGE + '/tags/'
           env.BUILDCACHE = 'docker.io/lsiodev/buildcache,registry.gitlab.com/linuxserver.io/docker-jenkins-builder/lsiodev-buildcache,ghcr.io/linuxserver/lsiodev-buildcache,quay.io/linuxserver.io/lsiodev-buildcache'
+          env.CITEST_IMAGETAG = 'develop'
         }
       }
     }
@@ -1174,7 +1177,7 @@ pipeline {
                     CI_DOCKERENV="LSIO_FIRST_PARTY=true"
                   fi
                 fi
-                docker pull ghcr.io/linuxserver/ci:latest
+                docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
                 if [ "${MULTIARCH}" == "true" ]; then
                   docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
                   docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
@@ -1215,7 +1218,7 @@ pipeline {
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
                 -e NODE_NAME=\"${NODE_NAME}\" \
                 -e SYFT_IMAGE_TAG=\"${CI_SYFT_IMAGE_TAG:-${SYFT_IMAGE_TAG}}\" \
-                -t ghcr.io/linuxserver/ci:latest \
+                -t ghcr.io/linuxserver/ci:${CITEST_IMAGETAG} \
                 python3 test_build.py'''
         }
       }
