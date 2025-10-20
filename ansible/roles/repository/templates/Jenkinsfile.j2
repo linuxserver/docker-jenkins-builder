@@ -461,7 +461,7 @@ pipeline {
                   -v ${WORKSPACE}:/mnt \
                   -e AWS_ACCESS_KEY_ID=\"${S3_KEY}\" \
                   -e AWS_SECRET_ACCESS_KEY=\"${S3_SECRET}\" \
-                  ghcr.io/linuxserver/baseimage-alpine:3.20 s6-envdir -fn -- /var/run/s6/container_environment /bin/bash -c "\
+                  ghcr.io/linuxserver/baseimage-alpine:3 s6-envdir -fn -- /var/run/s6/container_environment /bin/bash -c "\
                     apk add --no-cache python3 && \
                     python3 -m venv /lsiopy && \
                     pip install --no-cache-dir -U pip && \
@@ -1256,10 +1256,10 @@ pipeline {
                       fi
                   done
                   docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:{{ release_tag }} -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                      { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   fi
 {% if project_deprecation_status %}
                   docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
@@ -1288,21 +1288,21 @@ pipeline {
                       fi
                   done
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${META_TAG} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }} -t ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${SEMVER} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   fi
                 done
@@ -1311,15 +1311,15 @@ pipeline {
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}{% if build_riscv64 %} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${META_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
-                    { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${SEMVER}{% endif %} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
-                      { [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]] && exit 1; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
               '''
