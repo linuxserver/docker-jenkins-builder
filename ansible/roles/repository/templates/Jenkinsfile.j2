@@ -1360,9 +1360,9 @@ pipeline {
               echo "Updating to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% endif %}
 {% if external_type == "github_devel" %}
-              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq '.[0] |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq -r '.[0] |.body' > releasebody.json
 {% elif external_type == "github_stable" %}
-              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq '. |.body' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq -r '. |.body' > releasebody.json
 {% elif external_type == "alpine_repo" %}
               echo "Updating external repo packages to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% elif external_type == "custom_json" %}
@@ -1372,9 +1372,9 @@ pipeline {
 {% elif external_type == "external_blob" %}
               echo "External Release file changed at ${EXT_BLOB}" > releasebody.json
 {% elif external_type == "github_commit" %}
-              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_RELEASE_CLEAN} | jq '.commit.message' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/commits/${EXT_RELEASE_CLEAN} | jq -r '.commit.message' > releasebody.json
 {% elif external_type == "gitlab_commit" %}
-              curl -s https://gitlab.com/api/v4/projects/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq '. | .title' | sed 's:^.\\(.*\\).$:\\1:' > releasebody.json
+              curl -s https://gitlab.com/api/v4/projects/${EXT_GITLAB_ID}/repository/commits/${EXT_GIT_BRANCH} | jq -r '. | .title' > releasebody.json
 {% elif external_type == "npm_version" %}
               echo "Updating NPM version of ${EXT_NPM} to ${EXT_RELEASE_CLEAN}" > releasebody.json
 {% elif external_type == "os" %}
