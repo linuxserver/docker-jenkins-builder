@@ -860,6 +860,8 @@ pipeline {
                 -e WEB_PATH=\"${CI_WEBPATH}\" \
                 -e NODE_NAME=\"${NODE_NAME}\" \
                 -e SYFT_IMAGE_TAG=\"${CI_SYFT_IMAGE_TAG:-${SYFT_IMAGE_TAG}}\" \
+                -e COMMIT_SHA=\"${COMMIT_SHA}\" \
+                -e BUILD_NUMBER=\"${BUILD_NUMBER}\" \
                 -t ghcr.io/linuxserver/ci:${CITEST_IMAGETAG} \
                 python3 test_build.py'''
         }
@@ -953,25 +955,25 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
-        echo "Auto-generating release notes"
-        sh '''if [ "$(git tag --points-at HEAD)" != "" ]; then
-            echo "Existing tag points to current commit, suggesting no new LS changes"
-            AUTO_RELEASE_NOTES="No changes"
-          else
-            AUTO_RELEASE_NOTES=$(curl -fsL -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases/generate-notes  \
-              -d '{"tag_name":"'${META_TAG}'",\
-                  "target_commitish": "master"}' \
-              | jq -r '.body' | sed 's|## What.s Changed||')
-          fi'''
-        echo "Pushing New tag for current commit ${META_TAG}"
-        sh '''curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/git/tags \
-        -d '{"tag":"'${META_TAG}'",\
-             "object": "'${COMMIT_SHA}'",\
-             "message": "Tagging Release '${EXT_RELEASE_CLEAN}'-ls'${LS_TAG_NUMBER}' to master",\
-             "type": "commit",\
-             "tagger": {"name": "LinuxServer-CI","email": "ci@linuxserver.io","date": "'${GITHUB_DATE}'"}}' '''
-        echo "Pushing New release for Tag"
         sh '''#! /bin/bash
+              echo "Auto-generating release notes"
+              if [ "$(git tag --points-at HEAD)" != "" ]; then
+                echo "Existing tag points to current commit, suggesting no new LS changes"
+                AUTO_RELEASE_NOTES="No changes"
+              else
+                AUTO_RELEASE_NOTES=$(curl -fsL -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases/generate-notes  \
+                  -d '{"tag_name":"'${META_TAG}'",\
+                      "target_commitish": "master"}' \
+                  | jq -r '.body' | sed 's|## What.s Changed||')
+              fi
+              echo "Pushing New tag for current commit ${META_TAG}"
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/git/tags \
+                -d '{"tag":"'${META_TAG}'",\
+                  "object": "'${COMMIT_SHA}'",\
+                  "message": "Tagging Release '${EXT_RELEASE_CLEAN}'-ls'${LS_TAG_NUMBER}' to master",\
+                  "type": "commit",\
+                  "tagger": {"name": "LinuxServer-CI","email": "ci@linuxserver.io","date": "'${GITHUB_DATE}'"}}'
+              echo "Pushing New release for Tag"
               echo "Updating base packages to ${PACKAGE_TAG}" > releasebody.json
               jq -n \
                 --arg tag_name "$META_TAG" \
@@ -986,7 +988,8 @@ pipeline {
                   "body": ("**CI Report:**\\n\\n" + $ci_url + "\\n\\n**LinuxServer Changes:**\\n\\n" + $ls_notes + "\\n\\n**Remote Changes:**\\n\\n" + $remote_notes),
                   "draft": false,
                   "prerelease": false                }' > releasebody.json.done
-              curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done'''
+              curl -H "Authorization: token ${GITHUB_TOKEN}" -X POST https://api.github.com/repos/${LS_USER}/${LS_REPO}/releases -d @releasebody.json.done
+        '''
       }
     }
     // Add protection to the release branch
