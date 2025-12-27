@@ -20,6 +20,7 @@ This container is based on [Docker Baseimage Selkies](https://github.com/linuxse
 
 | Variable | Description |
 | :----: | --- |
+| PIXELFLUX_WAYLAND | **Experimental** If set to true the container will initialize in Wayland mode running [Smithay](https://github.com/Smithay/smithay) and Labwc while enabling zero copy encoding with a GPU |
 | CUSTOM_PORT | Internal port the container listens on for http if it needs to be swapped from the default `{% if external_http_port is defined %}{{ external_http_port }}{% else %}3000{% endif %}` |
 | CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default `{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}` |
 | CUSTOM_WS_PORT | Internal port the container listens on for websockets if it needs to be swapped from the default 8082 |
