@@ -99,9 +99,7 @@ SealSkin is a self-hosted, client-server platform that provides secure authentic
 
 This container is based on [Docker Baseimage Selkies](https://github.com/linuxserver/docker-baseimage-selkies).
 
-<details>
-<summary>Click to expand: Optional Environment Variables</summary>
-
+{% set blurb1 %}
 | Variable | Description |
 | :----: | --- |
 | PIXELFLUX_WAYLAND | **Experimental** If set to true the container will initialize in Wayland mode running [Smithay](https://github.com/Smithay/smithay) and Labwc while enabling zero copy encoding with a GPU |
@@ -135,23 +133,19 @@ This container is based on [Docker Baseimage Selkies](https://github.com/linuxse
 - **4**: Bottom Right
 - **5**: Centered
 - **6**: Animated
+{% endset %}
+{{ blurb1 | admonition(flavour=markdown, title="Click to expand: Optional Environment Variables", collapse="???") }}
 
-</details>
-
-<details>
-<summary>Click to expand: Optional Run Configurations (DinD & GPU Mounts)</summary>
-
+{% set blurb2 %}
 | Argument | Description |
 | :----: | --- |
 | `--privileged` | Starts a Docker-in-Docker (DinD) environment. For better performance, mount the Docker data directory from the host, e.g., `-v /path/to/docker-data:/var/lib/docker`. |
 | `-v /var/run/docker.sock:/var/run/docker.sock` | Mounts the host's Docker socket to manage host containers from within this container. |
 | `--device /dev/dri:/dev/dri` | Mount a GPU into the container, this can be used in conjunction with the `DRINODE` environment variable to leverage a host video card for GPU accelerated applications. |
+{% endset %}
+{{ blurb2 | admonition(flavour=markdown, title="Click to expand: Optional Run Configurations (DinD & GPU Mounts)", collapse="???") }}
 
-</details>
-
-<details>
-<summary>Click to expand: Legacy X11 Resolution & Acceleration</summary>
-
+{% set blurb3 %}
 **Note:** This section applies only if you are **NOT** using `PIXELFLUX_WAYLAND=true`.
 
 When using 3d acceleration via Nvidia DRM or DRI3 in X11 mode, it is important to clamp the virtual display to a reasonable max resolution to avoid memory exhaustion or poor performance.
@@ -165,7 +159,8 @@ This will set the total virtual framebuffer to 4K. By default, the virtual monit
 -e SELKIES_MANUAL_HEIGHT=1080
 -e MAX_RESOLUTION=1920x1080
 ```
-</details>
+{% endset %}
+{{ blurb3 | admonition(flavour=markdown, title="Click to expand: Legacy X11 Resolution & Acceleration", collapse="???") }}
 
 ### Language Support - Internationalization
 
@@ -210,9 +205,7 @@ You can install packages from the system's native repository using the [universa
 
 ### Advanced Configuration
 
-<details>
-<summary>Click to expand: Hardening Options</summary>
-
+{% set blurb4 %}
 These variables can be used to lock down the desktop environment for single-application use cases or to restrict user capabilities.
 
 | Variable | Description |
@@ -231,12 +224,10 @@ These variables can be used to lock down the desktop environment for single-appl
 | **`DISABLE_MOUSE_BUTTONS`** | If true, disables the right-click and middle-click context menus and actions within the Openbox window manager. |
 | **`HARDEN_KEYBINDS`** | If true, disables default Openbox keybinds that can bypass other hardening options (e.g., `Alt+F4` to close windows, `Alt+Escape` to show the root menu). |
 | **`RESTART_APP`** | If true, enables a watchdog service that automatically restarts the main application if it is closed. The user's autostart script is made read-only and root owned to prevent tampering. |
+{% endset %}
+{{ blurb4 | admonition(flavour=markdown, title="Click to expand: Hardening Options", collapse="???") }}
 
-</details>
-
-<details>
-<summary>Click to expand: Selkies Application Settings</summary>
-
+{% set blurb5 %}
 Using environment variables every facet of the application can be configured.
 
 **Booleans and Locking:**
@@ -312,5 +303,5 @@ If `SELKIES_MANUAL_WIDTH` or `SELKIES_MANUAL_HEIGHT` are set, the resolution is 
 | `SELKIES_ENABLE_PLAYER2` | `True` | Enable sharing link for gamepad player 2. |
 | `SELKIES_ENABLE_PLAYER3` | `True` | Enable sharing link for gamepad player 3. |
 | `SELKIES_ENABLE_PLAYER4` | `True` | Enable sharing link for gamepad player 4. |
-
-</details>
+{% endset %}
+{{ blurb5 | admonition(flavour=markdown, title="Click to expand: Selkies Application Settings", collapse="???") }}
