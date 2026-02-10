@@ -40,7 +40,7 @@ class FilterModule(object):
 
         note = ""
 
-        aa_severity = severity
+        clear_text = text
 
         if severity == "deprecation":
             note = f"# DEPRECATION NOTICE \n{text}"
@@ -48,6 +48,8 @@ class FilterModule(object):
             severity = severities.get(severity,"NOTE")
             text = text.replace("\n", "\n>")
             note = f">[!{severity}]\n>{text}"
+            if collapse != None:
+                note = f"<details>\n<summary>{title}</summary>\n\n{clear_text}\n</details>"
         elif flavour == "mkdocs":
             severity = severities.get(severity, "note")
             if collapse == None:
@@ -62,4 +64,3 @@ class FilterModule(object):
             note += f"\n\n    {text}"
 
         return note
-
