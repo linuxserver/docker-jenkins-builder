@@ -54,7 +54,7 @@ class FilterModule(object):
             severity = severities.get(severity, "note")
             if collapse == None:
                 note = "!!!"
-            elif collapse:
+            elif collapse == "expanded":
                 note = "???+"
             else:
                 note = "???"
