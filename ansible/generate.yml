@@ -19,7 +19,7 @@
     - name: Set UID
       tags: [ "always" ]
       changed_when: false
-      when: lookup('env', 'PUID')
+      when: lookup('env', 'PUID') | ternary(True, False)
       user:
         name: abc
         non_unique: yes
@@ -28,7 +28,7 @@
     - name: Set GID
       tags: [ "always" ]
       changed_when: false
-      when: lookup('env', 'PGID')
+      when: lookup('env', 'PGID') | ternary(True, False)
       group:
         name: abc
         non_unique: yes
