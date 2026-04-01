@@ -229,11 +229,11 @@ For Intel and AMD GPUs.
 1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
     * **Unraid:** Use the production branch from the Nvidia Driver Plugin.
 
-2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1` in your host bootloader.
+2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
     * **Standard Linux (GRUB):** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
 
         ```text
-        GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1"
+        GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1 nvidia_drm.fbdev=1"
         ```
 
         Then apply the changes by running:
@@ -242,7 +242,7 @@ For Intel and AMD GPUs.
         sudo update-grub
         ```
 
-    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1` to the end of the `append` line for the Unraid OS boot entry.
+    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` to the end of the `append` line for the Unraid OS boot entry.
 
 3. **Hardware Initialization:** **On headless systems, the Nvidia video card requires a physical dummy plug inserted into the GPU so that DRM initializes properly.**
 
