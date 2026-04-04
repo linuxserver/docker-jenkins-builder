@@ -1,9 +1,10 @@
 {#- Create a real object from repo_vars -#}
-{%- set better_vars={} -%}
-{%- for i in repo_vars -%}
-{%- set i=(i | replace(' = ', '=', 1) | replace('=', '¯\_(ツ)_/¯', 1) | replace("'", "")).split('¯\_(ツ)_/¯') -%}
-{%- set x=(better_vars.__setitem__(i[0], i[1])) -%}
-{%- endfor -%}
+{%- set better_vars = dict(
+  repo_vars
+  | map('regex_replace', ' = ', '=')
+  | map('regex_replace', "'", '')
+  | map('split', '=', 1)
+) -%}
 {#- Create a real object from repo_vars -#}
 name: External Trigger Main
 
