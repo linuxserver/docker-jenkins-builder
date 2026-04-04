@@ -9,6 +9,7 @@
 | CUSTOM_USER | HTTP Basic auth username, abc is default. |
 | DRI_NODE | **Encoding GPU**: Enable VAAPI/NVENC stream encoding and use the specified device IE `/dev/dri/renderD128` |
 | DRINODE | **Rendering GPU**: Specify which GPU to use for EGL/3D acceleration IE `/dev/dri/renderD129` |
+| AUTO_GPU | If set to true and in Wayland mode, we will automatically use the first GPU available for encoding and rendering IE `/dev/dri/renderD128` |
 | PASSWORD | HTTP Basic auth password, abc is default. If unset there will be no auth |
 | SUBFOLDER | Subfolder for the application if running a subfolder reverse proxy, need both slashes IE `/subfolder/` |
 | TITLE | The page title displayed on the web browser, default "Selkies" |
@@ -196,7 +197,9 @@ To use hardware acceleration in Wayland mode, we distinguish between the card us
 * `DRINODE`: The path to the GPU used for **Rendering** (EGL).
 * `DRI_NODE`: The path to the GPU used for **Encoding** (VAAPI/NVENC).
 
-If both variables point to the same device, the container will automatically enable **Zero Copy** encoding, significantly reducing CPU usage and latency.
+If both variables point to the same device, the container will automatically enable **Zero Copy** encoding, significantly reducing CPU usage and latency. If they are set to different devices one will be used for **Rendering** and one for **Encoding** with a cpu readback.
+
+You can also use the environment variable `AUTO_GPU=true`, with this set the first card detected in the container (IE `/dev/dri/renderD128`) will be used and configured for **Zero Copy**.
 
 ##### Intel & AMD (Open Source Drivers)
 
@@ -219,16 +222,18 @@ For Intel and AMD GPUs.
 
 **Note: Nvidia support is not available for Alpine-based images.**
 
+**Note: Nvidia frames have issues with hardware decoders in Chromium browsers you need to navigate to `chrome://flags/#disable-accelerated-video-decode` and toggle it to `Disabled` for smooth playback**
+
 **Prerequisites:**
 
 1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
     * **Unraid:** Use the production branch from the Nvidia Driver Plugin.
 
-2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1` in your host bootloader.
+2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
     * **Standard Linux (GRUB):** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
 
         ```text
-        GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1"
+        GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1 nvidia_drm.fbdev=1"
         ```
 
         Then apply the changes by running:
@@ -237,7 +242,7 @@ For Intel and AMD GPUs.
         sudo update-grub
         ```
 
-    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1` to the end of the `append` line for the Unraid OS boot entry.
+    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` to the end of the `append` line for the Unraid OS boot entry.
 
 3. **Hardware Initialization:** **On headless systems, the Nvidia video card requires a physical dummy plug inserted into the GPU so that DRM initializes properly.**
 
