@@ -29,7 +29,7 @@
     - permissions.yml
 
 - name: Populate conditional Github workflows
-  when: item.when
+  when: item.when | ternary(True, False)
   template:
     src: "{{ item.file }}.j2"
     dest: "/tmp/.github/workflows/{{ item.file }}"

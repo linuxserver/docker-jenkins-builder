@@ -1,119 +1,15 @@
-**Modern GUI desktop apps may have compatibility issues with the latest Docker syscall restrictions. You can use Docker with the `--security-opt seccomp=unconfined` setting to allow these syscalls on hosts with older Kernels or libseccomp versions.**
-
-### Security
-
-{{ "This container provides privileged access to the host system. Do not expose it to the Internet unless you have secured it properly." | admonition(flavour=markdown, severity="warning") }}
-
-**HTTPS is required for full functionality.** Modern browser features such as WebCodecs, used for video and audio, will not function over an insecure HTTP connection.
-
-By default, this container has no authentication. The optional `CUSTOM_USER` and `PASSWORD` environment variables enable basic HTTP auth, which is suitable only for securing the container on a trusted local network. For internet exposure, we strongly recommend placing the container behind a reverse proxy, such as [SWAG](https://github.com/linuxserver/docker-swag), with a robust authentication mechanism.
-
-The web interface includes a terminal with passwordless `sudo` access. Any user with access to the GUI can gain root control within the container, install arbitrary software, and probe your local network.
-
-While not generally recommended, certain legacy environments specifically those with older hardware or outdated Linux distributions may require the deactivation of the standard seccomp profile to get containerized desktop software to run. This can be achieved by utilizing the `--security-opt seccomp=unconfined` parameter. It is critical to use this option only when absolutely necessary as it disables a key security layer of Docker, elevating the potential for container escape vulnerabilities.
-
-### Hardware Acceleration & The Move to Wayland
-
-We are currently transitioning our desktop containers from X11 to Wayland. While X11 is still the default, we strongly encourage users to test the new Wayland mode.
-
-**Important:** GPU acceleration support for X11 is being deprecated. Future development for hardware acceleration will focus entirely on the Wayland stack.
-
-To enable Wayland mode, set the following environment variable:
-
-* `-e PIXELFLUX_WAYLAND=true`
-
-**Why use Wayland?**
-
-* **Zero Copy Encoding:** When configured correctly with a GPU, the frame is rendered and encoded on the video card without ever being copied to the system RAM. This drastically lowers CPU usage and latency.
-* **Modern Stack:** Single-application containers utilize **Labwc** (replacing Openbox) and full desktop containers use **KDE Plasma Wayland**, providing a more modern and secure compositing environment while retaining the same user experience.
-
-#### GPU Configuration
-
-To use hardware acceleration in Wayland mode, we distinguish between the card used for **Rendering** (3D apps/Desktops) and **Encoding** (Video Stream).
-
-**Configuration Variables:**
-
-* `DRINODE`: The path to the GPU used for **Rendering** (EGL).
-* `DRI_NODE`: The path to the GPU used for **Encoding** (VAAPI/NVENC).
-
-If both variables point to the same device, the container will automatically enable **Zero Copy** encoding, significantly reducing CPU usage and latency.
-
-##### Intel & AMD (Open Source Drivers)
-
-For Intel and AMD GPUs.
-
-```yaml
-    devices:
-      - /dev/dri:/dev/dri
-    environment:
-      - PIXELFLUX_WAYLAND=true
-      # Optional: Specify device if multiple exist (IE: /dev/dri/renderD129)
-      - DRINODE=/dev/dri/renderD128
-      - DRI_NODE=/dev/dri/renderD128
-```
-
-{% if show_nvidia is defined %}##### Nvidia (Proprietary Drivers)
-
-**Note: Nvidia support is not available for Alpine-based images.**
-
-**Prerequisites:**
-
-1. **Driver:** Proprietary drivers **580 or higher** are required.
-2. **Kernel Parameter:** Set `nvidia-drm.modeset=1` in your host bootloader (GRUB/systemd-boot).
-3. **Initialization:** On headless systems, run `nvidia-modprobe --modeset` on the host (once per boot) to initialize the card.
-4. **Docker Runtime:** Configure the host docker daemon to use the Nvidia runtime:
-
-    ```bash
-    sudo nvidia-ctk runtime configure --runtime=docker
-    sudo systemctl restart docker
-    ```
-
-**Compose Configuration:**
-
-```yaml
----
-services:
-  {{ project_name }}:
-    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
-    environment:
-      - PIXELFLUX_WAYLAND=true
-      # Ensure these point to the rendered node injected by the runtime (usually renderD128)
-      - DRINODE=/dev/dri/renderD128
-      - DRI_NODE=/dev/dri/renderD128
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [compute,video,graphics,utility]
-```
-{% endif %}
-
-### SealSkin Compatibility
-
-This container is compatible with [SealSkin](https://sealskin.app).
-
-SealSkin is a self-hosted, client-server platform that provides secure authentication and collaboration features while using a browser extension to intercept user actions such as clicking a link or downloading a file and redirect them to a secure, isolated application environment running on a remote server.
-
-* **SealSkin Server:** [Get it Here](https://github.com/linuxserver/docker-sealskin)
-* **Browser Extension:** [Chrome](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/).
-* **Mobile App:** [iOS](https://apps.apple.com/us/app/sealskin/id6758210210) and [Android](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin)
-
-### Options in all Selkies-based GUI containers
-
-This container is based on [Docker Baseimage Selkies](https://github.com/linuxserver/docker-baseimage-selkies).
-
-{% set blurb1 %}
+{%- set selkies_variables -%}
 | Variable | Description |
 | :----: | --- |
 | PIXELFLUX_WAYLAND | **Experimental** If set to true the container will initialize in Wayland mode running [Smithay](https://github.com/Smithay/smithay) and Labwc while enabling zero copy encoding with a GPU |
+| SELKIES_DESKTOP | If set to true and in Wayland mode, a simple panel will be initialized with labwc |
 | CUSTOM_PORT | Internal port the container listens on for http if it needs to be swapped from the default `{% if external_http_port is defined %}{{ external_http_port }}{% else %}3000{% endif %}` |
 | CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default `{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}` |
 | CUSTOM_WS_PORT | Internal port the container listens on for websockets if it needs to be swapped from the default 8082 |
 | CUSTOM_USER | HTTP Basic auth username, abc is default. |
 | DRI_NODE | **Encoding GPU**: Enable VAAPI/NVENC stream encoding and use the specified device IE `/dev/dri/renderD128` |
 | DRINODE | **Rendering GPU**: Specify which GPU to use for EGL/3D acceleration IE `/dev/dri/renderD129` |
+| AUTO_GPU | If set to true and in Wayland mode, we will automatically use the first GPU available for encoding and rendering IE `/dev/dri/renderD128` |
 | PASSWORD | HTTP Basic auth password, abc is default. If unset there will be no auth |
 | SUBFOLDER | Subfolder for the application if running a subfolder reverse proxy, need both slashes IE `/subfolder/` |
 | TITLE | The page title displayed on the web browser, default "Selkies" |
@@ -139,19 +35,15 @@ This container is based on [Docker Baseimage Selkies](https://github.com/linuxse
 * **4**: Bottom Right
 * **5**: Centered
 * **6**: Animated
-{% endset %}
-{{ blurb1 | admonition(flavour=markdown, title="Click to expand: Optional Environment Variables", collapse=True) }}
-
-{% set blurb2 %}
+{% endset -%}
+{%- set optional_variables -%}
 | Argument | Description |
 | :----: | --- |
 | `--privileged` | Starts a Docker-in-Docker (DinD) environment. For better performance, mount the Docker data directory from the host, e.g., `-v /path/to/docker-data:/var/lib/docker`. |
 | `-v /var/run/docker.sock:/var/run/docker.sock` | Mounts the host's Docker socket to manage host containers from within this container. |
 | `--device /dev/dri:/dev/dri` | Mount a GPU into the container, this can be used in conjunction with the `DRINODE` environment variable to leverage a host video card for GPU accelerated applications. |
-{% endset %}
-{{ blurb2 | admonition(flavour=markdown, title="Click to expand: Optional Run Configurations (DinD & GPU Mounts)", collapse=True) }}
-
-{% set blurb3 %}
+{% endset -%}
+{%- set legacy_variables -%}
 **Note:** This section applies only if you are **NOT** using `PIXELFLUX_WAYLAND=true`.
 
 When using 3d acceleration via Nvidia DRM or DRI3 in X11 mode, it is important to clamp the virtual display to a reasonable max resolution to avoid memory exhaustion or poor performance.
@@ -165,53 +57,8 @@ This will set the total virtual framebuffer to 4K. By default, the virtual monit
 -e SELKIES_MANUAL_HEIGHT=1080
 -e MAX_RESOLUTION=1920x1080
 ```
-{% endset %}
-{{ blurb3 | admonition(flavour=markdown, title="Click to expand: Legacy X11 Resolution & Acceleration", collapse=True) }}
-
-### Language Support - Internationalization
-
-To launch the desktop session in a different language, set the `LC_ALL` environment variable. For example:
-
-* `-e LC_ALL=zh_CN.UTF-8` - Chinese
-* `-e LC_ALL=ja_JP.UTF-8` - Japanese
-* `-e LC_ALL=ko_KR.UTF-8` - Korean
-* `-e LC_ALL=ar_AE.UTF-8` - Arabic
-* `-e LC_ALL=ru_RU.UTF-8` - Russian
-* `-e LC_ALL=es_MX.UTF-8` - Spanish (Latin America)
-* `-e LC_ALL=de_DE.UTF-8` - German
-* `-e LC_ALL=fr_FR.UTF-8` - French
-* `-e LC_ALL=nl_NL.UTF-8` - Netherlands
-* `-e LC_ALL=it_IT.UTF-8` - Italian
-
-### Application Management
-
-There are two methods for installing applications inside the container: PRoot Apps (recommended for persistence) and Native Apps.
-
-#### PRoot Apps (Persistent)
-
-Natively installed packages (e.g., via `apt-get install`) will not persist if the container is recreated. To retain applications and their settings across container updates, we recommend using [proot-apps](https://github.com/linuxserver/proot-apps). These are portable applications installed to the user's persistent `$HOME` directory.
-
-To install an application, use the command line inside the container:
-
-```bash
-proot-apps install filezilla
-```
-
-A list of supported applications is available [here](https://github.com/linuxserver/proot-apps?tab=readme-ov-file#supported-apps).
-
-#### Native Apps (Non-Persistent)
-
-You can install packages from the system's native repository using the [universal-package-install](https://github.com/linuxserver/docker-mods/tree/universal-package-install) mod. This method will increase the container's start time and is not persistent. Add the following to your `compose.yaml`:
-
-```yaml
-  environment:
-    - DOCKER_MODS=linuxserver/mods:universal-package-install
-    - INSTALL_PACKAGES=libfuse2|git|gdb
-```
-
-### Advanced Configuration
-
-{% set blurb4 %}
+{% endset -%}
+{%- set selkies_sec_vars -%}
 These variables can be used to lock down the desktop environment for single-application use cases or to restrict user capabilities.
 
 | Variable | Description |
@@ -230,10 +77,8 @@ These variables can be used to lock down the desktop environment for single-appl
 | **`DISABLE_MOUSE_BUTTONS`** | If true, disables the right-click and middle-click context menus and actions within the Openbox window manager. |
 | **`HARDEN_KEYBINDS`** | If true, disables default Openbox keybinds that can bypass other hardening options (e.g., `Alt+F4` to close windows, `Alt+Escape` to show the root menu). |
 | **`RESTART_APP`** | If true, enables a watchdog service that automatically restarts the main application if it is closed. The user's autostart script is made read-only and root owned to prevent tampering. |
-{% endset %}
-{{ blurb4 | admonition(flavour=markdown, title="Click to expand: Hardening Options", collapse=True) }}
-
-{% set blurb5 %}
+{% endset -%}
+{%- set selkies_vars -%}
 Using environment variables every facet of the application can be configured.
 
 **Booleans and Locking:**
@@ -312,5 +157,189 @@ If `SELKIES_MANUAL_WIDTH` or `SELKIES_MANUAL_HEIGHT` are set, the resolution is 
 | `SELKIES_ENABLE_PLAYER2` | `True` | Enable sharing link for gamepad player 2. |
 | `SELKIES_ENABLE_PLAYER3` | `True` | Enable sharing link for gamepad player 3. |
 | `SELKIES_ENABLE_PLAYER4` | `True` | Enable sharing link for gamepad player 4. |
-{% endset %}
-{{ blurb5 | admonition(flavour=markdown, title="Click to expand: Selkies Application Settings", collapse=True) }}
+{% endset -%}
+
+**Modern GUI desktop apps may have compatibility issues with the latest Docker syscall restrictions. You can use Docker with the `--security-opt seccomp=unconfined` setting to allow these syscalls on hosts with older Kernels or libseccomp versions.**
+
+### Security
+
+{{ "This container provides privileged access to the host system. Do not expose it to the Internet unless you have secured it properly." | admonition(flavour=markdown, severity="warning") }}
+
+**HTTPS is required for full functionality.** Modern browser features such as WebCodecs, used for video and audio, will not function over an insecure HTTP connection.
+
+By default, this container has no authentication. The optional `CUSTOM_USER` and `PASSWORD` environment variables enable basic HTTP auth, which is suitable only for securing the container on a trusted local network. For internet exposure, we strongly recommend placing the container behind a reverse proxy, such as [SWAG](https://github.com/linuxserver/docker-swag), with a robust authentication mechanism.
+
+The web interface includes a terminal with passwordless `sudo` access. Any user with access to the GUI can gain root control within the container, install arbitrary software, and probe your local network.
+
+While not generally recommended, certain legacy environments specifically those with older hardware or outdated Linux distributions may require the deactivation of the standard seccomp profile to get containerized desktop software to run. This can be achieved by utilizing the `--security-opt seccomp=unconfined` parameter. It is critical to use this option only when absolutely necessary as it disables a key security layer of Docker, elevating the potential for container escape vulnerabilities.
+
+### Hardware Acceleration & The Move to Wayland
+
+We are currently transitioning our desktop containers from X11 to Wayland. While X11 is still the default, we strongly encourage users to test the new Wayland mode.
+
+**Important:** GPU acceleration support for X11 is being deprecated. Future development for hardware acceleration will focus entirely on the Wayland stack.
+
+To enable Wayland mode, set the following environment variable:
+
+* `-e PIXELFLUX_WAYLAND=true`
+
+**Why use Wayland?**
+
+* **Zero Copy Encoding:** When configured correctly with a GPU, the frame is rendered and encoded on the video card without ever being copied to the system RAM. This drastically lowers CPU usage and latency.
+* **Modern Stack:** Single-application containers utilize **Labwc** (replacing Openbox) and full desktop containers use **KDE Plasma Wayland**, providing a more modern and secure compositing environment while retaining the same user experience.
+
+#### GPU Configuration
+
+To use hardware acceleration in Wayland mode, we distinguish between the card used for **Rendering** (3D apps/Desktops) and **Encoding** (Video Stream).
+
+**Configuration Variables:**
+
+* `DRINODE`: The path to the GPU used for **Rendering** (EGL).
+* `DRI_NODE`: The path to the GPU used for **Encoding** (VAAPI/NVENC).
+
+If both variables point to the same device, the container will automatically enable **Zero Copy** encoding, significantly reducing CPU usage and latency. If they are set to different devices one will be used for **Rendering** and one for **Encoding** with a cpu readback.
+
+You can also use the environment variable `AUTO_GPU=true`, with this set the first card detected in the container (IE `/dev/dri/renderD128`) will be used and configured for **Zero Copy**.
+
+##### Intel & AMD (Open Source Drivers)
+
+For Intel and AMD GPUs.
+
+```yaml
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - PIXELFLUX_WAYLAND=true
+      # Optional: Specify device if multiple exist (IE: /dev/dri/renderD129)
+      - DRINODE=/dev/dri/renderD128
+      - DRI_NODE=/dev/dri/renderD128
+```
+{% if show_nvidia is defined %}
+
+##### Nvidia (Proprietary Drivers)
+
+**Note: Nvidia support is currently considered experimental, driver changes can break it at any time.**
+
+**Note: Nvidia support is not available for Alpine-based images.**
+
+**Note: Nvidia frames have issues with hardware decoders in Chromium browsers you need to navigate to `chrome://flags/#disable-accelerated-video-decode` and toggle it to `Disabled` for smooth playback**
+
+**Prerequisites:**
+
+1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
+    * **Unraid:** Use the production branch from the Nvidia Driver Plugin.
+
+2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
+    * **Standard Linux (GRUB):** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
+
+        ```text
+        GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1 nvidia_drm.fbdev=1"
+        ```
+
+        Then apply the changes by running:
+
+        ```bash
+        sudo update-grub
+        ```
+
+    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` to the end of the `append` line for the Unraid OS boot entry.
+
+3. **Hardware Initialization:** **On headless systems, the Nvidia video card requires a physical dummy plug inserted into the GPU so that DRM initializes properly.**
+
+4. **Docker Runtime:** Configure the host docker daemon to use the Nvidia runtime:
+
+    ```bash
+    sudo nvidia-ctk runtime configure --runtime=docker
+    sudo systemctl restart docker
+    ```
+
+**Compose Configuration:**
+
+```yaml
+---
+services:
+  {{ project_name }}:
+    image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
+    environment:
+      - PIXELFLUX_WAYLAND=true
+      # Ensure these point to the rendered node injected by the runtime (usually renderD128)
+      - DRINODE=/dev/dri/renderD128
+      - DRI_NODE=/dev/dri/renderD128
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [compute,video,graphics,utility]
+```
+
+* **Unraid:** Ensure you're properly setting the DRINODE/DRI_NODE and adding `--gpus all --runtime nvidia` to your extra parameters.
+
+{% endif %}
+### SealSkin Compatibility
+
+This container is compatible with [SealSkin](https://sealskin.app).
+
+SealSkin is a self-hosted, client-server platform that provides secure authentication and collaboration features while using a browser extension to intercept user actions such as clicking a link or downloading a file and redirect them to a secure, isolated application environment running on a remote server.
+
+* **SealSkin Server:** [Get it Here](https://github.com/linuxserver/docker-sealskin)
+* **Browser Extension:** [Chrome](https://chromewebstore.google.com/detail/sealskin-isolation/lclgfmnljgacfdpmmmjmfpdelndbbfhk) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/sealskin-isolation/).
+* **Mobile App:** [iOS](https://apps.apple.com/us/app/sealskin/id6758210210) and [Android](https://play.google.com/store/apps/details?id=io.linuxserver.sealskin)
+
+### Options in all Selkies-based GUI containers
+
+This container is based on [Docker Baseimage Selkies](https://github.com/linuxserver/docker-baseimage-selkies).
+
+{{ selkies_variables | admonition(flavour=markdown, title="Click to expand: Optional Environment Variables", collapse=True) }}
+
+{{ optional_variables | admonition(flavour=markdown, title="Click to expand: Optional Run Configurations (DinD & GPU Mounts)", collapse=True) }}
+
+{{ legacy_variables | admonition(flavour=markdown, title="Click to expand: Legacy X11 Resolution & Acceleration", collapse=True) }}
+
+### Language Support - Internationalization
+
+To launch the desktop session in a different language, set the `LC_ALL` environment variable. For example:
+
+* `-e LC_ALL=zh_CN.UTF-8` - Chinese
+* `-e LC_ALL=ja_JP.UTF-8` - Japanese
+* `-e LC_ALL=ko_KR.UTF-8` - Korean
+* `-e LC_ALL=ar_AE.UTF-8` - Arabic
+* `-e LC_ALL=ru_RU.UTF-8` - Russian
+* `-e LC_ALL=es_MX.UTF-8` - Spanish (Latin America)
+* `-e LC_ALL=de_DE.UTF-8` - German
+* `-e LC_ALL=fr_FR.UTF-8` - French
+* `-e LC_ALL=nl_NL.UTF-8` - Netherlands
+* `-e LC_ALL=it_IT.UTF-8` - Italian
+
+### Application Management
+
+There are two methods for installing applications inside the container: PRoot Apps (recommended for persistence) and Native Apps.
+
+#### PRoot Apps (Persistent)
+
+Natively installed packages (e.g., via `apt-get install`) will not persist if the container is recreated. To retain applications and their settings across container updates, we recommend using [proot-apps](https://github.com/linuxserver/proot-apps). These are portable applications installed to the user's persistent `$HOME` directory.
+
+To install an application, use the command line inside the container:
+
+```bash
+proot-apps install filezilla
+```
+
+A list of supported applications is available [here](https://github.com/linuxserver/proot-apps?tab=readme-ov-file#supported-apps).
+
+#### Native Apps (Non-Persistent)
+
+You can install packages from the system's native repository using the [universal-package-install](https://github.com/linuxserver/docker-mods/tree/universal-package-install) mod. This method will increase the container's start time and is not persistent. Add the following to your `compose.yaml`:
+
+```yaml
+  environment:
+    - DOCKER_MODS=linuxserver/mods:universal-package-install
+    - INSTALL_PACKAGES=libfuse2|git|gdb
+```
+
+### Advanced Configuration
+
+{{ selkies_sec_vars | admonition(flavour=markdown, title="Click to expand: Hardening Options", collapse=True) }}
+
+{{ selkies_vars | admonition(flavour=markdown, title="Click to expand: Selkies Application Settings", collapse=True) }}
