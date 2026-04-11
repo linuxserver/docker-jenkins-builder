@@ -48,14 +48,14 @@
 
 When using 3d acceleration via Nvidia DRM or DRI3 in X11 mode, it is important to clamp the virtual display to a reasonable max resolution to avoid memory exhaustion or poor performance.
 
-* `-e MAX_RESOLUTION=3840x2160`
+* `-e MAX_RES=3840x2160`
 
 This will set the total virtual framebuffer to 4K. By default, the virtual monitor is 16K. If you have performance issues in an accelerated X11 session, try clamping the resolution to 1080p and work up from there:
 
 ```bash
 -e SELKIES_MANUAL_WIDTH=1920
 -e SELKIES_MANUAL_HEIGHT=1080
--e MAX_RESOLUTION=1920x1080
+-e MAX_RES=1920x1080
 ```
 {% endset -%}
 {%- set selkies_sec_vars -%}
