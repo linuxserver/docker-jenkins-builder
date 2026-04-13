@@ -227,10 +227,9 @@ For Intel and AMD GPUs.
 **Prerequisites:**
 
 1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
-    * **Unraid:** Use the production branch from the Nvidia Driver Plugin.
 
 2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
-    * **Standard Linux (GRUB):** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
+    * **GRUB:** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
 
         ```text
         GRUB_CMDLINE_LINUX_DEFAULT="<other existing options> nvidia-drm.modeset=1 nvidia_drm.fbdev=1"
@@ -241,8 +240,6 @@ For Intel and AMD GPUs.
         ```bash
         sudo update-grub
         ```
-
-    * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` to the end of the `append` line for the Unraid OS boot entry.
 
 3. **Hardware Initialization:** **On headless systems, the Nvidia video card requires a physical dummy plug inserted into the GPU so that DRM initializes properly.**
 
@@ -274,7 +271,9 @@ services:
               capabilities: [compute,video,graphics,utility]
 ```
 
-* **Unraid:** Ensure you're properly setting the DRINODE/DRI_NODE and adding `--gpus all --runtime nvidia` to your extra parameters.
+**Nvidia Unraid is not supported:**
+
+Unraid's official Nvidia driver package does not conform to NVIDIA Container Toolkit standards. On top of improper pathing, whole sections of the driver tree are missing and are not mounted into the container at runtime. This is the only known incompatible Linux operating system at this time.
 
 {% endif %}
 ### SealSkin Compatibility
