@@ -76,6 +76,7 @@ pipeline {
         script{
           env.EXIT_STATUS = ''
           env.CI_TEST_ATTEMPTED = ''
+          env.PUSH_ATTEMPTED = ''
           env.LS_RELEASE = sh(
             script: '''docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:latest 2>/dev/null | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
             returnStdout: true).trim()
