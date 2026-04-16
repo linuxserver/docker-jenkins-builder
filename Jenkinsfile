@@ -1160,6 +1160,13 @@ EOF
                       -d "{\\"body\\": \\"I am a bot, here is the pushed image/manifest for this PR for commit ${COMMIT_SHA:0:7} : \\n\\n\\`${GITHUBIMAGE}:${META_TAG}\\`\\"}"
                   fi
                   '''
+          } else {
+            sh '''#! /bin/bash
+                  curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "https://api.github.com/repos/$LS_USER/$LS_REPO/issues/$PULL_REQUEST/comments" \
+                    -d "{\\"body\\": \\"I am a bot, the build for PR commit ${COMMIT_SHA:0:7} failed and as a result no CI test was attempted and no images were pushed.\\"}"
+            '''
           }
         }
       }
