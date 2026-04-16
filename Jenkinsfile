@@ -879,6 +879,9 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
+        script{
+          env.PUSH_ATTEMPTED = 'true'
+        }
         retry_backoff(5,5) {
           sh '''#! /bin/bash
                 set -e
@@ -908,11 +911,18 @@ pipeline {
         environment name: 'EXIT_STATUS', value: ''
       }
       steps {
+        script{
+          env.PUSH_ATTEMPTED = 'true'
+        }
         retry_backoff(5,5) {
           sh '''#! /bin/bash
                 set -e
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-                  [[ ${MANIFESTIMAGE%%/*} =~ \\. ]] && MANIFESTIMAGEPLUS="${MANIFESTIMAGE}" || MANIFESTIMAGEPLUS="docker.io/${MANIFESTIMAGE}"
+                  if [[ "${MANIFESTIMAGE%%/*}" =~ \\. ]]; then
+                    MANIFESTIMAGEPLUS="${MANIFESTIMAGE}"
+                  else
+                    MANIFESTIMAGEPLUS="docker.io/${MANIFESTIMAGE}"
+                  fi
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
                       if [[ "${MANIFESTIMAGEPLUS}" == "$(cut -d "/" -f1 <<< ${i})"* ]]; then
@@ -1080,7 +1090,7 @@ EOF
       }
       script {
         if (env.GITHUBIMAGE =~ /lspipepr/){
-          if (env.CI_TEST_ATTEMPTED == "true"){
+          if (env.CI_TEST_ATTEMPTED == "true" || env.PUSH_ATTEMPTED == "true"){
             sh '''#! /bin/bash
                   # Function to retrieve JSON data from URL
                   get_json() {
