@@ -48,14 +48,14 @@
 
 When using 3d acceleration via Nvidia DRM or DRI3 in X11 mode, it is important to clamp the virtual display to a reasonable max resolution to avoid memory exhaustion or poor performance.
 
-* `-e MAX_RESOLUTION=3840x2160`
+* `-e MAX_RES=3840x2160`
 
 This will set the total virtual framebuffer to 4K. By default, the virtual monitor is 16K. If you have performance issues in an accelerated X11 session, try clamping the resolution to 1080p and work up from there:
 
 ```bash
 -e SELKIES_MANUAL_WIDTH=1920
 -e SELKIES_MANUAL_HEIGHT=1080
--e MAX_RESOLUTION=1920x1080
+-e MAX_RES=1920x1080
 ```
 {% endset -%}
 {%- set selkies_sec_vars -%}
@@ -173,6 +173,12 @@ The web interface includes a terminal with passwordless `sudo` access. Any user 
 
 While not generally recommended, certain legacy environments specifically those with older hardware or outdated Linux distributions may require the deactivation of the standard seccomp profile to get containerized desktop software to run. This can be achieved by utilizing the `--security-opt seccomp=unconfined` parameter. It is critical to use this option only when absolutely necessary as it disables a key security layer of Docker, elevating the potential for container escape vulnerabilities.
 
+### FullColor 4:4:4 Encoding
+
+If you notice blurry text, particularly light text on a black background, you can send true 8-bit color to the browser by enabling the **FullColor 4:4:4** encoding in the sidebar, or by using the jpeg encoding mode. 
+
+**Note on Hardware Acceleration:** Currently, only Nvidia GPUs support encoding this color profile in **Zero Copy** mode. If FullColor 4:4:4 is enabled on Intel or AMD GPUs, the system will fall back to CPU encoding. This forces the CPU to read the pixels back from the GPU, which will cause a significant decrease in performance.
+
 ### Hardware Acceleration & The Move to Wayland
 
 We are currently transitioning our desktop containers from X11 to Wayland. While X11 is still the default, we strongly encourage users to test the new Wayland mode.
@@ -221,8 +227,6 @@ For Intel and AMD GPUs.
 **Note: Nvidia support is currently considered experimental, driver changes can break it at any time.**
 
 **Note: Nvidia support is not available for Alpine-based images.**
-
-**Note: Nvidia frames have issues with hardware decoders in Chromium browsers you need to navigate to `chrome://flags/#disable-accelerated-video-decode` and toggle it to `Disabled` for smooth playback**
 
 **Prerequisites:**
 
