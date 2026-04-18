@@ -177,8 +177,6 @@ While not generally recommended, certain legacy environments specifically those 
 
 If you notice blurry text, particularly light text on a black background, you can send true 8-bit color to the browser by enabling the **FullColor 4:4:4** encoding in the sidebar, or by using the jpeg encoding mode. 
 
-To view this withut crashing on most client hardware, users on Chromium based browsers (including Android) will need to navigate to `chrome://flags/#disable-accelerated-video-decode` and set it to **Disabled**. Apple clients using Bionic processors can decode these frames natively with no additional settings.
-
 **Note on Hardware Acceleration:** Currently, only Nvidia GPUs support encoding this color profile in **Zero Copy** mode. If FullColor 4:4:4 is enabled on Intel or AMD GPUs, the system will fall back to CPU encoding. This forces the CPU to read the pixels back from the GPU, which will cause a significant decrease in performance.
 
 ### Hardware Acceleration & The Move to Wayland
@@ -229,8 +227,6 @@ For Intel and AMD GPUs.
 **Note: Nvidia support is currently considered experimental, driver changes can break it at any time.**
 
 **Note: Nvidia support is not available for Alpine-based images.**
-
-**Note: Nvidia frames have issues with hardware decoders in Chromium browsers you need to navigate to `chrome://flags/#disable-accelerated-video-decode` and toggle it to `Disabled` for smooth playback**
 
 **Prerequisites:**
 
