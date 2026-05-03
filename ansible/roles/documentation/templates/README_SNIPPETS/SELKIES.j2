@@ -1,7 +1,7 @@
 {%- set selkies_variables -%}
 | Variable | Description |
 | :----: | --- |
-| PIXELFLUX_WAYLAND | **Experimental** If set to true the container will initialize in Wayland mode running [Smithay](https://github.com/Smithay/smithay) and Labwc while enabling zero copy encoding with a GPU |
+| PIXELFLUX_WAYLAND | If set to true the container will initialize in Wayland mode running [Smithay](https://github.com/Smithay/smithay) and Labwc while enabling zero copy encoding with a GPU |
 | SELKIES_DESKTOP | If set to true and in Wayland mode, a simple panel will be initialized with labwc |
 | CUSTOM_PORT | Internal port the container listens on for http if it needs to be swapped from the default `{% if external_http_port is defined %}{{ external_http_port }}{% else %}3000{% endif %}` |
 | CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default `{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}` |
@@ -179,20 +179,22 @@ If you notice blurry text, particularly light text on a black background, you ca
 
 **Note on Hardware Acceleration:** Currently, only Nvidia GPUs support encoding this color profile in **Zero Copy** mode. If FullColor 4:4:4 is enabled on Intel or AMD GPUs, the system will fall back to CPU encoding. This forces the CPU to read the pixels back from the GPU, which will cause a significant decrease in performance.
 
-### Hardware Acceleration & The Move to Wayland
+### Hardware Acceleration & Wayland
 
-We are currently transitioning our desktop containers from X11 to Wayland. While X11 is still the default, we strongly encourage users to test the new Wayland mode.
+We have transitioned our desktop containers from X11 to a modern Wayland stack, which is now the default.
 
-**Important:** GPU acceleration support for X11 is being deprecated. Future development for hardware acceleration will focus entirely on the Wayland stack.
+**Hardware Fallback Note:** On `x86_64` architecture, the Wayland stack requires a processor with AVX2 support (Intel Haswell generation or newer). If your processor lacks AVX2 (such as older CPUs or certain low-end Celerons), the container will automatically fall back to X11.
 
-To enable Wayland mode, set the following environment variable:
+**Important:** GPU acceleration support for X11 is deprecated. Future development for hardware acceleration is focused entirely on the Wayland stack.
 
-* `-e PIXELFLUX_WAYLAND=true`
+If you experience compatibility issues and need to manually disable Wayland (forcing a fallback to X11), you can do so by setting the following environment variable:
 
-**Why use Wayland?**
+* `-e PIXELFLUX_WAYLAND=false`
+
+**Why Wayland?**
 
 * **Zero Copy Encoding:** When configured correctly with a GPU, the frame is rendered and encoded on the video card without ever being copied to the system RAM. This drastically lowers CPU usage and latency.
-* **Modern Stack:** Single-application containers utilize **Labwc** (replacing Openbox) and full desktop containers use **KDE Plasma Wayland**, providing a more modern and secure compositing environment while retaining the same user experience.
+* **Modern Stack:** Single-application containers utilize **Labwc** (replacing Openbox) and full desktop containers use **KDE Plasma Wayland**, providing a more modern, performant, and secure compositing environment while retaining the same user experience.
 
 #### GPU Configuration
 
