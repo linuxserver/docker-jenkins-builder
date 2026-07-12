@@ -228,6 +228,8 @@ For Intel and AMD GPUs.
 
 **Note: Nvidia support is not available for Alpine-based images.**
 
+**Note: As of driver 595.80, dummy plugs and kernel parameters are no longer needed. `--device /dev/nvidia-modeset` is required for proper vulkan support. One some systems `nvidia-modprobe --modeset` might need to be run to activate the device on boot.**
+
 **Prerequisites:**
 
 1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
