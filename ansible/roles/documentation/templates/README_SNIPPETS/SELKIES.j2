@@ -7,24 +7,25 @@
 | CUSTOM_HTTPS_PORT | Internal port the container listens on for https if it needs to be swapped from the default `{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}` |
 | CUSTOM_WS_PORT | Internal port the container listens on for websockets if it needs to be swapped from the default 8082 |
 | CUSTOM_USER | HTTP Basic auth username, abc is default. |
-| DRI_NODE | **Encoding GPU**: Enable VAAPI/NVENC stream encoding and use the specified device IE `/dev/dri/renderD128` |
-| DRINODE | **Rendering GPU**: Specify which GPU to use for EGL/3D acceleration IE `/dev/dri/renderD129` |
-| AUTO_GPU | If set to true and in Wayland mode, we will automatically use the first GPU available for encoding and rendering IE `/dev/dri/renderD128` |
+| DRI_NODE | **Encoding GPU**: Enable VAAPI/NVENC stream encoding and use the specified device e.g. `/dev/dri/renderD128` |
+| DRINODE | **Rendering GPU**: Specify which GPU to use for EGL/3D acceleration e.g. `/dev/dri/renderD128` |
+| AUTO_GPU | When a GPU is detected this is automatically enabled and the first available GPU will be used for encoding and rendering e.g. `/dev/dri/renderD128`. Set to `false` to disable this behavior. |
+| PIXELFLUX_CU | Port to enable the Computer Use API server for AI agent control of the desktop (Wayland mode only) |
 | PASSWORD | HTTP Basic auth password, abc is default. If unset there will be no auth |
-| SUBFOLDER | Subfolder for the application if running a subfolder reverse proxy, need both slashes IE `/subfolder/` |
+| SUBFOLDER | Subfolder for the application if running a subfolder reverse proxy, need both slashes e.g. `/subfolder/` |
 | TITLE | The page title displayed on the web browser, default "Selkies" |
 | DASHBOARD | Allows the user to set their dashboard. Options: `selkies-dashboard`, `selkies-dashboard-zinc`, `selkies-dashboard-wish` |
 | FILE_MANAGER_PATH | Modifies the default upload/download file path, path must have proper permissions for abc user |
 | START_DOCKER | If set to false a container with privilege will not automatically start the DinD Docker setup |
 | DISABLE_IPV6 | If set to true or any value this will disable IPv6 |
-| LC_ALL | Set the Language for the container to run as IE `fr_FR.UTF-8` `ar_AE.UTF-8` |
+| LC_ALL | Set the Language for the container to run as e.g. `fr_FR.UTF-8` `ar_AE.UTF-8` |
 | NO_DECOR | If set the application will run without window borders for use as a PWA. (Decor can be enabled and disabled with Ctrl+Shift+d) |
 | NO_FULL | Do not autmatically fullscreen applications when using openbox. |
 | NO_GAMEPAD | Disable userspace gamepad interposer injection. |
 | DISABLE_ZINK | Do not set the Zink environment variables if a video card is detected (userspace applications will use CPU rendering) |
 | DISABLE_DRI3 | Do not use DRI3 acceleration if a video card is detected (userspace applications will use CPU rendering) |
 | MAX_RES | Pass a larger maximum resolution for the container default is 16k `15360x8640` |
-| WATERMARK_PNG | Full path inside the container to a watermark png IE `/usr/share/selkies/www/icon.png` |
+| WATERMARK_PNG | Full path inside the container to a watermark png e.g. `/usr/share/selkies/www/icon.png` |
 | WATERMARK_LOCATION | Where to paint the image over the stream integer options below |
 
 **`WATERMARK_LOCATION` Options:**
@@ -198,29 +199,22 @@ If you experience compatibility issues and need to manually disable Wayland (for
 
 #### GPU Configuration
 
-To use hardware acceleration in Wayland mode, we distinguish between the card used for **Rendering** (3D apps/Desktops) and **Encoding** (Video Stream).
+When a GPU is mounted into the container, it will be automatically detected and configured for both rendering and encoding with zero copy. To disable this behavior (for example if you want to mount in a GPU but not use it), set `AUTO_GPU=false`.
 
-**Configuration Variables:**
-
+For multi-GPU systems or manual configuration, you can set:
 * `DRINODE`: The path to the GPU used for **Rendering** (EGL).
 * `DRI_NODE`: The path to the GPU used for **Encoding** (VAAPI/NVENC).
 
 If both variables point to the same device, the container will automatically enable **Zero Copy** encoding, significantly reducing CPU usage and latency. If they are set to different devices one will be used for **Rendering** and one for **Encoding** with a cpu readback.
 
-You can also use the environment variable `AUTO_GPU=true`, with this set the first card detected in the container (IE `/dev/dri/renderD128`) will be used and configured for **Zero Copy**.
-
 ##### Intel & AMD (Open Source Drivers)
 
-For Intel and AMD GPUs.
-
-```yaml
-    devices:
-      - /dev/dri:/dev/dri
-    environment:
-      - PIXELFLUX_WAYLAND=true
-      # Optional: Specify device if multiple exist (IE: /dev/dri/renderD129)
-      - DRINODE=/dev/dri/renderD128
-      - DRI_NODE=/dev/dri/renderD128
+```bash
+docker run --rm -it \
+  --shm-size=1gb \
+  -p {% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}:{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %} \
+  --device /dev/dri \
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }} bash
 ```
 {% if show_nvidia is defined %}
 
@@ -228,12 +222,14 @@ For Intel and AMD GPUs.
 
 **Note: Nvidia support is not available for Alpine-based images.**
 
+**Note: As of driver 595.80, dummy plugs and kernel parameters are no longer needed. `--device /dev/nvidia-modeset` is required for proper vulkan support. One some systems `nvidia-modprobe --modeset` might need to be run to activate the device on boot.**
+
 **Prerequisites:**
 
 1. **Driver:** Proprietary drivers **580 or higher** are required. **Crucially, you should install the driver using the `.run` file downloaded directly from the Nvidia website.**
     * **Unraid:** Use the production branch from the Nvidia Driver Plugin.
 
-2. **Kernel Parameter:** You must set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
+2. **Kernel Parameter:** You may need to set `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` in your host bootloader.
     * **Standard Linux (GRUB):** Edit `/etc/default/grub` and add the parameter to your existing `GRUB_CMDLINE_LINUX_DEFAULT` line:
 
         ```text
@@ -248,27 +244,35 @@ For Intel and AMD GPUs.
 
     * **Unraid (Syslinux):** Edit the file `/boot/syslinux/syslinux.cfg` and add `nvidia-drm.modeset=1 nvidia_drm.fbdev=1` to the end of the `append` line for the Unraid OS boot entry.
 
-3. **Hardware Initialization:** **On headless systems, the Nvidia video card requires a physical dummy plug inserted into the GPU so that DRM initializes properly.**
+3. **Hardware Initialization:** On headless systems, the Nvidia video card may require a physical dummy plug inserted into the GPU so that DRM initializes properly.
 
-4. **Docker Runtime:** Configure the host docker daemon to use the Nvidia runtime:
+**Run Example:**
 
-    ```bash
-    sudo nvidia-ctk runtime configure --runtime=docker
-    sudo systemctl restart docker
-    ```
+```bash
+docker run --rm -it \
+  --shm-size=1gb \
+  -p {% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %}:{% if external_https_port is defined %}{{ external_https_port }}{% else %}3001{% endif %} \
+  --runtime nvidia \
+  --gpus all \
+  --device /dev/nvidia-modeset \
+  lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }} bash
+```
 
-**Compose Configuration:**
+**Compose Example:**
+
+Configure the host docker daemon to use the nvidia runtime:
+
+```bash
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
 
 ```yaml
 ---
 services:
   {{ project_name }}:
     image: lscr.io/{{ lsio_project_name_short }}/{{ project_name }}:{{ release_tag }}
-    environment:
-      - PIXELFLUX_WAYLAND=true
-      # Ensure these point to the rendered node injected by the runtime (usually renderD128)
-      - DRINODE=/dev/dri/renderD128
-      - DRI_NODE=/dev/dri/renderD128
     deploy:
       resources:
         reservations:
