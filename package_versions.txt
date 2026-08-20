@@ -65,7 +65,7 @@ libbsd                                    0.12.2-r0                           ap
 libbz2                                    1.0.8-r6                            apk          
 libcrypto3                                3.5.7-r0                            apk          
 libcurl                                   8.14.1-r3                           apk          
-libexpat                                  2.8.2-r0                            apk          
+libexpat                                  2.8.3-r0                            apk          
 libffi                                    3.4.8-r0                            apk          
 libgcc                                    14.2.0-r6                           apk          
 libidn2                                   2.3.7-r0                            apk          
@@ -114,13 +114,13 @@ py3-resolvelib                            1.1.0-r0                            ap
 py3-resolvelib-pyc                        1.1.0-r0                            apk          
 py3-yaml                                  6.0.2-r0                            apk          
 py3-yaml-pyc                              6.0.2-r0                            apk          
-pyc                                       3.12.13-r0                          apk          
+pyc                                       3.12.14-r0                          apk          
 pycparser                                 2.22                                python       
 pynacl                                    1.5.0                               python       
 pyparsing                                 3.2.5                               python       
-python3                                   3.12.13-r0                          apk          
-python3-pyc                               3.12.13-r0                          apk          
-python3-pycache-pyc0                      3.12.13-r0                          apk          
+python3                                   3.12.14-r0                          apk          
+python3-pyc                               3.12.14-r0                          apk          
+python3-pycache-pyc0                      3.12.14-r0                          apk          
 pyyaml                                    6.0.2                               python       
 readline                                  8.2.13-r1                           apk          
 resolvelib                                1.1.0                               python       
