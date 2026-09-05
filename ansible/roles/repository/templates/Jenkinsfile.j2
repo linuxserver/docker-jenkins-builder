@@ -845,7 +845,7 @@ pipeline {
                         pids[$!]="$i"
                       done
                       for p in "${!pids[@]}"; do
-                        wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* ]] && exit 1; }
+                        wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
                       done
                     fi
                 '''
@@ -918,7 +918,7 @@ pipeline {
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* ]] && exit 1; }
+                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
                           done
                         fi
                     '''
@@ -985,7 +985,7 @@ pipeline {
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* ]] && exit 1; }
+                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
                           done
                         fi
                     '''
@@ -1062,7 +1062,7 @@ pipeline {
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* ]] && exit 1; }
+                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
                           done
                         fi
                     '''
@@ -1264,10 +1264,10 @@ pipeline {
                       fi
                   done
                   docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:{{ release_tag }} -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                      { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
 {% if project_deprecation_status %}
                   docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
@@ -1303,21 +1303,21 @@ pipeline {
                       fi
                   done
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
                   docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${META_TAG} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }} -t ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
                     docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${SEMVER} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
-                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   fi
                 done
@@ -1326,15 +1326,15 @@ pipeline {
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}{% if build_riscv64 %} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${META_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
-                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                    { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
                     docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${SEMVER}{% endif %} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
-                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" ]]; then exit 1; fi; }
+                      { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
               '''
