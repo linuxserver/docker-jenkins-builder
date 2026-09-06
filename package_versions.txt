@@ -58,7 +58,7 @@ golang.org/x/text                         v0.35.0                             go
 gopkg.in/op/go-logging.v1                 v1.0.0-20160211212156-b2cb9fa56473  go-module    
 grafana-ansible-collection                2.1.4                               npm          
 jinja2                                    3.1.6                               python       
-jq                                        1.8.1-r0                            apk          
+jq                                        1.8.2-r0                            apk          
 libapk2                                   2.14.10-r0                          apk          
 libattr                                   2.5.2-r2                            apk          
 libbsd                                    0.12.2-r0                           apk          
