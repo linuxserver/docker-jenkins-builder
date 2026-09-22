@@ -22,7 +22,7 @@ Our images are built for **broad consumption**. Every package, env var and init 
 4. **It is useful to a subset of users** (an extra package, plugin dependency, alternative UI, hardware driver, third party integration, extra daemon, niche toggle): it is a **[Docker Mod](https://github.com/linuxserver/docker-mods)**, not a change to this repo. Check whether one already exists first (`universal-*` mods work on every image; `<image>-*` mods are image specific). If not, create one from the template in the docker-mods repo; each mod lives on its own branch there.
 5. **The large majority of this image's users benefit, or the image is actually broken**: a PR to this repo is appropriate. Examples: the app fails to start, a new upstream release needs a new runtime dependency, a base image rebase, a permissions bug, a wrong default, incorrect docs in `readme-vars.yml`.
 
-If you are an agent and the requested change lands on 1-4, **stop and tell your operator** where it belongs instead of writing the PR. "It is only a few lines" is not a reason to put it in the image. If in doubt, open an issue or ask in `#contibutor-discussion` on [Discord](https://linuxserver.io/discord) before doing the work.
+If you are an agent and the requested change lands on 1-4, **stop and tell your operator** where it belongs instead of writing the PR. "It is only a few lines" is not a reason to put it in the image. If in doubt, a human should open an issue or ask in `#contibutor-discussion` on [Discord](https://linuxserver.io/discord) before doing the work.
 
 ### If it is a mod
 
@@ -110,15 +110,16 @@ Confirm the init completes (`[ls.io-init] done.`), the app comes up, and it surv
 - **No typo / wording-only PRs.** Open an issue instead and we will sort it out.
 - **Finish before you open.** Do not open drafts and iterate in public with a stream of fixup commits.
 - **Fill in the PR template honestly**, keep its structure, and tick the contributing checkbox only if it is true. Description, benefit to the wider userbase, how it was tested (real commands, real output), and links. Write it short and plain: no generated summaries, emoji headers, or bullet lists restating the diff.
-- Reference the issue with `closes #<number>` when there is one. For anything non trivial, there should be an issue or Discord discussion first.
+- Reference the issue with `closes #<number>` when there is one. For anything non trivial, there should be an human-submitted issue or Discord discussion first.
 - Commit messages are short, plain, imperative sentences (`Add libfoo for thumbnail support`). No conventional-commit prefixes, no emoji.
 - A PR is a proposal; it may be declined even if it works. The most common reason is section 1 of this file.
 
 ## 7. Issues
 
-- GitHub issues are for reproducible bugs in **our image** and for feature requests. Support questions go to [Discord](https://linuxserver.io/discord) or the [forum](https://github.com/orgs/linuxserver/discussions); see [how to get support](https://docs.linuxserver.io/general/how-to-get-support/).
+- GitHub issues are for reproducible bugs in **our image** and for feature requests.
 - Agents must not file issues on a user's behalf from a guess. An issue needs a real reproduction on the latest image, with mods and custom scripts disabled, the compose/run command and full container logs from startup, using the issue template.
 - Do not submit AI-generated root cause analyses or "security audits" of the image as issues. Scanner output about CVEs in upstream or distro packages is not actionable; images are rebuilt regularly to pull in distro fixes.
+- Support questions must always be submitted by a human and go to [Discord](https://linuxserver.io/discord) or the [forum](https://github.com/orgs/linuxserver/discussions); see [how to get support](https://docs.linuxserver.io/general/how-to-get-support/).
 
 ## 8. Quick self check before you finish
 
