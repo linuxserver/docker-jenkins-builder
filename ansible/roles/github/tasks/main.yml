@@ -77,12 +77,3 @@
     mode: "0644"
   loop:
     - AGENTS.md
-
-- name: Populate Github AGENTS symlinks
-  file:
-    src: "/tmp/AGENTS.md"
-    dest: "/tmp/{{ item }}"
-    state: "link"
-  loop:
-    - CLAUDE.md
-    - .github/copilot-instructions.md
