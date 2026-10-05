@@ -67,3 +67,13 @@
     - CONTRIBUTING.md
     - FUNDING.yml
     - PULL_REQUEST_TEMPLATE.md
+
+- name: Populate Github AGENTS file
+  template:
+    src: "{{ item }}.j2"
+    dest: "/tmp/{{ item }}"
+    owner: "abc"
+    group: "abc"
+    mode: "0644"
+  loop:
+    - AGENTS.md
