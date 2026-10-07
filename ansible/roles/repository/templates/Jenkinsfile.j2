@@ -1371,10 +1371,11 @@ pipeline {
                   "type": "commit",\
                   "tagger": {"name": "LinuxServer-CI","email": "ci@linuxserver.io","date": "'${GITHUB_DATE}'"}}'
               echo "Pushing New release for Tag"
-{% if custom_version_command is defined %}
+{% if custom_release_notes_command is defined %}
+              {{ custom_release_notes_command }}
+{% elif custom_version_command is defined %}
               echo "Updating to ${EXT_RELEASE_CLEAN}" > releasebody.json
-{% endif %}
-{% if external_type == "github_devel" %}
+{% elif external_type == "github_devel" %}
               curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases | jq -r '.[0] |.body' > releasebody.json
 {% elif external_type == "github_stable" %}
               curl -H "Authorization: token ${GITHUB_TOKEN}" -s https://api.github.com/repos/${EXT_USER}/${EXT_REPO}/releases/latest | jq -r '. |.body' > releasebody.json
