@@ -1335,10 +1335,10 @@ pipeline {
                 retry_ghcr docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
                 if [ "${MULTIARCH}" == "true" ]; then
                   retry_ghcr docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
-                  retry_ghcr docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
+                  docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
 {% if build_riscv64 %}
                   retry_ghcr docker pull ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=riscv64
-                  retry_ghcr docker tag ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:riscv64-${META_TAG}
+                  docker tag ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:riscv64-${META_TAG}
 {% endif %}
                 fi
                 docker run --rm \
