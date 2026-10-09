@@ -1,5 +1,3 @@
-{# optional gitlab_timeout from jenkins-vars.yml wraps registry.gitlab.com calls in timeout #}
-{% set gitlab_timeout_cmd = '${TIMEOUT_CMD} ' if gitlab_timeout is defined else '' %}
 {# bash function retrying ghcr pulls and builds on rate limit, written to the workspace once and inlined on remote nodes #}
 {% set retry_ghcr_fn %}
 retry_ghcr() {
@@ -143,8 +141,12 @@ pipeline {
           if ( env.SYFT_IMAGE_TAG == null ) {
             env.SYFT_IMAGE_TAG = 'latest'
           }
+          if ( env.GITLAB_TIMEOUT == null ) {
+            env.GITLAB_TIMEOUT = '600'
+          }
         }
         echo "Using syft image tag ${SYFT_IMAGE_TAG}"
+        echo "Using gitlab registry timeout ${GITLAB_TIMEOUT}"
         sh '''#! /bin/bash
               echo "The default github branch detected as ${GH_DEFAULT_BRANCH}" '''
         script{
@@ -911,18 +913,16 @@ pipeline {
                       declare -A pids
                       IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                       for i in "${CACHE[@]}"; do
-{% if gitlab_timeout is defined %}
                         if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                          TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                          TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                         else
                           TIMEOUT_CMD=""
                         fi
-{% endif %}
-                        {{ gitlab_timeout_cmd }}docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                        ${TIMEOUT_CMD} docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                         pids[$!]="$i"
                       done
                       for p in "${!pids[@]}"; do
-                        wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                        wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                       done
                     fi
                 '''
@@ -994,18 +994,16 @@ pipeline {
                           declare -A pids
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
-{% if gitlab_timeout is defined %}
                             if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                              TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                             else
                               TIMEOUT_CMD=""
                             fi
-{% endif %}
-                            {{ gitlab_timeout_cmd }}docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                            ${TIMEOUT_CMD} docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                            wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                           done
                         fi
                     '''
@@ -1072,18 +1070,16 @@ pipeline {
                           declare -A pids
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
-{% if gitlab_timeout is defined %}
                             if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                              TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                             else
                               TIMEOUT_CMD=""
                             fi
-{% endif %}
-                            {{ gitlab_timeout_cmd }}docker push ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                            ${TIMEOUT_CMD} docker push ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                            wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                           done
                         fi
                     '''
@@ -1160,18 +1156,16 @@ pipeline {
                           declare -A pids
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
-{% if gitlab_timeout is defined %}
                             if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                              TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                             else
                               TIMEOUT_CMD=""
                             fi
-{% endif %}
-                            {{ gitlab_timeout_cmd }}docker push ${i}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                            ${TIMEOUT_CMD} docker push ${i}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} &
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                            wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                           done
                         fi
                     '''
@@ -1368,13 +1362,11 @@ pipeline {
           sh '''#! /bin/bash
                 set -e
                 for PUSHIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-{% if gitlab_timeout is defined %}
                   if [[ "${PUSHIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                   else
                     TIMEOUT_CMD=""
                   fi
-{% endif %}
                   [[ ${PUSHIMAGE%%/*} =~ \\. ]] && PUSHIMAGEPLUS="${PUSHIMAGE}" || PUSHIMAGEPLUS="docker.io/${PUSHIMAGE}"
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
@@ -1382,14 +1374,14 @@ pipeline {
                           CACHEIMAGE=${i}
                       fi
                   done
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:{{ release_tag }} -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:{{ release_tag }} -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
-                    {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
 {% if project_deprecation_status %}
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${PUSHIMAGE}:{{ release_tag }} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% endif %}
                 done
               '''
@@ -1410,13 +1402,11 @@ pipeline {
           sh '''#! /bin/bash
                 set -e
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-{% if gitlab_timeout is defined %}
                   if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                   else
                     TIMEOUT_CMD=""
                   fi
-{% endif %}
                   if [[ "${MANIFESTIMAGE%%/*}" =~ \\. ]]; then
                     MANIFESTIMAGEPLUS="${MANIFESTIMAGE}"
                   else
@@ -1428,45 +1418,43 @@ pipeline {
                           CACHEIMAGE=${i}
                       fi
                   done
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${META_TAG} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }} -t ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${META_TAG} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }} -t ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   if [ -n "${SEMVER}" ]; then
-                    {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                    {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% if build_riscv64 %}
-                    {{ gitlab_timeout_cmd }}docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${SEMVER} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:riscv64-${SEMVER} ${CACHEIMAGE}:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
                   fi
                 done
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-{% if gitlab_timeout is defined %}
                   if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout {{ gitlab_timeout }}"
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
                   else
                     TIMEOUT_CMD=""
                   fi
-{% endif %}
 {% if project_deprecation_status %}
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}{% if build_riscv64 %} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ghcr.io/linuxserver/jenkins-builder:empty || true
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} -t ${MANIFESTIMAGE}:amd64-{{ release_tag }} -t ${MANIFESTIMAGE}:arm64v8-{{ release_tag }}{% if build_riscv64 %} -t ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ghcr.io/linuxserver/jenkins-builder:empty || true
 {% else %}
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:{{ release_tag }} ${MANIFESTIMAGE}:amd64-{{ release_tag }}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-{{ release_tag }}{% endif %} ${MANIFESTIMAGE}:arm64v8-{{ release_tag }} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
 {% endif %}
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${META_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${META_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                  {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${EXT_RELEASE_TAG}{% endif %} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
-                    {{ gitlab_timeout_cmd }}docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${SEMVER}{% endif %} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER}{% if build_riscv64 %} ${MANIFESTIMAGE}:riscv64-${SEMVER}{% endif %} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
