@@ -109,6 +109,54 @@ pipeline {
         }
       }
     }
+    /* ############################
+       Bash Function For GHCR Retry
+       ############################ */
+    // Create a reusable script for a ghcr retry bash function
+    stage("Create Bash Function"){
+      steps{
+        sh '''#! /bin/bash
+              # create our retry function
+              retry_ghcr() {
+                local max_attempts=5
+                local base_delay=1
+                local max_delay=30
+                local attempt=1
+
+                while true; do
+                  rm -rf /tmp/cmdstderr
+                  "$@" 2> >(tee /tmp/cmdstderr)
+                  local exit_code="$?"
+                  if [[ "${exit_code}" = "0" ]]; then
+                    rm -rf /tmp/cmdstderr
+                    return 0
+                  elif cat /tmp/cmdstderr | grep -q -v "retry-after:"; then
+                    rm -rf /tmp/cmdstderr
+                    return "$exit_code"
+                  elif (( attempt >= max_attempts )); then
+                    rm -rf /tmp/cmdstderr
+                    echo "retry: $* failed after $attempt attempts (exit $exit_code)" >&2
+                    return "$exit_code"
+                  else
+                    # Calculate exponential delay: base * 2^(attempt-1), capped at max_delay
+                    local delay=$(( base_delay * 2 ** (attempt - 1) ))
+                    (( delay > max_delay )) && delay="$max_delay"
+
+                    # Apply full jitter (random delay between 0 and calculated delay)
+                    local wait=$(( RANDOM % (delay + 1) ))
+
+                    rm -rf /tmp/cmdstderr
+
+                    echo "retry: attempt $attempt/$max_attempts failed (exit $exit_code); waiting ${wait}s..." >&2
+                    sleep "$wait"
+                    ((attempt++))
+                  fi
+                done
+              }
+              declare -f retry_ghcr > /tmp/retry_ghcr.sh
+           '''
+      }
+    }
     /* #######################
        Package Version Tagging
        ####################### */
@@ -459,6 +507,8 @@ pipeline {
           }
           sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-jenkins-builder/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
+                source /tmp/retry_ghcr.sh
+                retry_ghcr docker pull ghcr.io/linuxserver/baseimage-alpine:3.23
                 docker run --rm \
                   -v ${WORKSPACE}:/mnt \
                   -e AWS_ACCESS_KEY_ID=\"${S3_KEY}\" \
@@ -485,8 +535,9 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
+              source /tmp/retry_ghcr.sh
 {% if project_repo_name != "docker-jenkins-builder" %}
-              docker pull ghcr.io/linuxserver/jenkins-builder:latest
+              retry_ghcr docker pull ghcr.io/linuxserver/jenkins-builder:latest
 {% endif %}
               # Cloned repo paths for templating:
               # ${TEMPDIR}/docker-${CONTAINER_NAME}: Cloned branch {{ ls_branch }} of ${LS_USER}/${LS_REPO} for running the jenkins builder on
@@ -550,6 +601,7 @@ pipeline {
                 sed -i 's|^changelogs:|# init diagram\\ninit_diagram:\\n\\n# changelog\\nchangelogs:|' readme-vars.yml
               fi
               mkdir -p ${TEMPDIR}/d2
+              retry_ghcr docker pull ghcr.io/linuxserver/d2-builder:latest
               docker run --rm -v ${TEMPDIR}/d2:/output -e PUID=$(id -u) -e PGID=$(id -g) -e RAW="true" ghcr.io/linuxserver/d2-builder:latest ${CONTAINER_NAME}:{{ release_tag }}
               ls -al ${TEMPDIR}/d2
               yq -ei ".init_diagram |= load_str(\\"${TEMPDIR}/d2/${CONTAINER_NAME}-{{ release_tag }}.d2\\")" readme-vars.yml
@@ -798,22 +850,25 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
         sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
 {% endif %}
-        sh "docker buildx build \
-          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-          --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-          --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-          --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-          --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
-          --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh '''#! /bin/bash
+              source /tmp/retry_ghcr.sh
+              retry_ghcr docker buildx build \
+                --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                --label "org.opencontainers.image.authors={{ lsio_project_name }}" \
+                --label "org.opencontainers.image.url={{ project_github_repo_url }}/packages" \
+                --label "org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}" \
+                --label "org.opencontainers.image.source={{ project_github_repo_url }}" \
+                --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.vendor={{ lsio_project_name }}" \
+                --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.title={{ project_name|capitalize }}" \
+                --label "org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}" \
+                --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
+                --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+           '''
         sh '''#! /bin/bash
               set -e
               IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -871,22 +926,25 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  source /tmp/retry_ghcr.sh
+                  retry_ghcr docker buildx build \
+                    --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                    --label "org.opencontainers.image.authors={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.url={{ project_github_repo_url }}/packages" \
+                    --label "org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}" \
+                    --label "org.opencontainers.image.source={{ project_github_repo_url }}" \
+                    --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                    --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.vendor={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                    --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.title={{ project_name|capitalize }}" \
+                    --label "org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}" \
+                    --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
+                    --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
+                    --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+               '''
             sh '''#! /bin/bash
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -939,22 +997,62 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  # create our retry function
+                  retry_ghcr() {
+                    local max_attempts=5
+                    local base_delay=1
+                    local max_delay=30
+                    local attempt=1
+
+                    while true; do
+                      rm -rf /tmp/cmdstderr
+                      "$@" 2> >(tee /tmp/cmdstderr)
+                      local exit_code="$?"
+                      if [[ "${exit_code}" = "0" ]]; then
+                        rm -rf /tmp/cmdstderr
+                        return 0
+                      elif cat /tmp/cmdstderr | grep -q -v "retry-after:"; then
+                        rm -rf /tmp/cmdstderr
+                        return "$exit_code"
+                      elif (( attempt >= max_attempts )); then
+                        rm -rf /tmp/cmdstderr
+                        echo "retry: $* failed after $attempt attempts (exit $exit_code)" >&2
+                        return "$exit_code"
+                      else
+                        # Calculate exponential delay: base * 2^(attempt-1), capped at max_delay
+                        local delay=$(( base_delay * 2 ** (attempt - 1) ))
+                        (( delay > max_delay )) && delay="$max_delay"
+
+                        # Apply full jitter (random delay between 0 and calculated delay)
+                        local wait=$(( RANDOM % (delay + 1) ))
+
+                        rm -rf /tmp/cmdstderr
+
+                        echo "retry: attempt $attempt/$max_attempts failed (exit $exit_code); waiting ${wait}s..." >&2
+                        sleep "$wait"
+                        ((attempt++))
+                      fi
+                    done
+                  }
+                  declare -f retry_ghcr > /tmp/retry_ghcr.sh
+                  retry_ghcr docker buildx build \
+                    --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                    --label "org.opencontainers.image.authors={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.url={{ project_github_repo_url }}/packages" \
+                    --label "org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}" \
+                    --label "org.opencontainers.image.source={{ project_github_repo_url }}" \
+                    --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                    --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.vendor={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                    --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.title={{ project_name|capitalize }}" \
+                    --label "org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}" \
+                    --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
+                    --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
+                    --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+               '''
             sh '''#! /bin/bash
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -1015,22 +1113,62 @@ pipeline {
 {% if "docker-baseimage" not in project_repo_name %}
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.riscv64"
 {% endif %}
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.url={{ project_github_repo_url }}/packages\" \
-              --label \"org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
-              --label \"org.opencontainers.image.source={{ project_github_repo_url }}\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor={{ lsio_project_name }}\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title={{ project_name|capitalize }}\" \
-              --label \"org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}\" \
-              --no-cache --pull -f Dockerfile.riscv64 -t ${IMAGE}:riscv64-${META_TAG} --platform=linux/riscv64 \
-              --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  # create our retry function
+                  retry_ghcr() {
+                    local max_attempts=5
+                    local base_delay=1
+                    local max_delay=30
+                    local attempt=1
+
+                    while true; do
+                      rm -rf /tmp/cmdstderr
+                      "$@" 2> >(tee /tmp/cmdstderr)
+                      local exit_code="$?"
+                      if [[ "${exit_code}" = "0" ]]; then
+                        rm -rf /tmp/cmdstderr
+                        return 0
+                      elif cat /tmp/cmdstderr | grep -q -v "retry-after:"; then
+                        rm -rf /tmp/cmdstderr
+                        return "$exit_code"
+                      elif (( attempt >= max_attempts )); then
+                        rm -rf /tmp/cmdstderr
+                        echo "retry: $* failed after $attempt attempts (exit $exit_code)" >&2
+                        return "$exit_code"
+                      else
+                        # Calculate exponential delay: base * 2^(attempt-1), capped at max_delay
+                        local delay=$(( base_delay * 2 ** (attempt - 1) ))
+                        (( delay > max_delay )) && delay="$max_delay"
+
+                        # Apply full jitter (random delay between 0 and calculated delay)
+                        local wait=$(( RANDOM % (delay + 1) ))
+
+                        rm -rf /tmp/cmdstderr
+
+                        echo "retry: attempt $attempt/$max_attempts failed (exit $exit_code); waiting ${wait}s..." >&2
+                        sleep "$wait"
+                        ((attempt++))
+                      fi
+                    done
+                  }
+                  declare -f retry_ghcr > /tmp/retry_ghcr.sh
+                  retry_ghcr docker buildx build \
+                    --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                    --label "org.opencontainers.image.authors={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.url={{ project_github_repo_url }}/packages" \
+                    --label "org.opencontainers.image.documentation={{ lsio_docs_url }}/images/docker-{{ project_name }}\" \
+                    --label "org.opencontainers.image.source={{ project_github_repo_url }}" \
+                    --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                    --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.vendor={{ lsio_project_name }}" \
+                    --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                    --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.title={{ project_name|capitalize }}" \
+                    --label "org.opencontainers.image.description={% if project_blurb is defined %}{{ project_blurb | replace('"', '') | replace('\n', '  ') }}{% else %}{{ project_name }} image by {{ lsio_project_name }}{% endif %}" \
+                    --no-cache --pull -f Dockerfile.riscv64 -t ${IMAGE}:riscv64-${META_TAG} --platform=linux/riscv64 \
+                    --provenance={{ image_provenance | lower }} --sbom={{ image_sbom | lower }} --builder={{ image_builder }} --load \
+                    --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+               '''
             sh '''#! /bin/bash
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -1099,6 +1237,8 @@ pipeline {
                 LOCAL_CONTAINER=${IMAGE}:${META_TAG}
               fi
               touch ${TEMPDIR}/package_versions.txt
+              source /tmp/retry_ghcr.sh
+              retry_ghcr docker pull ghcr.io/anchore/syft:${SYFT_IMAGE_TAG}
               docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
                 -v ${TEMPDIR}:/tmp \
@@ -1191,13 +1331,14 @@ pipeline {
                     CI_DOCKERENV="LSIO_FIRST_PARTY=true"
                   fi
                 fi
-                docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
+                source /tmp/retry_ghcr.sh
+                retry_ghcr docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
                 if [ "${MULTIARCH}" == "true" ]; then
-                  docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
-                  docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
+                  retry_ghcr docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
+                  retry_ghcr docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
 {% if build_riscv64 %}
-                  docker pull ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=riscv64
-                  docker tag ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:riscv64-${META_TAG}
+                  retry_ghcr docker pull ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} --platform=riscv64
+                  retry_ghcr docker tag ghcr.io/linuxserver/lsiodev-buildcache:riscv64-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:riscv64-${META_TAG}
 {% endif %}
                 fi
                 docker run --rm \
