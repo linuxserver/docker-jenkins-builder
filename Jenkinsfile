@@ -51,6 +51,57 @@ pipeline {
         '''
       }
     }
+    /* ############################
+       Bash Function For GHCR Retry
+       ############################ */
+    // Create a reusable script for a ghcr retry bash function
+    stage("Create Bash Function"){
+      steps{
+        sh '''#! /bin/bash
+              # create our retry function
+              retry_ghcr() {
+                local max_attempts=7
+                local base_delay=10
+                local max_delay=90
+                local attempt=1
+                local errfile exit_code delay pause
+                errfile=$(mktemp)
+                while true; do
+                  # run inside an if so a caller's set -e cannot abort before we get to retry
+                  if "$@" 2> >(tee "${errfile}" >&2); then
+                    exit_code=0
+                  else
+                    exit_code=$?
+                  fi
+                  # make sure tee has finished writing before we read the file
+                  wait $! 2>/dev/null || true
+                  if [[ "${exit_code}" == "0" ]]; then
+                    rm -f "${errfile}"
+                    return 0
+                  elif ! grep -q -i -E "retry-after:|toomanyrequests|too many requests" "${errfile}"; then
+                    rm -f "${errfile}"
+                    return "${exit_code}"
+                  elif (( attempt >= max_attempts )); then
+                    rm -f "${errfile}"
+                    echo "retry: $* failed after ${attempt} attempts (exit ${exit_code})" >&2
+                    return "${exit_code}"
+                  else
+                    # exponential delay: base * 2^(attempt-1), capped at max_delay
+                    delay=$(( base_delay * 2 ** (attempt - 1) ))
+                    (( delay > max_delay )) && delay="${max_delay}"
+                    # jitter between half and full delay so parallel builds spread out
+                    pause=$(( delay / 2 + RANDOM % (delay / 2 + 1) ))
+                    echo "retry: attempt ${attempt}/${max_attempts} failed (exit ${exit_code}); waiting ${pause}s..." >&2
+                    sleep "${pause}"
+                    ((attempt++))
+                  fi
+                done
+              }
+
+              declare -f retry_ghcr > ${WORKSPACE}/retry_ghcr.sh
+           '''
+      }
+    }
     // Setup all the basic environment variables needed for the build
     stage("Set ENV Variables base"){
       steps{
@@ -78,7 +129,9 @@ pipeline {
           env.CI_TEST_ATTEMPTED = ''
           env.PUSH_ATTEMPTED = ''
           env.LS_RELEASE = sh(
-            script: '''docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:latest 2>/dev/null | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
+            script: '''#! /bin/bash
+                       source ${WORKSPACE}/retry_ghcr.sh
+                       retry_ghcr docker run --rm quay.io/skopeo/stable:v1 inspect docker://ghcr.io/${LS_USER}/${CONTAINER_NAME}:latest | jq -r '.Labels.build_version' | awk '{print $3}' | grep '\\-ls' || : ''',
             returnStdout: true).trim()
           env.LS_RELEASE_NOTES = sh(
             script: '''cat readme-vars.yml | awk -F \\" '/date: "[0-9][0-9].[0-9][0-9].[0-9][0-9]:/ {print $4;exit;}' | sed -E ':a;N;$!ba;s/\\r{0,1}\\n/\\\\n/g' ''',
@@ -99,8 +152,12 @@ pipeline {
           if ( env.SYFT_IMAGE_TAG == null ) {
             env.SYFT_IMAGE_TAG = 'latest'
           }
+          if ( env.GITLAB_TIMEOUT == null ) {
+            env.GITLAB_TIMEOUT = '600'
+          }
         }
         echo "Using syft image tag ${SYFT_IMAGE_TAG}"
+        echo "Using gitlab registry timeout ${GITLAB_TIMEOUT}"
         sh '''#! /bin/bash
               echo "The default github branch detected as ${GH_DEFAULT_BRANCH}" '''
         script{
@@ -267,21 +324,24 @@ pipeline {
     // Build Docker container local templating CI runs
     stage('Build-Jenkins-Builder') {
       steps {
-        sh "docker buildx build \
-          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-          --label \"org.opencontainers.image.authors=linuxserver.io\" \
-          --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-          --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.title=Jenkins-builder\" \
-          --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-          --provenance=false --sbom=false --builder=default \
-          --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 ."
+        sh '''#! /bin/bash
+              source ${WORKSPACE}/retry_ghcr.sh
+              retry_ghcr docker buildx build \
+                --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                --label "org.opencontainers.image.authors=linuxserver.io" \
+                --label "org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages" \
+                --label "org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder" \
+                --label "org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder" \
+                --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.vendor=linuxserver.io" \
+                --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.title=Jenkins-builder" \
+                --label "org.opencontainers.image.description=jenkins-builder image by linuxserver.io" \
+                --provenance=false --sbom=false --builder=default \
+                --no-cache --pull -t jenkinslocal:${COMMIT_SHA}-${BUILD_NUMBER} --platform=linux/amd64 .
+           '''
       }
     }
     // Run ShellCheck
@@ -299,6 +359,8 @@ pipeline {
           }
           sh '''curl -sL https://raw.githubusercontent.com/linuxserver/docker-jenkins-builder/master/checkrun.sh | /bin/bash'''
           sh '''#! /bin/bash
+                source ${WORKSPACE}/retry_ghcr.sh
+                retry_ghcr docker pull ghcr.io/linuxserver/baseimage-alpine:3.23
                 docker run --rm \
                   -v ${WORKSPACE}:/mnt \
                   -e AWS_ACCESS_KEY_ID=\"${S3_KEY}\" \
@@ -325,6 +387,7 @@ pipeline {
         sh '''#! /bin/bash
               set -e
               TEMPDIR=$(mktemp -d)
+              source ${WORKSPACE}/retry_ghcr.sh
               # Cloned repo paths for templating:
               # ${TEMPDIR}/docker-${CONTAINER_NAME}: Cloned branch master of ${LS_USER}/${LS_REPO} for running the jenkins builder on
               # ${TEMPDIR}/repo/${LS_REPO}: Cloned branch master of ${LS_USER}/${LS_REPO} for commiting various templated file changes and pushing back to Github
@@ -536,22 +599,25 @@ pipeline {
       steps {
         echo "Running on node: ${NODE_NAME}"
         sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
-        sh "docker buildx build \
-          --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-          --label \"org.opencontainers.image.authors=linuxserver.io\" \
-          --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-          --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-          --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-          --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-          --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-          --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-          --label \"org.opencontainers.image.title=Jenkins-builder\" \
-          --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-          --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
-          --provenance=true --sbom=true --builder=container --load \
-          --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+        sh '''#! /bin/bash
+              source ${WORKSPACE}/retry_ghcr.sh
+              retry_ghcr docker buildx build \
+                --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                --label "org.opencontainers.image.authors=linuxserver.io" \
+                --label "org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages" \
+                --label "org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder" \
+                --label "org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder" \
+                --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.vendor=linuxserver.io" \
+                --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                --label "org.opencontainers.image.title=Jenkins-builder" \
+                --label "org.opencontainers.image.description=jenkins-builder image by linuxserver.io" \
+                --no-cache --pull -t ${IMAGE}:${META_TAG} --platform=linux/amd64 \
+                --provenance=true --sbom=true --builder=container --load \
+                --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+           '''
         sh '''#! /bin/bash
               set -e
               IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -579,11 +645,16 @@ pipeline {
                       declare -A pids
                       IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                       for i in "${CACHE[@]}"; do
-                        docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                        if [[ "${i}" == *"registry.gitlab.com"* ]]; then
+                          TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                        else
+                          TIMEOUT_CMD=""
+                        fi
+                        ${TIMEOUT_CMD} docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                         pids[$!]="$i"
                       done
                       for p in "${!pids[@]}"; do
-                        wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                        wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                       done
                     fi
                 '''
@@ -605,22 +676,25 @@ pipeline {
           steps {
             echo "Running on node: ${NODE_NAME}"
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile"
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors=linuxserver.io\" \
-              --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-              --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title=Jenkins-builder\" \
-              --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-              --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
-              --provenance=true --sbom=true --builder=container --load \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  source ${WORKSPACE}/retry_ghcr.sh
+                  retry_ghcr docker buildx build \
+                    --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                    --label "org.opencontainers.image.authors=linuxserver.io" \
+                    --label "org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages" \
+                    --label "org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder" \
+                    --label "org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder" \
+                    --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                    --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.vendor=linuxserver.io" \
+                    --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                    --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.title=Jenkins-builder" \
+                    --label "org.opencontainers.image.description=jenkins-builder image by linuxserver.io" \
+                    --no-cache --pull -t ${IMAGE}:amd64-${META_TAG} --platform=linux/amd64 \
+                    --provenance=true --sbom=true --builder=container --load \
+                    --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+               '''
             sh '''#! /bin/bash
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -648,11 +722,16 @@ pipeline {
                           declare -A pids
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
-                            docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
+                            if [[ "${i}" == *"registry.gitlab.com"* ]]; then
+                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                            else
+                              TIMEOUT_CMD=""
+                            fi
+                            ${TIMEOUT_CMD} docker push ${i}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} &
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                            wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                           done
                         fi
                     '''
@@ -667,22 +746,64 @@ pipeline {
           steps {
             echo "Running on node: ${NODE_NAME}"
             sh "sed -r -i 's|(^FROM .*)|\\1\\n\\nENV LSIO_FIRST_PARTY=true|g' Dockerfile.aarch64"
-            sh "docker buildx build \
-              --label \"org.opencontainers.image.created=${GITHUB_DATE}\" \
-              --label \"org.opencontainers.image.authors=linuxserver.io\" \
-              --label \"org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages\" \
-              --label \"org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder\" \
-              --label \"org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}\" \
-              --label \"org.opencontainers.image.revision=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.vendor=linuxserver.io\" \
-              --label \"org.opencontainers.image.licenses=GPL-3.0-only\" \
-              --label \"org.opencontainers.image.ref.name=${COMMIT_SHA}\" \
-              --label \"org.opencontainers.image.title=Jenkins-builder\" \
-              --label \"org.opencontainers.image.description=jenkins-builder image by linuxserver.io\" \
-              --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
-              --provenance=true --sbom=true --builder=container --load \
-              --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION=\"${VERSION_TAG}\" --build-arg BUILD_DATE=${GITHUB_DATE} ."
+            sh '''#! /bin/bash
+                  # create our retry function
+                  retry_ghcr() {
+                    local max_attempts=7
+                    local base_delay=10
+                    local max_delay=90
+                    local attempt=1
+                    local errfile exit_code delay pause
+                    errfile=$(mktemp)
+                    while true; do
+                      # run inside an if so a caller's set -e cannot abort before we get to retry
+                      if "$@" 2> >(tee "${errfile}" >&2); then
+                        exit_code=0
+                      else
+                        exit_code=$?
+                      fi
+                      # make sure tee has finished writing before we read the file
+                      wait $! 2>/dev/null || true
+                      if [[ "${exit_code}" == "0" ]]; then
+                        rm -f "${errfile}"
+                        return 0
+                      elif ! grep -q -i -E "retry-after:|toomanyrequests|too many requests" "${errfile}"; then
+                        rm -f "${errfile}"
+                        return "${exit_code}"
+                      elif (( attempt >= max_attempts )); then
+                        rm -f "${errfile}"
+                        echo "retry: $* failed after ${attempt} attempts (exit ${exit_code})" >&2
+                        return "${exit_code}"
+                      else
+                        # exponential delay: base * 2^(attempt-1), capped at max_delay
+                        delay=$(( base_delay * 2 ** (attempt - 1) ))
+                        (( delay > max_delay )) && delay="${max_delay}"
+                        # jitter between half and full delay so parallel builds spread out
+                        pause=$(( delay / 2 + RANDOM % (delay / 2 + 1) ))
+                        echo "retry: attempt ${attempt}/${max_attempts} failed (exit ${exit_code}); waiting ${pause}s..." >&2
+                        sleep "${pause}"
+                        ((attempt++))
+                      fi
+                    done
+                  }
+
+                  retry_ghcr docker buildx build \
+                    --label "org.opencontainers.image.created=${GITHUB_DATE}" \
+                    --label "org.opencontainers.image.authors=linuxserver.io" \
+                    --label "org.opencontainers.image.url=https://github.com/linuxserver/docker-jenkins-builder/packages" \
+                    --label "org.opencontainers.image.documentation=https://docs.linuxserver.io/images/docker-jenkins-builder" \
+                    --label "org.opencontainers.image.source=https://github.com/linuxserver/docker-jenkins-builder" \
+                    --label "org.opencontainers.image.version=${EXT_RELEASE_CLEAN}-ls${LS_TAG_NUMBER}" \
+                    --label "org.opencontainers.image.revision=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.vendor=linuxserver.io" \
+                    --label "org.opencontainers.image.licenses=GPL-3.0-only" \
+                    --label "org.opencontainers.image.ref.name=${COMMIT_SHA}" \
+                    --label "org.opencontainers.image.title=Jenkins-builder" \
+                    --label "org.opencontainers.image.description=jenkins-builder image by linuxserver.io" \
+                    --no-cache --pull -f Dockerfile.aarch64 -t ${IMAGE}:arm64v8-${META_TAG} --platform=linux/arm64 \
+                    --provenance=true --sbom=true --builder=container --load \
+                    --build-arg ${BUILD_VERSION_ARG}=${EXT_RELEASE} --build-arg VERSION="${VERSION_TAG}" --build-arg BUILD_DATE=${GITHUB_DATE} .
+               '''
             sh '''#! /bin/bash
                   set -e
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
@@ -709,11 +830,16 @@ pipeline {
                           declare -A pids
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
-                            docker push ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
+                            if [[ "${i}" == *"registry.gitlab.com"* ]]; then
+                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                            else
+                              TIMEOUT_CMD=""
+                            fi
+                            ${TIMEOUT_CMD} docker push ${i}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} &
                             pids[$!]="$i"
                           done
                           for p in "${!pids[@]}"; do
-                            wait "$p" || { [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]] && exit 1; }
+                            wait "$p" || { if [[ "${pids[$p]}" != *"quay.io"* && "${pids[$p]}" != *"registry.gitlab.com"* ]]; then exit 1; fi; }
                           done
                         fi
                     '''
@@ -748,6 +874,8 @@ pipeline {
                 LOCAL_CONTAINER=${IMAGE}:${META_TAG}
               fi
               touch ${TEMPDIR}/package_versions.txt
+              source ${WORKSPACE}/retry_ghcr.sh
+              retry_ghcr docker pull ghcr.io/anchore/syft:${SYFT_IMAGE_TAG}
               docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock:ro \
                 -v ${TEMPDIR}:/tmp \
@@ -839,9 +967,10 @@ pipeline {
                     CI_DOCKERENV="LSIO_FIRST_PARTY=true"
                   fi
                 fi
-                docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
+                source ${WORKSPACE}/retry_ghcr.sh
+                retry_ghcr docker pull ghcr.io/linuxserver/ci:${CITEST_IMAGETAG}
                 if [ "${MULTIARCH}" == "true" ]; then
-                  docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
+                  retry_ghcr docker pull ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} --platform=arm64
                   docker tag ghcr.io/linuxserver/lsiodev-buildcache:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} ${IMAGE}:arm64v8-${META_TAG}
                 fi
                 docker run --rm \
@@ -887,6 +1016,11 @@ pipeline {
           sh '''#! /bin/bash
                 set -e
                 for PUSHIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
+                  if [[ "${PUSHIMAGE}" == "${GITLABIMAGE}" ]]; then
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                  else
+                    TIMEOUT_CMD=""
+                  fi
                   [[ ${PUSHIMAGE%%/*} =~ \\. ]] && PUSHIMAGEPLUS="${PUSHIMAGE}" || PUSHIMAGEPLUS="docker.io/${PUSHIMAGE}"
                   IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                   for i in "${CACHE[@]}"; do
@@ -894,10 +1028,10 @@ pipeline {
                           CACHEIMAGE=${i}
                       fi
                   done
-                  docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:latest -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${META_TAG} -t ${PUSHIMAGE}:latest -t ${PUSHIMAGE}:${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
-                    docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${PUSHIMAGE}:${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${PUSHIMAGE}" != "${QUAYIMAGE}" && "${PUSHIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
@@ -919,6 +1053,11 @@ pipeline {
           sh '''#! /bin/bash
                 set -e
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
+                  if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                  else
+                    TIMEOUT_CMD=""
+                  fi
                   if [[ "${MANIFESTIMAGE%%/*}" =~ \\. ]]; then
                     MANIFESTIMAGEPLUS="${MANIFESTIMAGE}"
                   else
@@ -930,26 +1069,31 @@ pipeline {
                           CACHEIMAGE=${i}
                       fi
                   done
-                  docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-latest -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${META_TAG} -t ${MANIFESTIMAGE}:amd64-latest -t ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                  docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-latest -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${META_TAG} -t ${MANIFESTIMAGE}:arm64v8-latest -t ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
-                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:amd64-${SEMVER} ${CACHEIMAGE}:amd64-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                    docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create --prefer-index=false -t ${MANIFESTIMAGE}:arm64v8-${SEMVER} ${CACHEIMAGE}:arm64v8-${COMMIT_SHA}-${BUILD_NUMBER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:latest ${MANIFESTIMAGE}:amd64-latest ${MANIFESTIMAGE}:arm64v8-latest || \
+                  if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
+                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                  else
+                    TIMEOUT_CMD=""
+                  fi
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:latest ${MANIFESTIMAGE}:amd64-latest ${MANIFESTIMAGE}:arm64v8-latest || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${META_TAG} ${MANIFESTIMAGE}:amd64-${META_TAG} ${MANIFESTIMAGE}:arm64v8-${META_TAG} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
-                  docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
+                  ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:amd64-${EXT_RELEASE_TAG} ${MANIFESTIMAGE}:arm64v8-${EXT_RELEASE_TAG} || \
                     { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   if [ -n "${SEMVER}" ]; then
-                    docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
+                    ${TIMEOUT_CMD} docker buildx imagetools create -t ${MANIFESTIMAGE}:${SEMVER} ${MANIFESTIMAGE}:amd64-${SEMVER} ${MANIFESTIMAGE}:arm64v8-${SEMVER} || \
                       { if [[ "${MANIFESTIMAGE}" != "${QUAYIMAGE}" && "${MANIFESTIMAGE}" != "${GITLABIMAGE}" ]]; then exit 1; fi; }
                   fi
                 done
