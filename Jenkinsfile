@@ -636,6 +636,17 @@ pipeline {
           retry_backoff(5,5) {
               sh '''#! /bin/bash
                     set -e
+                    # run a registry.gitlab.com command under what is left of the gitlab time budget
+                    gitlab_timeout() {
+                      local remaining=$(( GITLAB_DEADLINE - SECONDS ))
+                      if (( remaining <= 0 )); then
+                        echo "gitlab timeout budget of ${GITLAB_TIMEOUT}s used up, skipping: $*" >&2
+                        return 124
+                      fi
+                      timeout "${remaining}" "$@"
+                    }
+                    GITLAB_DEADLINE=$(( SECONDS + GITLAB_TIMEOUT ))
+
                     echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
                     echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                     echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
@@ -646,7 +657,7 @@ pipeline {
                       IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                       for i in "${CACHE[@]}"; do
                         if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                          TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                          TIMEOUT_CMD="gitlab_timeout"
                         else
                           TIMEOUT_CMD=""
                         fi
@@ -713,6 +724,17 @@ pipeline {
               retry_backoff(5,5) {
                   sh '''#! /bin/bash
                         set -e
+                        # run a registry.gitlab.com command under what is left of the gitlab time budget
+                        gitlab_timeout() {
+                          local remaining=$(( GITLAB_DEADLINE - SECONDS ))
+                          if (( remaining <= 0 )); then
+                            echo "gitlab timeout budget of ${GITLAB_TIMEOUT}s used up, skipping: $*" >&2
+                            return 124
+                          fi
+                          timeout "${remaining}" "$@"
+                        }
+                        GITLAB_DEADLINE=$(( SECONDS + GITLAB_TIMEOUT ))
+
                         echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
                         echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                         echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
@@ -723,7 +745,7 @@ pipeline {
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
                             if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                              TIMEOUT_CMD="gitlab_timeout"
                             else
                               TIMEOUT_CMD=""
                             fi
@@ -822,6 +844,17 @@ pipeline {
               retry_backoff(5,5) {
                   sh '''#! /bin/bash
                         set -e
+                        # run a registry.gitlab.com command under what is left of the gitlab time budget
+                        gitlab_timeout() {
+                          local remaining=$(( GITLAB_DEADLINE - SECONDS ))
+                          if (( remaining <= 0 )); then
+                            echo "gitlab timeout budget of ${GITLAB_TIMEOUT}s used up, skipping: $*" >&2
+                            return 124
+                          fi
+                          timeout "${remaining}" "$@"
+                        }
+                        GITLAB_DEADLINE=$(( SECONDS + GITLAB_TIMEOUT ))
+
                         echo $DOCKERHUB_TOKEN | docker login -u linuxserverci --password-stdin
                         echo $GITHUB_TOKEN | docker login ghcr.io -u LinuxServer-CI --password-stdin
                         echo $GITLAB_TOKEN | docker login registry.gitlab.com -u LinuxServer.io --password-stdin
@@ -831,7 +864,7 @@ pipeline {
                           IFS=',' read -ra CACHE <<< "$BUILDCACHE"
                           for i in "${CACHE[@]}"; do
                             if [[ "${i}" == *"registry.gitlab.com"* ]]; then
-                              TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                              TIMEOUT_CMD="gitlab_timeout"
                             else
                               TIMEOUT_CMD=""
                             fi
@@ -1015,9 +1048,20 @@ pipeline {
         retry_backoff(5,5) {
           sh '''#! /bin/bash
                 set -e
+                # run a registry.gitlab.com command under what is left of the gitlab time budget
+                gitlab_timeout() {
+                  local remaining=$(( GITLAB_DEADLINE - SECONDS ))
+                  if (( remaining <= 0 )); then
+                    echo "gitlab timeout budget of ${GITLAB_TIMEOUT}s used up, skipping: $*" >&2
+                    return 124
+                  fi
+                  timeout "${remaining}" "$@"
+                }
+                GITLAB_DEADLINE=$(( SECONDS + GITLAB_TIMEOUT ))
+
                 for PUSHIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                   if [[ "${PUSHIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                    TIMEOUT_CMD="gitlab_timeout"
                   else
                     TIMEOUT_CMD=""
                   fi
@@ -1052,9 +1096,20 @@ pipeline {
         retry_backoff(5,5) {
           sh '''#! /bin/bash
                 set -e
+                # run a registry.gitlab.com command under what is left of the gitlab time budget
+                gitlab_timeout() {
+                  local remaining=$(( GITLAB_DEADLINE - SECONDS ))
+                  if (( remaining <= 0 )); then
+                    echo "gitlab timeout budget of ${GITLAB_TIMEOUT}s used up, skipping: $*" >&2
+                    return 124
+                  fi
+                  timeout "${remaining}" "$@"
+                }
+                GITLAB_DEADLINE=$(( SECONDS + GITLAB_TIMEOUT ))
+
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                   if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                    TIMEOUT_CMD="gitlab_timeout"
                   else
                     TIMEOUT_CMD=""
                   fi
@@ -1082,7 +1137,7 @@ pipeline {
                 done
                 for MANIFESTIMAGE in "${IMAGE}" "${GITLABIMAGE}" "${GITHUBIMAGE}" "${QUAYIMAGE}"; do
                   if [[ "${MANIFESTIMAGE}" == "${GITLABIMAGE}" ]]; then
-                    TIMEOUT_CMD="timeout ${GITLAB_TIMEOUT}"
+                    TIMEOUT_CMD="gitlab_timeout"
                   else
                     TIMEOUT_CMD=""
                   fi
