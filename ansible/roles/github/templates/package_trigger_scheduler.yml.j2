@@ -90,7 +90,7 @@ jobs:
           if [[ -n "${triggered_branches}" ]] || [[ -n "${skipped_branches}" ]]; then
             if [[ -n "${triggered_branches}" ]]; then
               NOTIFY_BRANCHES="**Triggered:** ${triggered_branches} \n"
-              NOTIFY_BUILD_URL="**Build URL:** {{ lsio_ci_url }}/blue/organizations/jenkins/Docker-Pipeline-Builders%2F{{ project_repo_name }}/activity/ \n"
+              NOTIFY_BUILD_URL="**Build URL:** {{ lsio_ci_url }}/job/Docker-Pipeline-Builders/job/{{ project_repo_name }}/ \n"
               echo "**** Package check build(s) triggered for branch(es): ${triggered_branches} ****"
             fi
             if [[ -n "${skipped_branches}" ]]; then
